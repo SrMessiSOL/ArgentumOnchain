@@ -1,6 +1,6 @@
 # Vercel frontend and Windows backend
 
-Import SrMessiSOL/ArgentumOnchain into Vercel with **Root Directory `frontend`**, Next.js, Node.js 24.x, and the checked-in frozen pnpm install/build commands. The API and authoritative game server remain on the Windows host. No paid plan is selected by this procedure.
+Import SrMessiSOL/ArgentumOnchain into Vercel with **Root Directory `frontend`**, Next.js, Node.js 24.x, and the checked-in install/build commands. The install command explicitly selects pnpm 11.19.0 because a plain pnpm override can select an older bundled version; it preserves the frozen lockfile. The API and authoritative game server remain on the Windows host. No paid plan is selected by this procedure.
 
 Vercel production environment:
 

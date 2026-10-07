@@ -32,6 +32,8 @@
         "export-frontend-maps": "tsx src/scripts/exportFrontendOptimizedMaps.ts",
         "export-client-objs": "tsx src/scripts/exportClientObjs.ts",
         "start": "node dist/server.js",
+        "start:hosted": "node scripts/start-hosted.cjs",
+        "test:hosted-startup": "node tests/hosted-startup.test.cjs",
         "lint": "eslint './src/**/*.ts'",
         "world-map": "node scripts/build-world-map.cjs",
         "compare-original-data": "tsx src/scripts/compareOriginalData.ts",
