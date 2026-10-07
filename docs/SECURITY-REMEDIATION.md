@@ -53,3 +53,13 @@ Run `security:health` in the API for a read-only database/journal report; add `-
 - Run 100-player load, outage/restore and real-wallet lifecycle rehearsals on the intended host; obtain an independent security review.
 
 These items remain open. Passing the tests above does not establish 100-player capacity or production readiness.
+
+## Follow-up: wallet replacement and ban revocation
+
+Wallet replacement now requires valid signatures from both the currently linked wallet and the proposed replacement over the same account/session/origin-bound, expiring challenge. Recent authentication still applies. Staked characters, active gameplay, pending transfers and active listings block replacement. A successful replacement revokes other account sessions and all outstanding game tickets; the approving session remains active. Wallet challenge and verification requests each have an account-level budget of ten attempts per minute.
+
+First-time linking and reverifying the same wallet retain their existing one-wallet flow. The website reconnects the original linked wallet; this change does not add an automatic lost-wallet recovery or a two-wallet replacement UI. Accounts without access to the original wallet cannot bypass this policy through a replacement proof from a new wallet alone. A reviewed recovery policy remains a release requirement.
+
+The active game-session check now rejects new character bans, character IP bans and bans associated with the same stored IP. Existing game sockets use the periodic check (approximately 30 seconds); this is not immediate push revocation. Expired bans no longer block the check.
+
+Validation: 70 isolated API security tests passed, including missing/wrong/stale previous-wallet signatures, replay, recent-auth expiry, protected staking state, other-session revocation, first/same-wallet linking, verification budgets, concurrent replacement retries, and ban/expired-ban cases. No live wallet signatures or asset transfers were performed. End-to-end stolen-socket rehearsal and full account recovery remain open.

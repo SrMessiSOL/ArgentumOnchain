@@ -1469,6 +1469,9 @@ export async function isGameSessionActive(sessionCredentialHash:string,character
     if(!/^sha256:[0-9a-f]{64}$/.test(sessionCredentialHash)||!z.string().uuid().safeParse(characterId).success)return false;
     const result=await pool.query(`SELECT 1 FROM auth_sessions s JOIN characters c ON c.account_id=s.account_id
         WHERE s.token=$1 AND s.expires_at>NOW() AND s.created_at>NOW()-INTERVAL '30 days'
-        AND c.id=$2 AND c.deleted_at IS NULL AND c.economy_lock IS NULL`,[sessionCredentialHash,characterId]);
+        AND c.id=$2 AND c.deleted_at IS NULL AND c.economy_lock IS NULL
+          AND (c.banned IS NULL OR c.banned<=NOW())
+          AND (c.ip_banned_until IS NULL OR c.ip_banned_until<=NOW())
+          AND NOT EXISTS(SELECT 1 FROM characters b WHERE b.ip=c.ip AND b.ip_banned_until>NOW())`,[sessionCredentialHash,characterId]);
     return Boolean(result.rowCount);
 }

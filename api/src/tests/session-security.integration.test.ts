@@ -44,3 +44,13 @@ test('game session checks revoke active sockets after logout and reject another 
  expect(await isGameSessionActive(credentialHash(a.sessionToken),randomUUID())).toBe(false);
  await logoutSession(a.sessionToken);expect(await isGameSessionActive(credentialHash(a.sessionToken),id)).toBe(false);
 });
+
+test('active game access is revoked by character bans and shared IP bans, including expired-ban recovery',async()=>{
+ const a=await registerAccount({name:'Banvalidation',email:'bancheck@example.invalid',password:'Securetest123!'}),id=randomUUID(),other=randomUUID(),hash=credentialHash(a.sessionToken);
+ await pool.query("INSERT INTO characters(id,account_id,name,ip) VALUES($1,$2,'Bantest','192.0.2.10'),($3,$2,'Ipbantest','192.0.2.10')",[id,a.account._id,other]);
+ expect(await isGameSessionActive(hash,id)).toBe(true);
+ await pool.query("UPDATE characters SET banned=NOW()+INTERVAL '1 hour' WHERE id=$1",[id]);expect(await isGameSessionActive(hash,id)).toBe(false);
+ await pool.query("UPDATE characters SET banned=NOW()-INTERVAL '1 hour',ip_banned_until=NOW()+INTERVAL '1 hour' WHERE id=$1",[id]);expect(await isGameSessionActive(hash,id)).toBe(false);
+ await pool.query("UPDATE characters SET ip_banned_until=NULL WHERE id=$1",[id]);await pool.query("UPDATE characters SET ip_banned_until=NOW()+INTERVAL '1 hour' WHERE id=$1",[other]);expect(await isGameSessionActive(hash,id)).toBe(false);
+ await pool.query("UPDATE characters SET ip_banned_until=NOW()-INTERVAL '1 hour' WHERE id=$1",[other]);expect(await isGameSessionActive(hash,id)).toBe(true);
+});
