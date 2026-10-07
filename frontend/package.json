@@ -3,9 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev --turbopack --hostname 0.0.0.0",
+        "dev": "next dev --turbopack --hostname 127.0.0.1",
         "build": "next build",
-        "start": "next start",
+        "start": "next start --hostname 127.0.0.1",
         "lint": "eslint",
         "generate:headswithfile": "node ./scripts/generate-headswithfile.mjs",
         "test:english": "node scripts/test-english.mjs",

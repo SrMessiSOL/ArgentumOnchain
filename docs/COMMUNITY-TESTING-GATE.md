@@ -17,3 +17,7 @@ Status on 2026-10-07: **not approved for public testing yet**. Mainnet remains a
 Do not reset the realm or erase accounts to make a check pass. Keep ambiguous signed operations reserved; preserve journals, receipts and backup state. Use the emergency settlement pause during a settlement incident.
 
 See [Security remediation](SECURITY-REMEDIATION.md) for implementation evidence and known limits, and [Operations](OPERATIONS.md) for recovery procedures. The intended desktop's capacity has not been measured.
+
+## Intended host preparation receipt (2026-10-07)
+
+See [host preparation](INTENDED-HOST-PREPARATION.md). Repository fetched at ebed12f; supported runtimes staged, system installation incomplete. Elevation/ACL and child-process restrictions blocked service setup and regression execution. ESU remains unverified. No realm migration or public deployment occurred. All existing release blockers remain open.

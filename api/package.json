@@ -5,7 +5,7 @@
     "description": "Minimal auth/character API backed by PostgreSQL for Argentum Online Web",
     "main": "dist/server.js",
     "scripts": {
-        "clean": "rm -rf dist",
+        "clean": "node -e \"require('node:fs').rmSync('dist', {recursive:true,force:true})\"",
         "apply-balance": "tsx src/scripts/applyBalanceToCharacters.ts",
         "apply-balance:prod": "node dist/scripts/applyBalanceToCharacters.js",
         "cancel-npc-sold-market-listings": "tsx src/scripts/cancelNpcSoldMarketListings.ts",
@@ -22,7 +22,7 @@
         "remove-newbie-items:prod": "node dist/scripts/removeNewbieItemsFromHighLevelCharacters.js",
         "reset-spell-stats": "tsx src/scripts/resetSpellStats.ts",
         "reset-spell-stats:prod": "node dist/scripts/resetSpellStats.js",
-        "build": "pnpm run clean && tsc && mkdir -p dist/jsons dist/mapas_source && cp src/jsons/*.json dist/jsons/ && cp -R src/mapas_source/. dist/mapas_source/",
+        "build": "pnpm run clean && tsc && node scripts/copy-assets.cjs",
         "dev": "tsx watch src/server.ts",
         "balance-csv": "tsx src/scripts/exportBalanceComparison.ts",
         "test": "vitest run",
