@@ -72,7 +72,7 @@ import {
     VIEWPORT_PIXEL_WIDTH,
 } from "../../lib/viewport";
 
-const DEFAULT_WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:7666";
+const DEFAULT_WS_URL = process.env.NEXT_PUBLIC_GAME_SOCKET_URL || process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:7666";
 const OverviewModal = dynamic(() => import("../../components/OverviewModal"), {
     ssr: false,
 });

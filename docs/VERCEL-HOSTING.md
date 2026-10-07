@@ -5,7 +5,7 @@ Import SrMessiSOL/ArgentumOnchain into Vercel with **Root Directory `frontend`**
 Vercel production environment:
 
 - `API_BASE_URL=https://<backend-host>/player-api` (server-side configuration)
-- `NEXT_PUBLIC_WS_URL=wss://<backend-host>/game-socket`
+- `NEXT_PUBLIC_GAME_SOCKET_URL=wss://<backend-host>/game-socket` (public Config, not a secret; overrides the legacy `NEXT_PUBLIC_WS_URL`)
 - `NEXT_PUBLIC_SITE_URL=https://<production-website-host>`
 - `NEXT_PUBLIC_REALM_ENABLED=0` until the release gate passes. Vercel defaults to disabled gameplay. This UI setting is not backend authorization; keep the gateway disabled too.
 
