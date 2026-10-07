@@ -23,7 +23,7 @@ The localization pass covers account screens, character creation, HUD, controls,
 
 Translation runs at presentation boundaries: game IDs and protocol values remain compatible, while player chat, character names and clan names are preserved. English command aliases retain Spanish compatibility. Text overlays localize legacy signs while preserving their original artwork for Spanish; map-aware signage corrects town labels.
 
-The source and artwork review closed the known translation gaps. This does not mean every late-game encounter was manually played. New content must extend the catalogs and regression fixtures. See [English validation](FULL-ENGLISH-VALIDATION.md) and [sign review](SIGN-LOCATION-REVIEW.md).
+The source and artwork review closed the known translation gaps. This does not mean every late-game encounter was manually played. New content must extend the catalogs and regression fixtures. See [English validation](docs/FULL-ENGLISH-VALIDATION.md) and [sign review](docs/archive/SIGN-LOCATION-REVIEW.md).
 
 ### Player website and interface
 
@@ -56,13 +56,13 @@ Withdrawal requires the character to be offline. The server reserves it, invalid
 
 Character sales preserve the same character ID, including inventory, equipment, personal bank, spells, progression, character gold and titles. Shared account/clan vaults are excluded. Marketplace payment and NFT delivery are combined in the prepared Solana transaction, followed by finalized, idempotent database settlement. Chain confirmation and database settlement remain separate steps.
 
-Staking uses Metaplex delegated freeze authority and wallet authorization. The operator co-signs relevant transactions. There is no standalone Anchor escrow/staking program in this version. See [character asset design](CHARACTER-ASSETS-PLAN.md) and [validation](CHARACTER-ASSETS-VALIDATION.md).
+Staking uses Metaplex delegated freeze authority and wallet authorization. The operator co-signs relevant transactions. There is no standalone Anchor escrow/staking program in this version. See [character asset design](docs/CHARACTER-ASSETS-PLAN.md) and [validation](docs/archive/CHARACTER-ASSETS-VALIDATION.md).
 
 ### Items and gold
 
 Items remain off-chain unless exported. Exported quantities are absent from the character bundle, preventing the same item from remaining in a sold character and also existing as a wallet receipt. Item marketplace rules exclude newbie gear, equipped items and other ineligible stock. Website item sales and wallet exports have separate lifecycle checks.
 
-Gold withdrawals mint; deposits burn. There is no fixed reserve of pre-minted tokens being transferred back and forth. This is an operator-controlled bridge for the game economy. See [economy design](CHARACTER-ECONOMY-PLAN.md), [economy validation](CHARACTER-ECONOMY-VALIDATION.md) and [item marketplace validation](ITEM-MARKETPLACE-VALIDATION.md).
+Gold withdrawals mint; deposits burn. There is no fixed reserve of pre-minted tokens being transferred back and forth. This is an operator-controlled bridge for the game economy. See [economy design](docs/CHARACTER-ECONOMY-PLAN.md), [economy validation](docs/archive/CHARACTER-ECONOMY-VALIDATION.md) and [item marketplace validation](docs/archive/ITEM-MARKETPLACE-VALIDATION.md).
 
 All chain flows validate prepared transaction contents and wallet signatures. Signed bytes and operation receipts support retries and recovery. An ambiguous RPC response does not authorize a refund or unlock: the operation stays reserved until reconciliation establishes its outcome. A wallet showing a transaction does not alone prove database settlement completed.
 
@@ -86,11 +86,16 @@ Website API routes --> Node/Express API <--> Authoritative game server
 | `frontend/` | Website, browser game, localization, wallet UI and sprite previews |
 | `server/` | Realtime game rules, socket handling and durable save/recovery journals |
 | `api/` | Accounts, persistence, wallet proofs, asset/economy operations and migrations |
+| `docs/` | Current architecture, localization, security and operations guides |
+| `docs/archive/` | Historical plans, validation reports and test receipts |
+| `scripts/` | Windows operations tools and public gateway |
 | `database/aoweb.sql` | Upstream game seed; not a backup of the running realm |
-| `Start-AOWeb.ps1`, `Check-AOWeb.ps1`, `Stop-AOWeb.ps1` | Prepared Windows trial operations |
-| `Backup-AOWeb.ps1` | Private database/runtime backup and isolated restore verification |
+| `scripts/Start-AOWeb.ps1`, `scripts/Check-AOWeb.ps1`, `scripts/Stop-AOWeb.ps1` | Prepared Windows trial operations |
+| `scripts/Backup-AOWeb.ps1` | Private database/runtime backup and isolated restore verification |
 
 PostgreSQL is required. This project has not removed the database or moved the complete game state onto Solana.
+
+See the [documentation index](docs/README.md) for current guides and the [archive](docs/archive/README.md) for historical reports.
 
 ## Local development
 
@@ -165,17 +170,17 @@ The mint must match the configured authority and expected mint policy. Issuers n
 For the already prepared workspace, use:
 
 ```powershell
-./Start-AOWeb.ps1
-./Check-AOWeb.ps1
-./Backup-AOWeb.ps1 -VerifyRestore
-./Stop-AOWeb.ps1 -KeepDatabase
+./scripts/Start-AOWeb.ps1
+./scripts/Check-AOWeb.ps1
+./scripts/Backup-AOWeb.ps1 -VerifyRestore
+./scripts/Stop-AOWeb.ps1 -KeepDatabase
 ```
 
-These scripts depend on the workspace's private `work/` directory, installed PostgreSQL and prepared environment files. They are not a one-command bootstrap for an arbitrary fresh clone. See [operations](OPERATIONS.md) for ports, maintenance, backup recovery and runtime configuration.
+These scripts depend on the workspace's private `work/` directory, installed PostgreSQL and prepared environment files. They are not a one-command bootstrap for an arbitrary fresh clone. See [operations](docs/OPERATIONS.md) for ports, maintenance, backup recovery and runtime configuration.
 
 The trial can run on a desktop computer with the website and game exposed through a gateway/tunnel. PostgreSQL and internal service endpoints should remain private. Temporary tunnel URLs change and are not permanent deployment addresses or availability guarantees; this README intentionally does not pin one.
 
-24/7 hosting and at least 100 simultaneous players remain deployment/load-test requirements, not proven capacity claims. See [hosting plan](DEVNET-HOSTING-PLAN.md).
+24/7 hosting and at least 100 simultaneous players remain deployment/load-test requirements, not proven capacity claims. See [hosting plan](docs/DEVNET-HOSTING-PLAN.md).
 
 ## Security changes and verification
 
@@ -214,7 +219,7 @@ The API security runner creates and drops isolated temporary databases. Other in
 
 Set `AOWEB_SETTLEMENT_PAUSED=1` and restart the API to block new settlement requests while retaining recovery/status paths. A pause cannot revoke a transaction already signed in a wallet.
 
-Read [the remediation report](SECURITY-REMEDIATION.md) for exact validation, remaining dependency advisories and the incident procedure, and [the security policy](SECURITY.md) for handling sensitive reports.
+Read [the remediation report](docs/SECURITY-REMEDIATION.md) for exact validation, remaining dependency advisories and the incident procedure, and [the security policy](SECURITY.md) for handling sensitive reports.
 
 ## Road to mainnet
 

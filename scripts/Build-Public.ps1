@@ -1,6 +1,6 @@
 param([string]$DistDir='.next-public-en',[string]$BuildId='english-complete-20261004')
 $ErrorActionPreference='Stop'
-$workRoot=Join-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) 'work'
+$workRoot=Join-Path (Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent) 'work'
 $public=Get-Content -LiteralPath (Join-Path $workRoot 'aoweb-public.json') -Raw | ConvertFrom-Json
 if($public.distDir -eq $DistDir){throw 'Choose an inactive build directory; the active website must not be overwritten.'}
 if($DistDir -notmatch '^\.next-public-[a-z0-9-]+$'){throw 'Invalid build directory'}
@@ -9,7 +9,7 @@ $env:NEXT_BUILD_ID=$BuildId
 $env:NEXT_PUBLIC_SITE_URL=$public.url
 $env:NEXT_PUBLIC_WS_URL='/game-socket'
 $env:NEXT_TELEMETRY_DISABLED='1'
-Push-Location (Join-Path $PSScriptRoot 'frontend')
+Push-Location (Join-Path (Split-Path $PSScriptRoot -Parent) 'frontend')
 try {
     & npm.cmd run test:english
     if($LASTEXITCODE -ne 0){throw 'English release checks failed'}

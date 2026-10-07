@@ -12,13 +12,13 @@ Live QA used the existing disposable Spelltester account and its already-owned d
 
 Scope: local player presentation only. Remote-player visibility is not implemented by this change. Ownership transfer/revocation is covered by the existing API and display expiry policy; no new transfer transaction was performed. Death/invisibility suppression was checked in automated tests, not by killing the live test character. Visual appearance remains subject to user approval.
 
-![First Hunt in the game](../cosmetic-first-hunt-ingame.png)
+![First Hunt in the game](../../../cosmetic-first-hunt-ingame.png)
 
-![Explorer in the game](../cosmetic-explorer-ingame.png)
+![Explorer in the game](../../../cosmetic-explorer-ingame.png)
 
 Unequip was also verified live: both the nameplate crest and inventory badge disappeared. First Hunt was restored afterward. The test character was logged out normally.
 
-![Unequipped comparison](../cosmetic-unequipped-ingame.png)
+![Unequipped comparison](../../../cosmetic-unequipped-ingame.png)
 
 ## Server-verified console title — 2026-10-05
 
@@ -28,4 +28,4 @@ Both regular and staff character-inspection branches use the same lookup. Viewer
 
 Validation: isolated API tests cover internal authentication, malformed IDs, both cosmetic kinds, changed ownership, wrong issuer, missing assets, RPC outage and no equipment. API/server type checks and full frontend regression/build passed. After the user logged out, the world was saved/backed up and API/game restarted. Live UI inspection of Spelltester displayed the correct First Hunt title with the existing real devnet collectible. A second-player session was not used for the live test. Test character logged out normally afterward.
 
-![Verified cosmetic title in the console](../cosmetic-console-title.png)
+![Verified cosmetic title in the console](../../../cosmetic-console-title.png)

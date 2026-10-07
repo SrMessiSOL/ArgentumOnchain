@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 if($RequireQuiescent){
  foreach($port in @(3101,7766)){if(Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue){throw 'Stop the API and game services before a checkpoint backup.'}}
 }
-$workspaceRoot=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$workspaceRoot=Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent
 $previousPgPassword=$env:PGPASSWORD
 $credentialFile=Join-Path $workspaceRoot 'work/database-admin.dpapi'
 if(Test-Path -LiteralPath $credentialFile){
@@ -23,7 +23,7 @@ if($LASTEXITCODE -ne 0){throw 'Backup failed; live database was not modified.'}
 $report=@{createdAt=(Get-Date).ToUniversalTime().ToString('o');archive=$archive;sha256=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash;bytes=(Get-Item -LiteralPath $archive).Length;restoreVerified=$false}
 $secretBundle=@{}
 foreach($relative in @('api/.env','server/.env','frontend/.env.local')){
- $source=Join-Path $PSScriptRoot $relative
+ $source=Join-Path (Split-Path $PSScriptRoot -Parent) $relative
  if(Test-Path -LiteralPath $source){$secretBundle[$relative]=[IO.File]::ReadAllText($source)}
 }
 $runtimeFile=Join-Path $workspaceRoot 'work/aoweb-runtime.json'

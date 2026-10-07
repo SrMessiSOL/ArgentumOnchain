@@ -1,6 +1,6 @@
 # Existing AOWeb, running locally
 
-**Current instructions (2026-10-04):** see [OPERATIONS.md](OPERATIONS.md) for the verified startup, maintenance, backup/restore and devnet configuration. The historical notes below describe the first local run; their statements that no assets exist on Solana and that the game is entirely Spanish are superseded by [FIVE-STEPS-VALIDATION.md](FIVE-STEPS-VALIDATION.md).
+**Current instructions (2026-10-04):** see [OPERATIONS.md](../OPERATIONS.md) for the verified startup, maintenance, backup/restore and devnet configuration. The historical notes below describe the first local run; their statements that no assets exist on Solana and that the game is entirely Spanish are superseded by [FIVE-STEPS-VALIDATION.md](FIVE-STEPS-VALIDATION.md).
 
 Open http://127.0.0.1:3100. This is the original AOWeb client/server and game content, not the separate Canvas prototype.
 

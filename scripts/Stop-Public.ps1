@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$trialWorkspace = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$trialWorkspace = Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent
 $trialWork = Join-Path $trialWorkspace 'work'
 $configPath = Join-Path $trialWork 'aoweb-public.json'
 if (Test-Path -LiteralPath $configPath) {

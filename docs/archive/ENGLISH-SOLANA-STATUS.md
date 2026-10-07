@@ -16,7 +16,7 @@ Character marketplace and 1:1 SPL gold are implemented and tested on devnet. Cur
 
 # Current localization status — 2026-10-04
 
-The full English localization pass is implemented and live. See [FULL-ENGLISH-VALIDATION.md](FULL-ENGLISH-VALIDATION.md) for coverage, browser checks and validation boundaries. Older entries below are historical, including their incomplete-translation and initial devnet status statements.
+The full English localization pass is implemented and live. See [FULL-ENGLISH-VALIDATION.md](../FULL-ENGLISH-VALIDATION.md) for coverage, browser checks and validation boundaries. Older entries below are historical, including their incomplete-translation and initial devnet status statements.
 
 ---
 
@@ -137,4 +137,4 @@ Verified actual Explorer badge transfers in both directions on Solana devnet and
 
 Final active frontend: `.next-public-en`. Live final checks confirmed the English Safety indicator, map text/accessibility, Strength label, saved level-2 character, purchased apple and 8 gold. Spanish remains selectable; wider world translation is still partial.
 
-See [FIVE-STEPS-VALIDATION.md](FIVE-STEPS-VALIDATION.md) for the full evidence and limits, and [OPERATIONS.md](OPERATIONS.md) for operation and recovery. Final screenshot: `../final-english-game.png`.
+See [FIVE-STEPS-VALIDATION.md](FIVE-STEPS-VALIDATION.md) for the full evidence and limits, and [OPERATIONS.md](../OPERATIONS.md) for operation and recovery. Final screenshot: `../final-english-game.png`.

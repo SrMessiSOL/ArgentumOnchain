@@ -1,6 +1,6 @@
 param([switch]$KeepDatabase)
 $ErrorActionPreference='Stop'
-$workspaceRoot=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$workspaceRoot=Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent
 $workRoot=Join-Path $workspaceRoot 'work'
 $record=Get-Content (Join-Path $workRoot 'aoweb-processes.json') -Raw | ConvertFrom-Json
 $health=Invoke-RestMethod 'http://127.0.0.1:7766/health' -TimeoutSec 5
@@ -14,7 +14,7 @@ if(Test-Path -LiteralPath $maintenanceRecord){
         Stop-Process -Id $maintenance.pid
     }
 }
-$tokenLine=Get-Content (Join-Path $PSScriptRoot 'server/.env') | Where-Object {$_ -match '^TOKEN_AUTH='} | Select-Object -First 1
+$tokenLine=Get-Content (Join-Path (Split-Path $PSScriptRoot -Parent) 'server/.env') | Where-Object {$_ -match '^TOKEN_AUTH='} | Select-Object -First 1
 $token=$tokenLine.Substring('TOKEN_AUTH='.Length)
 $save=Invoke-RestMethod 'http://127.0.0.1:7766/internal/save' -Method Post -Headers @{Authorization=$token} -TimeoutSec 30
 if(!$save.ok){throw 'World save failed; services remain running.'}
@@ -32,7 +32,7 @@ foreach($name in @('game','web','api')){
     if(!$ownsPort -and $name -eq 'web'){
         foreach($owner in $listener.OwningProcess){
             $child=Get-CimInstance Win32_Process -Filter "ProcessId=$owner"
-            if($child.ParentProcessId -eq $taskPid -and $child.CommandLine -like "*$(Join-Path $PSScriptRoot 'frontend')*start-server.js*"){$children+=$owner;$ownsPort=$true}
+            if($child.ParentProcessId -eq $taskPid -and $child.CommandLine -like "*$(Join-Path (Split-Path $PSScriptRoot -Parent) 'frontend')*start-server.js*"){$children+=$owner;$ownsPort=$true}
         }
     }
     if(!$matches -or !$ownsPort){throw "Identity mismatch for $name; refusing to stop it"}

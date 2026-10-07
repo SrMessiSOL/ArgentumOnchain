@@ -6,7 +6,7 @@ try {
     try { $launcherAcquired = $launcherMutex.WaitOne(15000) }
     catch [System.Threading.AbandonedMutexException] { $launcherAcquired = $true }
     if (!$launcherAcquired) { throw 'Another service launcher is active; retry shortly.' }
-$repoRoot = $PSScriptRoot
+$repoRoot = Split-Path $PSScriptRoot -Parent
 $workspaceRoot = Split-Path (Split-Path $repoRoot -Parent) -Parent
 $workRoot = Join-Path $workspaceRoot 'work'
 $pgBin = 'C:\Program Files\PostgreSQL\16\bin'
@@ -82,11 +82,11 @@ if(!$NoMaintenance){
     if(Test-Path -LiteralPath $maintenanceRecord){
         $maintenance=Get-Content -LiteralPath $maintenanceRecord -Raw | ConvertFrom-Json
         $existing=Get-CimInstance Win32_Process -Filter "ProcessId=$($maintenance.pid)"
-        $running=$existing -and $existing.CommandLine -like "*$(Join-Path $repoRoot 'Maintain-AOWeb.ps1')*"
+        $running=$existing -and $existing.CommandLine -like "*$(Join-Path $PSScriptRoot 'Maintain-AOWeb.ps1')*"
     }
     if(!$running){
         $shellPath=(Get-Process -Id $PID).Path
-        $argsLine='-NoProfile -File "'+(Join-Path $repoRoot 'Maintain-AOWeb.ps1')+'"'
+        $argsLine='-NoProfile -File "'+(Join-Path $PSScriptRoot 'Maintain-AOWeb.ps1')+'"'
         $keeper=Start-Process -FilePath $shellPath -ArgumentList $argsLine -WindowStyle Hidden -RedirectStandardOutput (Join-Path $workRoot 'maintenance.stdout.log') -RedirectStandardError (Join-Path $workRoot 'maintenance.stderr.log') -PassThru
         @{pid=$keeper.Id} | ConvertTo-Json | Set-Content -LiteralPath $maintenanceRecord
     }

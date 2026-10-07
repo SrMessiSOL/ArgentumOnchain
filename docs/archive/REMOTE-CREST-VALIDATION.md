@@ -14,6 +14,6 @@ Production frontend build remote-crests-20261005-v1 and all English/remote-cosme
 
 The dedicated Spelltester fixture connected through a separate websocket. Unequipping its cosmetic removed one equipped entry from the nearby server snapshot; original equipment was restored through the existing verified equip endpoint. This was a reversible equipment change, not an on-chain transfer. Both agent test characters logged out normally; user sessions were left connected.
 
-![Remote crest and console title from the observer account](../remote-crest-observer.png)
+![Remote crest and console title from the observer account](../../../remote-crest-observer.png)
 
 Ownership-change review completed on 2026-10-05: see COSMETIC-OWNERSHIP-VALIDATION.md for simulated transfer, receiver equipping, reconnect and outage evidence. No runtime change or restart was needed.

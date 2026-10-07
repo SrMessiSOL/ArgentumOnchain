@@ -8,4 +8,4 @@ Validation: production compilation and TypeScript passed; full English regressio
 
 Only the frontend was restarted. Game/API remained running; final game health was ready. No NFTs minted, wallets relinked or SOL spent.
 
-![Verified equipped cosmetic and received form](../wallet-cosmetic-polish.png)
+![Verified equipped cosmetic and received form](../../../wallet-cosmetic-polish.png)

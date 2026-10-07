@@ -83,4 +83,4 @@ No other city-label mismatch found in this review. Direction signs retain the de
 
 Production build sign-map-review-20261005-v1 passed the English suite, map-location regression and TypeScript compilation. Live Ullathorpe screenshot verifies the corrected sign alongside the City of Ullathorpe HUD. Nix is verified against its actual map placement and label resolver, not by a live visit. The test character logged out normally; no shared-server restart.
 
-![Corrected Ullathorpe notice](../sign-ullathorpe-fixed.png)
+![Corrected Ullathorpe notice](../../../sign-ullathorpe-fixed.png)

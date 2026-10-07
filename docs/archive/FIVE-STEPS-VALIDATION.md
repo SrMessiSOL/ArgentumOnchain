@@ -26,7 +26,7 @@ The live merchant showed English names, buy/sell totals and inventory, then Span
 
 Added authenticated local save and game health endpoints; unauthorized save returns 401 and public gateway access returns 404. Autosave is capped at 60 seconds even when older database balance settings request 30 minutes. Save/backup/stop/start passed; a second launch reused the existing healthy services. Shutdown refusal with a connected character was verified without stopping any service. Devnet issuance and the linked account survived restart.
 
-The maintenance service checks API/game availability every 30 seconds and saves/backs up every 30 minutes. Its forced-backup path passed. Database backup restored into a separate database with 4 accounts, 4 characters, 1,062 objects, 340 NPC templates and 2 cosmetic claims. The issuer/config bundle is protected with Windows DPAPI and passed a decrypt round trip. See `../backup-restore-receipt.json`, `../operations-receipt.json`, `../maintenance-recovery-receipt.json` and [OPERATIONS.md](OPERATIONS.md). The PC and temporary tunnel remain development hosting, not a 24/7 release.
+The maintenance service checks API/game availability every 30 seconds and saves/backs up every 30 minutes. Its forced-backup path passed. Database backup restored into a separate database with 4 accounts, 4 characters, 1,062 objects, 340 NPC templates and 2 cosmetic claims. The issuer/config bundle is protected with Windows DPAPI and passed a decrypt round trip. See `../backup-restore-receipt.json`, `../operations-receipt.json`, `../maintenance-recovery-receipt.json` and [OPERATIONS.md](../OPERATIONS.md). The PC and temporary tunnel remain development hosting, not a 24/7 release.
 
 ## 4. Multiplayer capacity — measured
 

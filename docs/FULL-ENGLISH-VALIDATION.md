@@ -2,9 +2,9 @@
 
 The English-first release is running at https://double-test-audience-examinations.trycloudflare.com on the existing shared PC-hosted realm. Build: `marketplace-polish-20261005-v9`, directory `.next-public-next` (left console layout update; English gate passed). Spanish remains selectable and persists through the existing account preference and locale cookie.
 
-![Final English macro picker, item names and Save action](../aoweb-english-final.png)
+![Final English macro picker, item names and Save action](../../aoweb-english-final.png)
 
-![Final English console and command help](../aoweb-english-console-final.png)
+![Final English console and command help](../../aoweb-english-console-final.png)
 
 ## Completion audit
 
@@ -113,7 +113,7 @@ Expanded the release gate to inspect the browser's bundled items, NPCs and spell
 
 All localization tests and server type checking passed. Live character selection, equipment wiki and spell descriptions were reviewed in English. No further untranslated game-owned text was found in this pass. Proper names, incantations, player-authored text and the optional Spanish locale remain intentional exceptions. The existing note about replacement copy on the unreadable legacy sign still applies.
 
-The empty realm was saved and backed up before restarting to activate the server-only fix. Frontend production build remains `english-release-20261004-v8`; no frontend application change required another build. Evidence: [English spell wiki](../aoweb-english-review.png).
+The empty realm was saved and backed up before restarting to activate the server-only fix. Frontend production build remains `english-release-20261004-v8`; no frontend application change required another build. Evidence: [English spell wiki](../../aoweb-english-review.png).
 
 ## Dynamic combat follow-up review — 2026-10-04
 
@@ -143,7 +143,7 @@ The first build failed on a corrupted generated `.next/dev/types/routes.d.ts`, n
 
 Final verification: the English gate and server/API type checks passed; the corrected production build passed with 49 routes. Build-time ranking fetch warnings occurred while the API was stopped; after restart, the live ranking populated normally. The realm was saved and backed up (`aoweb-20261004-220152-168.dump`) with zero players online before restarting. Game and API health checks pass, and v10 is active. Live browser checks confirmed `Mage · Human` / `Warrior · Human` in ranking rows and `CON` on character creation. No character was created or modified during this review.
 
-Evidence: [corrected character creation](../aoweb-creation-english-v10.png), [English ranking](../aoweb-ranking-english-v10.png). No further unresolved game-owned translation gaps were found within this pass's reviewed scope; previously documented artwork and exhaustive-runtime limits remain applicable.
+Evidence: [corrected character creation](../../aoweb-creation-english-v10.png), [English ranking](../../aoweb-ranking-english-v10.png). No further unresolved game-owned translation gaps were found within this pass's reviewed scope; previously documented artwork and exhaustive-runtime limits remain applicable.
 
 ## Display-helper and accessibility follow-up — 2026-10-04
 
@@ -185,14 +185,14 @@ Added regression checks for exported image alt strings and actual metadata-helpe
 
 Console starts visible. Wide desktop windows place channels, scrolling messages and Enter chat input in the left sidebar. The game, sidebar, inventory and macros scale together to fit short windows; narrower windows retain the compact layout. Verified live at 1280 x 720 with Spelltester: connection messages, character inspection and First Hunt title; Enter opens the sidebar input and Escape closes it while keeping the console visible. Test character logged out normally. English regression suite and production TypeScript/build passed. Shared game server was not restarted.
 
-![Default console beside the game](../console-left-ingame.png)
+![Default console beside the game](../../console-left-ingame.png)
 
 
 ## Persistent console and outgoing channels — 2026-10-05
 
 The log now merges game, Global, Party, Clan and Private entries chronologically. Channel selection changes the outgoing message destination and opens input; it never filters the log or changes its Console heading. Removed the compact-view hide-console button. Existing commands and recipient routing remain in use. Live QA selected all four channels with Spelltester and retained connection messages, character inspection and cosmetic title. Private-selected screenshot below. No test messages were sent to other players. English gate, production build and a focused chronological-merge/visibility check passed. Test character logged out normally; shared server not restarted.
 
-![Private selected with game console still visible](../console-persistent-ingame.png)
+![Private selected with game console still visible](../../console-persistent-ingame.png)
 
 
 

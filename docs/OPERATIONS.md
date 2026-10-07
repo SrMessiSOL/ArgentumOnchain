@@ -4,12 +4,12 @@ This is one shared realm on this PC. Gameplay remains authoritative and off-chai
 
 ## Start, check and stop
 
-Run these PowerShell scripts from this directory:
+Run these PowerShell scripts from the repository root:
 
 ```powershell
-./Start-AOWeb.ps1
-./Check-AOWeb.ps1
-./Stop-AOWeb.ps1 -KeepDatabase
+./scripts/Start-AOWeb.ps1
+./scripts/Check-AOWeb.ps1
+./scripts/Stop-AOWeb.ps1 -KeepDatabase
 ```
 
 The launcher starts the isolated PostgreSQL cluster, waits for the API and game health checks, reuses matching processes, and refuses unknown port owners. It also starts a hidden maintenance process. `-NoWeb` skips the local development frontend; `-NoMaintenance` suppresses maintenance startup for controlled diagnostics. Runtime settings in the workspace's `work/aoweb-runtime.json` preserve the dedicated devnet issuer and metadata origin across API restarts. That file contains paths/configuration, not private key bytes.
@@ -23,7 +23,7 @@ Stop refuses while characters are online. After normal logout it stops maintenan
 ## Backups and restore verification
 
 ```powershell
-./Backup-AOWeb.ps1 -VerifyRestore
+./scripts/Backup-AOWeb.ps1 -VerifyRestore
 ```
 
 Custom-format PostgreSQL archives, SHA-256 receipts and encrypted runtime bundles are saved under `work/backups/`. Verification creates a new `aoweb_restore_<timestamp>` database, restores the archive there, and checks table counts. It never restores over the live database. These databases are intentionally retained for inspection.
