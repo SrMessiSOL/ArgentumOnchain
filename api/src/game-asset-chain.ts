@@ -21,11 +21,25 @@ export function assetIdentity(id:string){
  const key=Keypair.fromSeed(createHmac('sha256',issuer.secretKey).update(`aochain:game-asset:v1:${id}`).digest());
  return {key,address:key.publicKey.toBase58(),issuer:issuer.publicKey.toBase58()};
 }
-export async function fetchGameAsset(address:string){
- const account=await (await checkedChain()).getAccountInfo(new PublicKey(address),'finalized');
+function decodeGameAsset(address:string,account:Awaited<ReturnType<import('@solana/web3.js').Connection['getAccountInfo']>>){
  if(!account)return null;
  if(account.owner.toBase58()!==MPL_CORE_PROGRAM_ID.toString())throw Error('assets.invalidAsset');
  return deserializeAssetV1({publicKey:publicKey(address),owner:publicKey(account.owner.toBase58()),lamports:lamports(account.lamports),executable:account.executable,rentEpoch:BigInt(account.rentEpoch??0),data:new Uint8Array(account.data)});
+}
+export async function fetchGameAsset(address:string){
+ return decodeGameAsset(address,await (await checkedChain()).getAccountInfo(new PublicKey(address),'finalized'));
+}
+/** Batch RPC reads; retain nulls and registration verification at the caller. */
+export async function fetchGameAssets(addresses:string[]){
+ const result=new Map<string,ReturnType<typeof decodeGameAsset>>();
+ const connection=await checkedChain();
+ for(let offset=0;offset<addresses.length;offset+=100){
+  const batch=addresses.slice(offset,offset+100);
+  const accounts=await connection.getMultipleAccountsInfo(batch.map(address=>new PublicKey(address)),'finalized');
+  if(accounts.length!==batch.length)throw Error('assets.invalidAsset');
+  for(let i=0;i<batch.length;i++)result.set(batch[i],decodeGameAsset(batch[i],accounts[i]));
+ }
+ return result;
 }
 export function attributes(record:AssetRecord,settlement?:Settlement){
  return [{key:'aochain_kind',value:record.kind},{key:'aochain_id',value:record.kind==='character'?record.character_id:record.id},

@@ -2,14 +2,14 @@ import {describe,it,expect,vi,beforeEach} from 'vitest';
 import {Keypair,PublicKey,SystemProgram,Transaction,ComputeBudgetProgram} from '@solana/web3.js';
 import {publicKey} from '@metaplex-foundation/umi';
 import {MPL_CORE_PROGRAM_ID,getCreateV2InstructionDataSerializer,getUpdatePluginV1InstructionDataSerializer} from '@metaplex-foundation/mpl-core';
-const state=vi.hoisted(()=>({asset:null as any,issuer:null as any}));
+const state=vi.hoisted(()=>({asset:null as any,issuer:null as any,batch:vi.fn()}));
 vi.mock('../economy-chain',async(importOriginal)=>{
  const actual=await importOriginal<typeof import('../economy-chain')>();
  const web3=await import('@solana/web3.js');
- return {validateSignedTransaction:actual.validateSignedTransaction,economyAuthority:()=>state.issuer,checkedChain:async()=>({getLatestBlockhash:async()=>({blockhash:Keypair.generate().publicKey.toBase58(),lastValidBlockHeight:99}),getAccountInfo:async()=>state.asset?{owner:new PublicKey('CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d'),lamports:1,executable:false,rentEpoch:0,data:Buffer.from([1])}:null}),createEconomyTransaction:(payer:PublicKey,blockhash:string)=>new web3.Transaction({feePayer:payer,recentBlockhash:blockhash}).add(ComputeBudgetProgram.setComputeUnitLimit({units:200000}))};
+ return {validateSignedTransaction:actual.validateSignedTransaction,economyAuthority:()=>state.issuer,checkedChain:async()=>({getLatestBlockhash:async()=>({blockhash:Keypair.generate().publicKey.toBase58(),lastValidBlockHeight:99}),getMultipleAccountsInfo:state.batch,getAccountInfo:async()=>state.asset?{owner:new PublicKey('CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d'),lamports:1,executable:false,rentEpoch:0,data:Buffer.from([1])}:null}),createEconomyTransaction:(payer:PublicKey,blockhash:string)=>new web3.Transaction({feePayer:payer,recentBlockhash:blockhash}).add(ComputeBudgetProgram.setComputeUnitLimit({units:200000}))};
 });
 vi.mock('@metaplex-foundation/mpl-core',async(importOriginal)=>({...await importOriginal<object>(),deserializeAssetV1:()=>state.asset}));
-import {assetIdentity,signAssetSubmission,prepareAssetTransaction,prepareCharacterPurchase,attributes,type AssetRecord} from '../game-asset-chain';
+import {fetchGameAssets,assetIdentity,signAssetSubmission,prepareAssetTransaction,prepareCharacterPurchase,attributes,type AssetRecord} from '../game-asset-chain';
 const wallet=Keypair.generate();let record:AssetRecord;
 beforeEach(()=>{state.issuer=Keypair.generate();state.asset=null;process.env.AOWEB_GOLD_AUTHORITY_FILE='test';const id='11111111-1111-4111-8111-111111111111';const key=assetIdentity(id);record={id,kind:'character',character_id:id,asset_address:key.address,issuer_address:key.issuer,metadata_uri:'https://test.invalid/character.json'};});
 function existing(frozen:boolean,owner=wallet.publicKey.toBase58()){
@@ -45,4 +45,13 @@ describe('real Core SDK transaction construction; no network or funds',()=>{
   record={...record,kind:'item',item_id:42,quantity:3};const p=await prepareAssetTransaction('item-export','export',record,wallet.publicKey.toBase58(),'Sword');const tx=Transaction.from(Buffer.from(p.transaction_bytes,'base64'));const [data]=getCreateV2InstructionDataSerializer().deserialize(core(tx)[0].data);expect(JSON.stringify(data.plugins)).toContain('quantity');expect(JSON.stringify(data.plugins)).not.toContain('FreezeDelegate');finalize(tx,p,'item-export');
   existing(false);state.asset.attributes.attributeList=attributes(record);const imported=await prepareAssetTransaction('item-import','import',record,wallet.publicKey.toBase58(),'Sword');const burn=Transaction.from(Buffer.from(imported.transaction_bytes,'base64'));expect(core(burn)).toHaveLength(1);burn.partialSign(wallet);expect(burn.verifySignatures()).toBe(false);expect(()=>burn.serialize()).toThrow();finalize(Transaction.from(Buffer.from(imported.transaction_bytes,'base64')),imported,'item-import');
  });
+});
+
+it('batches at most 100 addresses and preserves missing entries',async()=>{
+ const addresses=Array.from({length:201},()=>Keypair.generate().publicKey.toBase58());state.batch.mockReset().mockImplementation(async(keys:any[])=>keys.map(()=>null));
+ const result=await fetchGameAssets(addresses);expect(state.batch.mock.calls.map(call=>call[0].length)).toEqual([100,100,1]);expect(result.size).toBe(201);expect([...result.values()].every(value=>value===null)).toBe(true);
+});
+it('batch reads reject unexpected program ownership and incomplete responses',async()=>{
+ const address=Keypair.generate().publicKey.toBase58();state.batch.mockResolvedValueOnce([]);await expect(fetchGameAssets([address])).rejects.toThrow('assets.invalidAsset');
+ state.batch.mockResolvedValueOnce([{owner:SystemProgram.programId,lamports:1,data:Buffer.from([1]),executable:false}]);await expect(fetchGameAssets([address])).rejects.toThrow('assets.invalidAsset');
 });

@@ -35,7 +35,7 @@
         "lint": "eslint './src/**/*.ts'",
         "world-map": "node scripts/build-world-map.cjs",
         "compare-original-data": "tsx src/scripts/compareOriginalData.ts",
-        "test:security": "node --import tsx tests/market-journal.test.ts && node --import tsx tests/connection-budget.test.ts && node tests/faction-claim.test.cjs"
+        "test:security": "node --import tsx tests/market-journal.test.ts && node --import tsx tests/connection-budget.test.ts && node tests/faction-claim.test.cjs && node --import tsx tests/inbound-packets.test.ts && node --import tsx tests/connection-identity.test.ts"
     },
     "repository": {
         "type": "git",

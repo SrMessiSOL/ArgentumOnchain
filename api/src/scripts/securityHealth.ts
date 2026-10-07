@@ -1,3 +1,4 @@
+import {securityHealthIssues} from '../securityHealthPolicy';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import pool from '../db';
@@ -20,7 +21,7 @@ async function main(){
   const journals=[['vault','AOWEB_VAULT_JOURNAL_DIR','vault-operations','vault_operation_receipts'],['character','AOWEB_CHARACTER_JOURNAL_DIR','character-operations','character_save_receipts'],['world','AOWEB_WORLD_JOURNAL_DIR','world-operations','floor_spawn_receipts'],['market','AOWEB_MARKET_JOURNAL_DIR','market-operations','market_operation_receipts']];
   for(const [label,variable,folder,table]of journals){
    const directory=process.env[variable]||path.resolve(__dirname,'../../../../../work',folder);let pending=0,bytes=0,malformed=0,receiptExists=0;
-   for(const name of await fs.readdir(directory).catch(()=>[])){
+   for(const name of await fs.readdir(directory).catch((error:NodeJS.ErrnoException)=>{if(error.code==='ENOENT')return [];throw error;})){
     if(!name.endsWith('.json'))continue;pending++;const target=path.join(directory,name);const info=await fs.lstat(target);bytes+=info.size;
     if(!info.isFile()||info.size>4*1024*1024){malformed++;continue;}
     try{const entry=JSON.parse(await fs.readFile(target,'utf8'));if(!/^[0-9a-f-]{36}$/i.test(entry.operationId)||name!==entry.operationId+'.json')throw Error();
@@ -40,6 +41,10 @@ async function main(){
   let verified=0,failed=0;for(const row of rows){try{if(row.address&&await verifyPlayableAsset(row.asset_address,row.address))verified++;else failed++;}catch{failed++;}}
   report.stakes={checked:rows.length,verified,unverified:failed};
  }
+ const storage=await fs.statfs(path.resolve(__dirname,'../../../../../work'),{bigint:true});
+ report.availableDiskBytes=(storage.bavail*storage.bsize).toString();
+ report.issues=securityHealthIssues(report);report.measuredChecksPassed=(report.issues as string[]).length===0;
+ if(!report.measuredChecksPassed)process.exitCode=1;
  console.log(JSON.stringify(report,null,2));
 }
 main().catch((error:unknown)=>{console.error('Read-only security health check failed. No automatic repair was performed.',{name:(error as Error).name,code:(error as {code?:string}).code??'unavailable'});process.exitCode=1;}).finally(()=>pool.end());

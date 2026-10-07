@@ -306,15 +306,11 @@ const pkg: PackageApi = {
     },
 
     getString() {
-        if (!this.canReadBytes(2)) {
-            return "";
-        }
+        if (!this.canReadBytes(2)) throw Error('Truncated game string');
 
         const lengthStr = this.getShort();
 
-        if (lengthStr < 0 || !this.canReadBytes(lengthStr)) {
-            return "";
-        }
+        if (lengthStr < 0 || lengthStr > 8192 || !this.canReadBytes(lengthStr)) throw Error('Invalid game string');
 
         return this.bufferRcv.readString(lengthStr, ByteBuffer.METRICS_CHARS);
     },

@@ -1,3 +1,5 @@
+import {connectionIdentity} from './connectionIdentity';
+import {createInboundPacketValidator} from './inboundPacketValidation';
 import {ConnectionBudget,outboundWithinBudget} from './connectionBudget';
 import {InboundBudget,MAX_INBOUND_BYTES} from './inboundBudget';
 import { bankOperations } from './bankOperationGuard';
@@ -147,29 +149,7 @@ function handleSocketClosed(ws: RuntimeClient) {
 }
 
 function getConnectionIp(request: RuntimeConnectionRequest, ws: RuntimeClient): string | undefined {
-    const realIp = request.headers?.["x-real-ip"];
-    const realIpValue = Array.isArray(realIp) ? realIp[0] : realIp;
-
-    if (realIpValue?.trim()) {
-        return realIpValue.trim();
-    }
-
-    const cloudflareIp = request.headers?.["cf-connecting-ip"];
-    const cloudflareIpValue = Array.isArray(cloudflareIp) ? cloudflareIp[0] : cloudflareIp;
-
-    if (cloudflareIpValue?.trim()) {
-        return cloudflareIpValue.trim();
-    }
-
-    const forwardedFor = request.headers?.["x-forwarded-for"];
-    const forwardedValue = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
-    const forwardedIp = forwardedValue?.split(",")[0]?.trim();
-
-    if (forwardedIp) {
-        return forwardedIp;
-    }
-
-    return request.socket?.remoteAddress ?? ws._socket?.remoteAddress;
+    return connectionIdentity(request.socket?.remoteAddress ?? ws._socket?.remoteAddress,request.headers ?? {});
 }
 
 const http = require("http");
@@ -247,6 +227,8 @@ function handleHttpRequest(request: any, response: any) {
     response.setHeader("Content-Type", "application/json; charset=utf-8");
     response.end(JSON.stringify({ error: "Not found" }));
 }
+
+const validateInboundPacket=createInboundPacketValidator(pkg.serverPacketID);
 
 const PACKET_TYPE_NAMES: Record<number, string> = {
     [pkg.serverPacketID.changeHeading]: "heading",
@@ -571,6 +553,7 @@ wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnecti
                 ws.close(1008, 'Packet budget exceeded');
                 return;
             }
+            if (!validateInboundPacket(data)) { ws.close(1008,'Invalid game packet'); return; }
             // Do not allow another client inventory action or tab switch during a bank save.
             // Packet bytes are still budgeted above; nothing is queued for later replay.
             if (ws.id && bankOperations.isBusy(ws.id)) return;

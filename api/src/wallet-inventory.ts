@@ -2,19 +2,22 @@ import {PublicKey} from '@solana/web3.js';
 import {getAssociatedTokenAddressSync,unpackAccount,TOKEN_PROGRAM_ID} from '@solana/spl-token';
 import pool from './db';
 import {checkedChain} from './economy-chain';
-import {fetchGameAsset,attributes,type AssetRecord} from './game-asset-chain';
+import {fetchGameAssets,attributes,type AssetRecord} from './game-asset-chain';
 
 export async function readWalletInventory(wallet:string){
  const connection=await checkedChain();
- const records=(await pool.query("SELECT a.*,c.id_body,c.id_head,c.id_weapon,c.id_shield,c.id_helmet,COALESCE(o.name,c.name) AS name FROM game_assets a LEFT JOIN game_objects o ON o.id=a.item_id LEFT JOIN characters c ON c.id=a.character_id WHERE a.state='active' ORDER BY a.created_at DESC")).rows;
+ const records=(await pool.query("SELECT a.*,c.id_body,c.id_head,c.id_weapon,c.id_shield,c.id_helmet,COALESCE(o.name,c.name) AS name FROM game_assets a LEFT JOIN game_objects o ON o.id=a.item_id LEFT JOIN characters c ON c.id=a.character_id WHERE a.state='active' ORDER BY a.created_at DESC LIMIT 5001")).rows;
+ // Fail visibly instead of returning a partial inventory when a realm exceeds this bounded fallback.
+ if(records.length>5000)throw Error('economy.rpcBusy');
+ const chainAssets=await fetchGameAssets(records.map(record=>record.asset_address));
  const assets:{address:string;kind:string;name:string;quantity:number|null;characterId:string;staked:boolean;itemId?:number;appearance?:{bodyId:number;headId:number;weaponId:number;shieldId:number;helmetId:number}}[]=[];
- for(let offset=0;offset<records.length;offset+=8)await Promise.all(records.slice(offset,offset+8).map(async(record:AssetRecord&{name:string;id_body:number;id_head:number;id_weapon:number;id_shield:number;id_helmet:number})=>{
-  const asset=await fetchGameAsset(record.asset_address);
-  if(!asset||asset.owner!==wallet||asset.updateAuthority.type!=='Address'||asset.updateAuthority.address!==record.issuer_address||asset.uri!==record.metadata_uri)return;
+ for(const record of records as (AssetRecord&{name:string;id_body:number;id_head:number;id_weapon:number;id_shield:number;id_helmet:number})[]){
+  const asset=chainAssets.get(record.asset_address);
+  if(!asset||asset.owner!==wallet||asset.updateAuthority.type!=='Address'||asset.updateAuthority.address!==record.issuer_address||asset.uri!==record.metadata_uri)continue;
   const registered=new Map(asset.attributes?.attributeList.map(a=>[a.key,a.value]));
-  if(attributes(record).some(a=>registered.get(a.key)!==a.value))return;
+  if(attributes(record).some(a=>registered.get(a.key)!==a.value))continue;
   assets.push({address:record.asset_address,kind:record.kind,name:record.name,quantity:record.quantity??null,characterId:record.character_id,staked:Boolean(asset.freezeDelegate?.frozen),itemId:record.item_id,appearance:record.kind==='character'?{bodyId:record.id_body,headId:record.id_head,weaponId:record.id_weapon,shieldId:record.id_shield,helmetId:record.id_helmet}:undefined});
- }));
+ }
  let goldBalance:string|null=null;
  const goldMint=process.env.AOWEB_GOLD_MINT??null;
  if(goldMint){

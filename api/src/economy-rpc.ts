@@ -1,6 +1,7 @@
+import {boundedRpcFetch} from './rpcCapacity';
 import {requireDevnet} from './cosmetic-policy';
 // Retry reads/broadcasts only; the caller persists signed bytes before broadcast.
-export async function economyRpcFetch(input:Parameters<typeof fetch>[0],init?:Parameters<typeof fetch>[1],request:typeof fetch=fetch,pause:(ms:number)=>Promise<void>=ms=>new Promise(resolve=>setTimeout(resolve,ms))):Promise<Response>{
+export async function economyRpcFetch(input:Parameters<typeof fetch>[0],init?:Parameters<typeof fetch>[1],request:typeof fetch=boundedRpcFetch,pause:(ms:number)=>Promise<void>=ms=>new Promise(resolve=>setTimeout(resolve,ms))):Promise<Response>{
  for(let attempt=0;attempt<3;attempt++){
   const response=await request(input,{...init,signal:AbortSignal.timeout(5000)});
   if(response.status!==429)return response;
@@ -11,7 +12,7 @@ export async function economyRpcFetch(input:Parameters<typeof fetch>[0],init?:Pa
  throw Error('economy.rpcBusy');
 }
 
-export function createDevnetFetch(request:typeof fetch=fetch,now:()=>number=Date.now,pause:(ms:number)=>Promise<void>=ms=>new Promise(resolve=>setTimeout(resolve,ms))):typeof fetch{
+export function createDevnetFetch(request:typeof fetch=boundedRpcFetch,now:()=>number=Date.now,pause:(ms:number)=>Promise<void>=ms=>new Promise(resolve=>setTimeout(resolve,ms))):typeof fetch{
  const fallback='https://solana-devnet.gateway.tatum.io';
  let verifiedUntil=0,verification:Promise<void>|null=null;
  const calls:number[]=[];

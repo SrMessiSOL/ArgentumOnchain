@@ -1,0 +1,7 @@
+import {test,expect} from 'vitest';
+import {securityHealthIssues} from '../securityHealthPolicy';
+const healthy=()=>({ledgerMismatches:0,snapshots:{hashMismatches:0},rawCredentials:{sessions:0,tickets:0},stakes:{unverified:0},pendingReceiptCounts:{world:{malformed:0}},availableDiskBytes:String(1024*1024*1024)});
+test('clean measured counters do not claim full escrow reconciliation',()=>{expect(securityHealthIssues(healthy())).toEqual([]);});
+test('integrity, leaked credentials and ownership failures are actionable',()=>{const report=healthy();report.ledgerMismatches=1;report.snapshots.hashMismatches=1;report.rawCredentials.tickets=1;report.stakes.unverified=1;expect(securityHealthIssues(report)).toEqual(['gold-ledger-mismatch','snapshot-hash-mismatch','unhashed-credentials','unverified-staked-ownership']);});
+test('malformed journals and low storage fail the measured checks',()=>{const report=healthy();report.pendingReceiptCounts.world.malformed=1;report.availableDiskBytes='1';expect(securityHealthIssues(report)).toEqual(['malformed-world-journal','low-disk-space']);});
+test('disk threshold uses exact integers and pending work alone is not corruption',()=>{const report=healthy();report.availableDiskBytes=String(500*1024*1024);expect(securityHealthIssues(report)).toEqual([]);expect(securityHealthIssues({...report,pendingReceiptCounts:{world:{pending:10,malformed:0}}})).toEqual([]);});

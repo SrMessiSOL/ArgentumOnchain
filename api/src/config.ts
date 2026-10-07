@@ -10,6 +10,7 @@ type Config = {
   databaseStatementTimeoutMs: number;
   databaseIdleInTransactionTimeoutMs: number;
   tokenAuth: string;
+  gameServiceToken: string | null;
   nodeEnv: string;
   corsOrigin: string;
   siteUrl: string;
@@ -86,6 +87,7 @@ const config: Config = {
   databaseStatementTimeoutMs: getOptionalNumberEnv("DATABASE_STATEMENT_TIMEOUT_MS", 15000),
   databaseIdleInTransactionTimeoutMs: getOptionalNumberEnv("DATABASE_IDLE_IN_TX_TIMEOUT_MS", 10000),
   tokenAuth: getRequiredEnv("TOKEN_AUTH"),
+  gameServiceToken: process.env.GAME_SERVICE_TOKEN?.trim() || null,
   nodeEnv: process.env.NODE_ENV ?? "development",
   corsOrigin: process.env.CORS_ORIGIN?.trim() || "*",
   siteUrl: (process.env.SITE_URL?.trim() || "https://aoweb.app").replace(/\/+$/, ""),
