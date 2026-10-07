@@ -51,7 +51,7 @@ try {
  & (Join-Path $PgBin 'pg_ctl.exe') -D $data -l (Join-Path $root 'postgres.log') -o "-h 127.0.0.1 -p $Port" -w start
  if($LASTEXITCODE -ne 0){throw 'Disposable PostgreSQL startup failed; no realm process was changed'}
  $started=$true
- $keys=@('PATH','AOCHAIN_SECURITY_ADMIN_DATABASE_URL','DATABASE_URL','NODE_ENV','NEXT_TELEMETRY_DISABLED','AOWEB_GOLD_AUTHORITY_FILE','AOWEB_DEVNET_ISSUER_FILE','AOWEB_DEVNET_RPC','AOWEB_SETTLEMENT_PAUSED')
+ $keys=@('PATH','AOCHAIN_SECURITY_ADMIN_DATABASE_URL','DATABASE_URL','TOKEN_AUTH','GAME_SERVICE_TOKEN','NODE_ENV','NEXT_TELEMETRY_DISABLED','AOWEB_GOLD_AUTHORITY_FILE','AOWEB_DEVNET_ISSUER_FILE','AOWEB_DEVNET_RPC','AOWEB_SETTLEMENT_PAUSED')
  foreach($key in $keys){$savedEnv[$key]=[Environment]::GetEnvironmentVariable($key,'Process')}
  $env:PATH=(Split-Path $NodeExe -Parent)+';'+$env:PATH
  $env:NODE_ENV='test'
@@ -61,7 +61,9 @@ try {
  $env:AOWEB_GOLD_AUTHORITY_FILE=$null
  $env:AOWEB_DEVNET_ISSUER_FILE=$null
  $env:AOWEB_DEVNET_RPC=$null
- $env:AOWEB_SETTLEMENT_PAUSED='1'
+ # These endpoint tests mock signing/RPC and need to exercise unpaused paths.
+ # The actual realm's protected environment remains paused and is never loaded.
+ $env:AOWEB_SETTLEMENT_PAUSED='0'
  foreach($package in @('api','server','frontend')){
   Run-Check "$package frozen install" (Join-Path $repo $package) @($PnpmCjs,'install','--frozen-lockfile')
  }
@@ -69,8 +71,15 @@ try {
   Run-Check "$package TypeScript" (Join-Path $repo $package) @('node_modules/typescript/bin/tsc')
   Run-Check "$package assets" (Join-Path $repo $package) @('scripts/copy-assets.cjs')
  }
+ $env:TOKEN_AUTH='test-only-operations-'+[Guid]::NewGuid().ToString('N')
+ $env:GAME_SERVICE_TOKEN='test-only-game-'+[Guid]::NewGuid().ToString('N')
  Run-Check 'API isolated security suite' (Join-Path $repo 'api') @('scripts/security-regressions.cjs')
  Run-Check 'Server security suite' (Join-Path $repo 'server') @($PnpmCjs,'run','test:security')
+ # Neither runtime credentials nor the disposable administrator URL go to web builds.
+ $env:TOKEN_AUTH=$null
+ $env:GAME_SERVICE_TOKEN=$null
+ $env:DATABASE_URL=$null
+ $env:AOCHAIN_SECURITY_ADMIN_DATABASE_URL=$null
  Run-Check 'English regressions' (Join-Path $repo 'frontend') @('scripts/test-english.mjs')
  $env:NODE_ENV='production'
  Run-Check 'Frontend production build' (Join-Path $repo 'frontend') @('node_modules/next/dist/bin/next','build')
