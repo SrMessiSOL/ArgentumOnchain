@@ -9,6 +9,9 @@ const valid = {
  AOWEB_SETTLEMENT_PAUSED:'1'
 };
 assert.doesNotThrow(() => validate(valid));
+const isolated={AOWEB_SIGNER_URL:'http://127.0.0.1:3104',AOWEB_SIGNER_TOKEN:'s'.repeat(64),AOWEB_GOLD_AUTHORITY_PUBLIC_KEY:'11111111111111111111111111111111'};
+assert.doesNotThrow(()=>validate({...valid,...isolated}));
+for(const patch of [{AOWEB_SIGNER_URL:'http://external.invalid:3104'},{AOWEB_SIGNER_URL:'http://secret:password@127.0.0.1:3104'},{AOWEB_SIGNER_TOKEN:undefined},{AOWEB_SIGNER_TOKEN:valid.TOKEN_AUTH},{AOWEB_GOLD_AUTHORITY_PUBLIC_KEY:undefined}])assert.throws(()=>validate({...valid,...isolated,...patch}));
 for (const patch of [
  {NODE_ENV:'development'}, {HOST:'0.0.0.0'}, {HOST:undefined},
  {AOWEB_RUN_MIGRATIONS:undefined}, {AOWEB_RUN_MIGRATIONS:'1'},

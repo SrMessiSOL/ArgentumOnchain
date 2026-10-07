@@ -33,6 +33,17 @@ function validateHostedEnvironment(env) {
   if (env.AOWEB_GOLD_AUTHORITY_FILE || env.AOWEB_DEVNET_ISSUER_FILE) {
     reject('Do not mount authority files into the hosted API; signer isolation remains unfinished');
   }
+  if (env.AOWEB_SIGNER_URL || env.AOWEB_SIGNER_TOKEN || env.AOWEB_GOLD_AUTHORITY_PUBLIC_KEY) {
+    let signer;
+    try { signer = new URL(env.AOWEB_SIGNER_URL); } catch { reject('Invalid isolated signer configuration'); }
+    if (signer.protocol !== 'http:' || signer.hostname !== '127.0.0.1' || !signer.port ||
+        signer.pathname !== '/' || signer.username || signer.password || signer.search || signer.hash ||
+        !env.AOWEB_SIGNER_TOKEN || env.AOWEB_SIGNER_TOKEN.length < 64 ||
+        env.AOWEB_SIGNER_TOKEN === env.TOKEN_AUTH || env.AOWEB_SIGNER_TOKEN === env.GAME_SERVICE_TOKEN ||
+        !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(env.AOWEB_GOLD_AUTHORITY_PUBLIC_KEY || '')) {
+      reject('Isolated signer requires loopback, public authority and a separate credential');
+    }
+  }
 }
 
 module.exports = { validateHostedEnvironment, validateHostedFilesystem };

@@ -21,3 +21,15 @@ Before activation:
 - Complete authorized devnet wallet/lost-response/provider/restart tests and independent review before opening testing.
 
 Do not relax disabled startup merely to pass a health check.
+
+## Asset and API preparation follow-up
+
+Gold and asset routes now support an optional isolated signer client. NFT transaction preparation uses Umi no-op signers and public authority/asset identities; the API need not load an authority file in this mode. Local legacy paths remain for existing development fixtures. Hosted startup still refuses authority files and unpaused settlement, and validates separate signer credentials and loopback configuration. No isolated configuration has been activated on the host.
+
+The client has four concurrent requests maximum, a five-second deadline, an 8 KiB response ceiling, no redirects and fixed route names. It checks returned operation ID, exact message, payer, all signatures and signature ID before the API's existing database transaction records bytes. Transport or validation failures preserve the reservation. The signing service still exposes no signing HTTP routes.
+
+Asset approval preparation checks committed operation/asset/character/wallet state, metadata URI, snapshot references and chain ownership/delegates. It rebuilds the message at the wallet's original blockhash. Stake permits a transferred NFT's verified wallet owner rather than requiring the old off-chain account owner, and binds finalized on-chain snapshot attributes. Cosmetics have deterministic identity, eligibility, season, reservation/supply and URI checks, but no isolated issuance endpoint or API integration yet. Tokenized marketplace purchases remain unsupported by the isolated signer.
+
+Signer-owned lifetime issuance reservations now limit gold withdrawals and asset/cosmetic counts independently of API-writable database records. They use an exclusive lock and durable per-operation record. No automatic refund/reset is allowed; an interrupted lock or malformed record fails closed. These budgets are wired into gold/asset signing cores, which remain unexposed. Operator provisioning, budget recovery/review, durable cosmetic signed bytes and replay/reconciliation integration are still required.
+
+API compilation, gold policy/journal tests, asset/cosmetic/budget tests and a real loopback signer-client test pass using offline fixtures. A real Core SDK NFT preparation test succeeds with public keys only and no authority file. The portable host runner additionally includes signer-reader SQL permission tests and authenticated backup encryption tests; its new database integration run is pending. The live services remain on their previous guarded build and public gameplay remains disabled.

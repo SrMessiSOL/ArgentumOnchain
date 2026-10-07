@@ -1,4 +1,5 @@
 import {startOperationRecovery} from './operationRecovery';
+import {isolatedSignerConfigured,isolatedAssetIdentity,isolatedSubmission} from './signer-client';
 import {randomUUID} from 'node:crypto';
 import type {Express,Request} from 'express';
 import type {PoolClient} from 'pg';
@@ -49,7 +50,7 @@ export function installGameAssetRoutes(app:Express){
     if(!character)throw Error('assets.notOwned');
     if(kind==='unstake')record=(await c.query("SELECT * FROM game_assets WHERE character_id=$1 AND kind='character' AND state='active' FOR UPDATE",[character.id])).rows[0];
     else {
-     const id=kind==='mint'?character.id:randomUUID();const derived=assetIdentity(id);
+     const id=kind==='mint'?character.id:randomUUID();const derived=isolatedSignerConfigured()?await isolatedAssetIdentity(id):assetIdentity(id);
      record={id,kind:kind==='mint'?'character':'item',character_id:character.id,asset_address:derived.address,issuer_address:derived.issuer,metadata_uri:metadataUri(id)};
     }
    }
@@ -96,7 +97,7 @@ export function installGameAssetRoutes(app:Express){
    const op=(await c.query('SELECT * FROM game_asset_operations WHERE id=$1 AND account_id=$2 FOR UPDATE',[body.operationId,account])).rows[0];if(!op)throw Error('assets.notOwned');
    if(op.state==='complete'||op.state==='failed')return op;
    const record=(await c.query('SELECT * FROM game_assets WHERE id=$1',[op.asset_id])).rows[0];if(!record)throw Error('assets.inconsistent');
-   const signed=signAssetSubmission(body.transaction,op.message_bytes,op.wallet,op.kind,record);
+   const signed=isolatedSignerConfigured()?await isolatedSubmission('asset',op.id,body.transaction,op.message_bytes,op.wallet):signAssetSubmission(body.transaction,op.message_bytes,op.wallet,op.kind,record);
    if(op.signature&&op.signature!==signed.signature)throw Error('economy.invalidTransaction');
    await c.query("UPDATE game_asset_operations SET state='signed',signature=$2,transaction_bytes=$3 WHERE id=$1",[op.id,signed.signature,signed.bytes]);return {...op,...{state:'signed',signature:signed.signature,transaction_bytes:signed.bytes}};
   });

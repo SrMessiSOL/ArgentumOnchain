@@ -1,4 +1,5 @@
 import {startOperationRecovery} from './operationRecovery';
+import {isolatedSignerConfigured,isolatedSubmission} from './signer-client';
 import {prepareCharacterPurchase,signAssetSubmission} from "./game-asset-chain";
 import {itemEligibilitySql,requireTradableItem,itemQuantity,inventoryDelivery} from './item-economy';
 import {randomUUID} from 'node:crypto';
@@ -62,7 +63,7 @@ export function installEconomyRoutes(app:Express){
  route('/auth/economy/submit',async(req,id)=>{
  const intent=await transaction(async c=>{const row=(await c.query('SELECT * FROM economy_intents WHERE id=$1 AND account_id=$2 FOR UPDATE',[req.body?.intentId,id])).rows[0];if(!row)throw Error('economy.notOwned');if(row.state==='complete'||row.state==='failed')return row;
  const asset=row.kind==='purchase'?(await c.query("SELECT a.* FROM game_assets a JOIN characters c ON c.asset_address=a.asset_address WHERE c.id=$1 AND a.kind='character' AND a.state='active'",[row.character_id])).rows[0]:null;
- const signed=asset?signAssetSubmission(req.body?.transaction??'',row.message_bytes,row.wallet,'purchase',asset):validateSignedTransaction(req.body?.transaction??'',row.message_bytes,row.wallet,[economyAuthority()]);if(row.signature&&row.signature!==signed.signature)throw Error('economy.invalidTransaction');await c.query("UPDATE economy_intents SET state='signed',signature=$2,transaction_bytes=$3 WHERE id=$1",[row.id,signed.signature,signed.bytes]);return {...row,state:'signed',signature:signed.signature,transaction_bytes:signed.bytes};});
+ const signed=isolatedSignerConfigured()?await isolatedSubmission('economy',row.id,req.body?.transaction??'',row.message_bytes,row.wallet):asset?signAssetSubmission(req.body?.transaction??'',row.message_bytes,row.wallet,'purchase',asset):validateSignedTransaction(req.body?.transaction??'',row.message_bytes,row.wallet,[economyAuthority()]);if(row.signature&&row.signature!==signed.signature)throw Error('economy.invalidTransaction');await c.query("UPDATE economy_intents SET state='signed',signature=$2,transaction_bytes=$3 WHERE id=$1",[row.id,signed.signature,signed.bytes]);return {...row,state:'signed',signature:signed.signature,transaction_bytes:signed.bytes};});
  if(intent.state!=='complete'&&intent.state!=='failed'){try{await economyConnection.sendRawTransaction(Buffer.from(intent.transaction_bytes,'base64'),{skipPreflight:false,maxRetries:2});}catch{/* Keep the persisted receipt; an RPC error does not prove failure. */}}
  return {id:intent.id,state:intent.state,signature:intent.signature};
  });

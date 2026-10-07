@@ -6,6 +6,7 @@ import {Keypair,PublicKey} from '@solana/web3.js';
 import {checkedChain} from '../economy-chain';
 import {approveEconomySubmission,type EconomyApproval} from './economy-policy';
 import {recordSignedReceipt} from './journal';
+import {reserveIssuance,type IssuanceBudget} from './budget';
 
 export function validateSignerEnvironment(env:NodeJS.ProcessEnv){
  const deny=()=>{throw Error('Signer startup policy failed');};
@@ -49,7 +50,7 @@ export async function startSigner(){
 }
 
 /** Reviewed signing core, not exposed by the preparation service. No broadcast. */
-export async function signCommittedEconomyOperation(pool:Pool,id:string,raw:string,issuer:Keypair,policy:{mint:string;maximumGold:number;maximumLamports:number},journal:string){
+export async function signCommittedEconomyOperation(pool:Pool,id:string,raw:string,issuer:Keypair,policy:{mint:string;maximumGold:number;maximumLamports:number},journal:string,budget:IssuanceBudget){
  const result=await pool.query<EconomyApproval>(`SELECT i.*,w.address AS linked_wallet,c.account_id AS owner_id,c.economy_lock,c.connected,c.deleted_at,
  COALESCE(s.seller_id,t.seller_id) AS seller_id,COALESCE(s.seller_wallet,t.seller_wallet) AS seller_wallet,COALESCE(s.state,t.state) AS listing_state,
  COALESCE(s.intent_id,t.intent_id) AS listing_intent,COALESCE(s.buyer_id,t.buyer_id) AS buyer_id,
@@ -61,6 +62,7 @@ export async function signCommittedEconomyOperation(pool:Pool,id:string,raw:stri
  const chain=await checkedChain();
  if((await chain.getBlockHeight('finalized'))>Number(row.last_valid_height))throw Error('signer.expired');
  const receipt=approveEconomySubmission(row,raw,issuer,policy);
+ reserveIssuance(budget,id,row.message_bytes,{gold:row.kind==='withdraw'?Number(row.amount):0,assets:0,cosmetics:0});
  return recordSignedReceipt(journal,{id,message:row.message_bytes,...receipt});
 }
 

@@ -4,9 +4,11 @@ import {TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID,getAssociatedTokenAddressSy
 import bs58 from 'bs58';
 import {requireDevnet} from './cosmetic-policy';
 import {createDevnetFetch} from './economy-rpc';
+import {isolatedSignerConfigured} from './signer-client';
 export const economyConnection=new Connection(process.env.AOWEB_DEVNET_RPC||'https://api.devnet.solana.com',{commitment:'finalized',disableRetryOnRateLimit:true,fetch:createDevnetFetch()});
 export function economyAuthority(){const file=process.env.AOWEB_GOLD_AUTHORITY_FILE;if(!file)throw Error('economy.unavailable');return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(file,'utf8'))));}
-export function economyReady(){return Boolean(process.env.AOWEB_GOLD_MINT&&process.env.AOWEB_GOLD_AUTHORITY_FILE);}
+export function economyApprovalPublicKey(){return isolatedSignerConfigured()?new PublicKey(process.env.AOWEB_GOLD_AUTHORITY_PUBLIC_KEY!):economyAuthority().publicKey;}
+export function economyReady(){return Boolean(process.env.AOWEB_GOLD_MINT&&(process.env.AOWEB_GOLD_AUTHORITY_FILE||(isolatedSignerConfigured()&&process.env.AOWEB_GOLD_AUTHORITY_PUBLIC_KEY)));}
 let verifiedUntil=0,verification:Promise<void>|null=null;
 export async function checkedChain(){
  if(Date.now()>=verifiedUntil){
@@ -15,7 +17,7 @@ export async function checkedChain(){
  }
  return economyConnection;
 }
-export async function checkedMint(){const mint=new PublicKey(process.env.AOWEB_GOLD_MINT!);const info=await getMint(await checkedChain(),mint,'finalized',TOKEN_PROGRAM_ID);const authority=economyAuthority();if(info.decimals!==0||!info.mintAuthority?.equals(authority.publicKey)||info.freezeAuthority)throw Error('economy.unavailable');return {mint,authority};}
+export async function checkedMint(){const mint=new PublicKey(process.env.AOWEB_GOLD_MINT!);const info=await getMint(await checkedChain(),mint,'finalized',TOKEN_PROGRAM_ID);const authority={publicKey:economyApprovalPublicKey()};if(info.decimals!==0||!info.mintAuthority?.equals(authority.publicKey)||info.freezeAuthority)throw Error('economy.unavailable');return {mint,authority};}
 export function createEconomyTransaction(payer:PublicKey,blockhash:string){
  // Phantom leaves existing compute-budget instructions intact. Bind the small
  // devnet priority fee before signing, so exact-message validation stays strict.
@@ -31,7 +33,7 @@ export async function prepareTransaction(kind:'purchase'|'deposit'|'withdraw',id
  if(kind==='deposit')tx.add(createBurnCheckedInstruction(ata,mint,payer,BigInt(amount),0,[],TOKEN_PROGRAM_ID));
  else tx.add(createAssociatedTokenAccountIdempotentInstruction(payer,ata,payer,mint),createMintToCheckedInstruction(mint,ata,authority.publicKey,BigInt(amount),0,[],TOKEN_PROGRAM_ID));}
  // Authority approval prevents wallet-only broadcast before the API has persisted its signature.
- const approval=economyAuthority().publicKey;
+ const approval=economyApprovalPublicKey();
  tx.add(new TransactionInstruction({programId:new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),keys:[{pubkey:approval,isSigner:true,isWritable:false}],data:Buffer.from(`aoweb:devnet:${kind}:${id}`)}));
  return {transaction_bytes:tx.serialize({requireAllSignatures:false}).toString('base64'),message_bytes:tx.serializeMessage().toString('base64'),last_valid_height:lastValidBlockHeight};
 }
