@@ -77,7 +77,7 @@ export async function prepareAssetTransaction(action:AssetAction,operation:strin
    append(tx,updatePlugin(umi,{asset:asset.publicKey,authority:signer,plugin:{type:'FreezeDelegate',frozen:false}}));
   }else append(tx,burn(umi,{asset,authority:umi.payer}));
  }
- tx.add(new TransactionInstruction({programId:new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),keys:action==='item-import'?[]:[{pubkey:issuer.publicKey,isSigner:true,isWritable:false}],data:Buffer.from(`aochain:assets:v1:${action}:${operation}`)}));
+ tx.add(new TransactionInstruction({programId:new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),keys:[{pubkey:issuer.publicKey,isSigner:true,isWritable:false}],data:Buffer.from(`aochain:assets:v1:${action}:${operation}`)}));
  return {transaction_bytes:tx.serialize({requireAllSignatures:false}).toString('base64'),message_bytes:tx.serializeMessage().toString('base64'),last_valid_height:lastValidBlockHeight};
 }
 /** Payment and NFT delivery occur in the same Solana transaction. */
@@ -94,7 +94,7 @@ export async function prepareCharacterPurchase(operation:string,record:AssetReco
 export function signAssetSubmission(raw:string,message:string,wallet:string,action:AssetAction|'purchase',record:AssetRecord){
  const issuer=economyAuthority();
  if(issuer.publicKey.toBase58()!==record.issuer_address)throw Error('assets.invalidAsset');
- const signers=action==='item-import'?[]:[issuer];
+ const signers=[issuer];
  if(action==='mint'||action==='item-export'){
   const key=assetIdentity(record.id).key;
   if(key.publicKey.toBase58()!==record.asset_address)throw Error('assets.invalidAsset');

@@ -1,3 +1,5 @@
+import {installBodyLimits} from './requestBodyLimits';
+import {createChainRequestBudget} from './chainRequestBudget';
 import {settlementPause} from './settlementPause';
 import {AuthBudget,authIdentity} from './authBudget';
 import {isIP} from 'node:net';
@@ -268,7 +270,7 @@ async function start(): Promise<void> {
     }
 }
 
-app.use(express.json({ limit: "2mb" }));
+installBodyLimits(app);
 app.use(settlementPause);
 const authBudget=new AuthBudget();
 app.use((request,response,next)=>{
@@ -340,6 +342,8 @@ app.use((request, response, next) => {
 
     next();
 });
+
+app.use(createChainRequestBudget());
 
 app.get("/health", async (_request, response) => {
     await pool.query("SELECT 1");

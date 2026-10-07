@@ -7,7 +7,7 @@ import type {PoolClient} from 'pg';
 import pool from './db';
 import {getPublicSessionByToken} from './repositories/auth';
 import {assertCharacterAvailable,goldAmount,saleLamports,MAX_GOLD} from './economy-policy';
-import {economyReady,economyAuthority,hasPreparedSignatures,prepareTransaction,validateSignedTransaction,receiptState,economyConnection} from './economy-chain';
+import {economyReady,economyAuthority,hasPreparedSignatures,canWalletBroadcastPrepared,prepareTransaction,validateSignedTransaction,receiptState,economyConnection} from './economy-chain';
 async function identity(req:Request){const t=req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];const s=t?await getPublicSessionByToken(t):null;if(!s)throw Error('economy.signIn');return s.account._id;}
 async function wallet(client:PoolClient,id:string){const r=(await client.query('SELECT address FROM account_wallets WHERE account_id=$1 FOR UPDATE',[id])).rows[0];if(!r)throw Error('economy.linkWallet');return r.address as string;}
 async function transaction<T>(fn:(c:PoolClient)=>Promise<T>){const c=await pool.connect();try{await c.query('BEGIN');await c.query("SELECT set_config('aoweb.economy_writer','yes',true)");const result=await fn(c);await c.query('COMMIT');return result;}catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}}
@@ -62,7 +62,7 @@ export function installEconomyRoutes(app:Express){
  route('/auth/economy/submit',async(req,id)=>{
  const intent=await transaction(async c=>{const row=(await c.query('SELECT * FROM economy_intents WHERE id=$1 AND account_id=$2 FOR UPDATE',[req.body?.intentId,id])).rows[0];if(!row)throw Error('economy.notOwned');if(row.state==='complete'||row.state==='failed')return row;
  const asset=row.kind==='purchase'?(await c.query("SELECT a.* FROM game_assets a JOIN characters c ON c.asset_address=a.asset_address WHERE c.id=$1 AND a.kind='character' AND a.state='active'",[row.character_id])).rows[0]:null;
- const signed=asset?signAssetSubmission(req.body?.transaction??'',row.message_bytes,row.wallet,'purchase',asset):validateSignedTransaction(req.body?.transaction??'',row.message_bytes,row.wallet,row.kind==='withdraw'?[economyAuthority()]:[]);if(row.signature&&row.signature!==signed.signature)throw Error('economy.invalidTransaction');await c.query("UPDATE economy_intents SET state='signed',signature=$2,transaction_bytes=$3 WHERE id=$1",[row.id,signed.signature,signed.bytes]);return {...row,state:'signed',signature:signed.signature,transaction_bytes:signed.bytes};});
+ const signed=asset?signAssetSubmission(req.body?.transaction??'',row.message_bytes,row.wallet,'purchase',asset):validateSignedTransaction(req.body?.transaction??'',row.message_bytes,row.wallet,[economyAuthority()]);if(row.signature&&row.signature!==signed.signature)throw Error('economy.invalidTransaction');await c.query("UPDATE economy_intents SET state='signed',signature=$2,transaction_bytes=$3 WHERE id=$1",[row.id,signed.signature,signed.bytes]);return {...row,state:'signed',signature:signed.signature,transaction_bytes:signed.bytes};});
  if(intent.state!=='complete'&&intent.state!=='failed'){try{await economyConnection.sendRawTransaction(Buffer.from(intent.transaction_bytes,'base64'),{skipPreflight:false,maxRetries:2});}catch{/* Keep the persisted receipt; an RPC error does not prove failure. */}}
  return {id:intent.id,state:intent.state,signature:intent.signature};
  });
@@ -71,7 +71,7 @@ export function installEconomyRoutes(app:Express){
 export async function reconcileIntent(intentId:string,accountId?:string){
  const initial=(await pool.query('SELECT * FROM economy_intents WHERE id=$1',[intentId])).rows[0];if(!initial||accountId&&initial.account_id!==accountId)throw Error('economy.notOwned');if(initial.state==='complete'||initial.state==='failed')return {state:initial.state};
  const proof=await receiptState(initial.signature,Number(initial.last_valid_height));if(proof==='pending'){if(initial.state==='signed')try{await economyConnection.sendRawTransaction(Buffer.from(initial.transaction_bytes,'base64'),{skipPreflight:false,maxRetries:1});}catch{}return {state:'pending'};}
- if(proof==='failed'&&initial.state==='prepared'&&hasPreparedSignatures(initial.transaction_bytes))return {state:'pending'};
+ if(proof==='failed'&&initial.state==='prepared'&&(hasPreparedSignatures(initial.transaction_bytes)||canWalletBroadcastPrepared(initial.transaction_bytes,initial.wallet)))return {state:'pending'};
  if(proof==='complete'&&initial.state!=='signed')throw Error('economy.inconsistent');
  return transaction(async c=>{const i=(await c.query('SELECT * FROM economy_intents WHERE id=$1 FOR UPDATE',[intentId])).rows[0];if(i.state==='complete'||i.state==='failed')return {state:i.state};
  if(i.state!==initial.state||i.signature!==initial.signature)return {state:'pending'};

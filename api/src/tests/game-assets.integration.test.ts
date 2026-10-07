@@ -5,8 +5,8 @@ import {randomUUID} from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 vi.mock('../repositories/auth',()=>({getPublicSessionByToken:async(token:string)=>({account:{_id:token}})}));
-const chain=vi.hoisted(()=>({proof:'pending',legacy:false,hook:null as null|(()=>Promise<void>),assets:new Map<string,any>(),plans:new Map<string,any>(),send:vi.fn(async()=> 'signature')}));
-vi.mock('../economy-chain',()=>({hasPreparedSignatures:()=>chain.legacy,economyAuthority:()=>({}),receiptState:async()=>{const proof=chain.proof;const hook=chain.hook;chain.hook=null;if(hook)await hook();return proof;},validateSignedTransaction:()=>({bytes:'signed',signature:randomUUID()}),economyConnection:{sendRawTransaction:chain.send}}));
+const chain=vi.hoisted(()=>({proof:'pending',legacy:false,ownerOnly:false,hook:null as null|(()=>Promise<void>),assets:new Map<string,any>(),plans:new Map<string,any>(),send:vi.fn(async()=> 'signature')}));
+vi.mock('../economy-chain',()=>({hasPreparedSignatures:()=>chain.legacy,canWalletBroadcastPrepared:()=>chain.ownerOnly,economyAuthority:()=>({}),receiptState:async()=>{const proof=chain.proof;const hook=chain.hook;chain.hook=null;if(hook)await hook();return proof;},validateSignedTransaction:()=>({bytes:'signed',signature:randomUUID()}),economyConnection:{sendRawTransaction:chain.send}}));
 vi.mock('../game-asset-chain',()=>({signAssetSubmission:()=>({bytes:'signed',signature:randomUUID()}),assetReady:()=>true,assetIdentity:(id:string)=>({address:'asset-'+id,issuer:'test-issuer'}),
  verifiedAsset:async(record:any,wallet?:string)=>{const asset=chain.assets.get(record.asset_address);if(!asset||(wallet&&asset.owner!==wallet))throw Error('assets.notOwned');return asset;},
  verifyPlayableAsset:async(address:string,wallet:string)=>{const a=chain.assets.get(address);return !!a&&a.owner===wallet&&a.freezeDelegate?.frozen;},
@@ -39,7 +39,7 @@ beforeAll(async()=>{
  const app=express();app.use(express.json());installGameAssetRoutes(app);server=app.listen(0,'127.0.0.1');await new Promise<void>(r=>server.once('listening',r));url='http://127.0.0.1:'+(server.address() as any).port;
 });
 beforeEach(async()=>{
- chain.legacy=false;chain.hook=null;chain.proof='pending';chain.assets.clear();chain.plans.clear();chain.send.mockClear();
+ chain.legacy=false;chain.ownerOnly=false;chain.hook=null;chain.proof='pending';chain.assets.clear();chain.plans.clear();chain.send.mockClear();
  await pool.query('TRUNCATE accounts,characters,account_wallets,auth_sessions,game_tickets,character_items,character_bank_items,character_spells,character_sales,item_sales,market_listings,market_claims CASCADE');
  await pool.query('INSERT INTO accounts VALUES($1),($2)',[seller,buyer]);await pool.query("INSERT INTO account_wallets VALUES($1,'seller-wallet'),($2,'buyer-wallet')",[seller,buyer]);
  await pool.query("INSERT INTO characters(id,account_id,name) VALUES($1,$2,'Bundlehero'),($3,$4,'Recipient')",[character,seller,recipient,buyer]);
@@ -112,3 +112,8 @@ describe('off-chain items with mint/burn exports',()=>{
  });
 });
 
+
+it('legacy wallet-only preparation expiry is quarantined instead of releasing reserved inventory',async()=>{
+ const minted=await prepare('mint');await complete(minted.body.id);chain.proof='pending';const out=await prepare('item-export',{slot:1,quantity:2});expect(out.status).toBe(200);chain.ownerOnly=true;chain.proof='failed';
+ expect((await reconcileAssetOperation(out.body.id,seller)).state).toBe('pending');expect((await pool.query('SELECT cant FROM character_items WHERE character_id=$1',[character])).rows[0].cant).toBe(3);expect((await pool.query('SELECT economy_lock FROM characters WHERE id=$1',[character])).rows[0].economy_lock).toBe(out.body.id);
+});

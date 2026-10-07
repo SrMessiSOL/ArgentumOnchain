@@ -125,7 +125,7 @@ Copy `api/.env.example` to `api/.env`, `server/.env.example` to `server/.env`, a
 - API: set `DATABASE_URL` to your local database, `PORT=3001`, and `SITE_URL` / `CORS_ORIGIN` to `http://localhost:3000`.
 - Game server: set `PORT=7666` and `API_BASE_URL=http://127.0.0.1:3001`.
 - Frontend: set `API_BASE_URL` / `NEXT_PUBLIC_API_BASE_URL` to `http://localhost:3001`, `NEXT_PUBLIC_WS_URL=ws://localhost:7666`, and `NEXT_PUBLIC_SITE_URL=http://localhost:3000`.
-- Set the same freshly generated private `TOKEN_AUTH` for the three services. Do not use `changeme`, commit environment files, or expose this value through a `NEXT_PUBLIC_` setting.
+- Set the same freshly generated private `TOKEN_AUTH` for the API and game server only. The frontend uses player sessions and must not receive this internal-service credential. Do not use `changeme`, commit environment files, or expose this value through a `NEXT_PUBLIC_` setting.
 
 Apply migrations with a database owner during initial setup; use restricted runtime credentials with `AOWEB_RUN_MIGRATIONS=0` for hosted operation. The API startup checks supplemental schemas, and existing databases require the documented additive migrations, including session hashes and ledger integrity. Back up before migrating existing data.
 

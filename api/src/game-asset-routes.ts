@@ -10,7 +10,7 @@ import {assertCharacterAvailable} from './economy-policy';
 import {itemEligibilitySql,itemQuantity,requireTradableItem,inventoryDelivery} from './item-economy';
 import {assetReady,assetIdentity,signAssetSubmission,prepareAssetTransaction,verifiedAsset,type AssetRecord,type AssetAction} from './game-asset-chain';
 import {saveSnapshot,readBundle,bundleHash} from './game-asset-policy';
-import {receiptState,hasPreparedSignatures,economyConnection} from './economy-chain';
+import {receiptState,hasPreparedSignatures,canWalletBroadcastPrepared,economyConnection} from './economy-chain';
 
 async function identity(req:Request){const token=req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];const session=token?await getPublicSessionByToken(token):null;if(!session)throw Error('assets.signIn');return session.account._id;}
 async function transaction<T>(fn:(c:PoolClient)=>Promise<T>){const c=await pool.connect();try{await c.query('BEGIN');await c.query("SELECT set_config('aoweb.economy_writer','yes',true)");const value=await fn(c);await c.query('COMMIT');return value;}catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}}
@@ -118,7 +118,7 @@ export async function reconcileAssetOperation(id:string,account?:string){
  if(['complete','failed'].includes(initial.state))return {state:initial.state};
  const proof=await receiptState(initial.signature,Number(initial.last_valid_height));
  if(proof==='pending'){if(initial.state==='signed')try{await economyConnection.sendRawTransaction(Buffer.from(initial.transaction_bytes,'base64'),{skipPreflight:false,maxRetries:1});}catch{}return {state:'pending'};}
- if(proof==='failed'&&initial.state==='prepared'&&hasPreparedSignatures(initial.transaction_bytes))return {state:'pending'};
+ if(proof==='failed'&&initial.state==='prepared'&&(hasPreparedSignatures(initial.transaction_bytes)||canWalletBroadcastPrepared(initial.transaction_bytes,initial.wallet)))return {state:'pending'};
  if(proof==='complete'&&initial.state!=='signed')throw Error('assets.inconsistent');
  return transaction(async c=>{
   const op=(await c.query('SELECT * FROM game_asset_operations WHERE id=$1 FOR UPDATE',[id])).rows[0];if(['complete','failed'].includes(op.state))return {state:op.state};

@@ -41,8 +41,8 @@ describe('real Core SDK transaction construction; no network or funds',()=>{
   existing(true,seller);await expect(prepareCharacterPurchase('sale',record,wallet.publicKey.toBase58(),seller,1000000)).rejects.toThrow('unstakeFirst');
   existing(false);await expect(prepareCharacterPurchase('sale',record,wallet.publicKey.toBase58(),seller,1000000)).rejects.toThrow('notOwned');
  });
- it('builds an item receipt with registered quantity and requires the owner signature to burn it',async()=>{
+ it('builds an item receipt with registered quantity and requires owner and persisted issuer approval to burn it',async()=>{
   record={...record,kind:'item',item_id:42,quantity:3};const p=await prepareAssetTransaction('item-export','export',record,wallet.publicKey.toBase58(),'Sword');const tx=Transaction.from(Buffer.from(p.transaction_bytes,'base64'));const [data]=getCreateV2InstructionDataSerializer().deserialize(core(tx)[0].data);expect(JSON.stringify(data.plugins)).toContain('quantity');expect(JSON.stringify(data.plugins)).not.toContain('FreezeDelegate');finalize(tx,p,'item-export');
-  existing(false);state.asset.attributes.attributeList=attributes(record);const imported=await prepareAssetTransaction('item-import','import',record,wallet.publicKey.toBase58(),'Sword');const burn=Transaction.from(Buffer.from(imported.transaction_bytes,'base64'));expect(core(burn)).toHaveLength(1);burn.partialSign(wallet);expect(burn.verifySignatures()).toBe(true);
+  existing(false);state.asset.attributes.attributeList=attributes(record);const imported=await prepareAssetTransaction('item-import','import',record,wallet.publicKey.toBase58(),'Sword');const burn=Transaction.from(Buffer.from(imported.transaction_bytes,'base64'));expect(core(burn)).toHaveLength(1);burn.partialSign(wallet);expect(burn.verifySignatures()).toBe(false);expect(()=>burn.serialize()).toThrow();finalize(Transaction.from(Buffer.from(imported.transaction_bytes,'base64')),imported,'item-import');
  });
 });

@@ -30,7 +30,9 @@ export async function prepareTransaction(kind:'purchase'|'deposit'|'withdraw',id
  else {const {mint,authority}=await checkedMint();const ata=getAssociatedTokenAddressSync(mint,payer,false,TOKEN_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
  if(kind==='deposit')tx.add(createBurnCheckedInstruction(ata,mint,payer,BigInt(amount),0,[],TOKEN_PROGRAM_ID));
  else tx.add(createAssociatedTokenAccountIdempotentInstruction(payer,ata,payer,mint),createMintToCheckedInstruction(mint,ata,authority.publicKey,BigInt(amount),0,[],TOKEN_PROGRAM_ID));}
- tx.add(new TransactionInstruction({programId:new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),keys:[],data:Buffer.from(`aoweb:devnet:${kind}:${id}`)}));
+ // Authority approval prevents wallet-only broadcast before the API has persisted its signature.
+ const approval=economyAuthority().publicKey;
+ tx.add(new TransactionInstruction({programId:new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),keys:[{pubkey:approval,isSigner:true,isWritable:false}],data:Buffer.from(`aoweb:devnet:${kind}:${id}`)}));
  return {transaction_bytes:tx.serialize({requireAllSignatures:false}).toString('base64'),message_bytes:tx.serializeMessage().toString('base64'),last_valid_height:lastValidBlockHeight};
 }
 // Server signatures are issued only after the wallet proof is verified inside
@@ -40,7 +42,10 @@ export function validateSignedTransaction(raw:string,message:string,wallet:strin
   if(typeof raw!=='string'||raw.length>2200)throw Error();
   const tx=Transaction.from(Buffer.from(raw,'base64'));
   if(tx.serializeMessage().toString('base64')!==message||tx.feePayer?.toString()!==wallet||!tx.signature||!tx.verifySignatures(false))throw Error();
-  if(cosigners.length)tx.partialSign(...cosigners);
+  // Legacy messages may not require the approval signer; never change their message.
+  const required=tx.compileMessage();
+  const needed=cosigners.filter(key=>required.accountKeys.slice(0,required.header.numRequiredSignatures).some(address=>address.equals(key.publicKey)));
+  if(needed.length)tx.partialSign(...needed);
   if(!tx.verifySignatures())throw Error();
   return {bytes:tx.serialize().toString('base64'),signature:bs58.encode(tx.signature!)};
  }catch{throw Error('economy.invalidTransaction');}
@@ -49,6 +54,15 @@ export function validateSignedTransaction(raw:string,message:string,wallet:strin
 // Expiry without a reported signature cannot prove they were never broadcast.
 export function hasPreparedSignatures(raw:string){
  try{return Transaction.from(Buffer.from(raw,'base64')).signatures.some(s=>Boolean(s.signature));}catch{return true;}
+}
+/** A wallet-only legacy preparation could already have landed without API submission. */
+export function canWalletBroadcastPrepared(raw:string,wallet:string):boolean {
+ try {
+  const tx=Transaction.from(Buffer.from(raw,'base64'));
+  if(tx.feePayer?.toBase58()!==wallet)return true;
+  const message=tx.compileMessage();
+  return message.accountKeys.slice(0,message.header.numRequiredSignatures).every(key=>key.toBase58()===wallet);
+ }catch{return true;}
 }
 export async function receiptState(signature:string|null,height:number){
  const conn=await checkedChain();
