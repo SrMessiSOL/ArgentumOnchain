@@ -7,6 +7,7 @@ Vercel production environment:
 - `API_BASE_URL=https://<backend-host>/player-api` (server-side configuration)
 - `NEXT_PUBLIC_WS_URL=wss://<backend-host>/game-socket`
 - `NEXT_PUBLIC_SITE_URL=https://<production-website-host>`
+- `NEXT_PUBLIC_REALM_ENABLED=0` until the release gate passes. Vercel defaults to disabled gameplay. This UI setting is not backend authorization; keep the gateway disabled too.
 
 Never upload database credentials, operations/game credentials, authority keys, private realm files or backups to Vercel. Deploy only `frontend/`. Preview deployments must use a separate disposable test backend, or leave the backend unavailable; do not add wildcard preview origins to the realm.
 

@@ -3759,6 +3759,9 @@ function HomeContent() {
 }
 
 export default function Home() {
+    if (process.env.NEXT_PUBLIC_REALM_ENABLED === "0") {
+        return <main className="min-h-screen bg-black text-white p-12"><h1>Realm preparation in progress</h1><p>Community testing is not open yet. Gameplay will become available after the hosting and security checks pass.</p><a href="/">Return to AOCHAIN</a></main>;
+    }
     return (
         <Suspense fallback={<main className="min-h-screen bg-black" />}>
             <HomeContent />

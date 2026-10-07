@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
     allowedDevOrigins: ["127.0.0.1", "localhost"],
     env: {
         NEXT_PUBLIC_NEXT_BUILD_ID: buildId,
+        NEXT_PUBLIC_REALM_ENABLED: process.env.NEXT_PUBLIC_REALM_ENABLED || (process.env.VERCEL ? "0" : "1"),
     },
     generateBuildId: async () => buildId,
     async headers(){return [{source:'/:path*',headers:[
