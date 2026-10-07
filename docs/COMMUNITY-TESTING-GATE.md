@@ -21,3 +21,5 @@ See [Security remediation](SECURITY-REMEDIATION.md) for implementation evidence 
 ## Intended host preparation receipt (2026-10-07)
 
 See [host preparation](INTENDED-HOST-PREPARATION.md). Repository fetched at ebed12f; supported runtimes staged, system installation incomplete. Elevation/ACL and child-process restrictions blocked service setup and regression execution. ESU remains unverified. No realm migration or public deployment occurred. All existing release blockers remain open.
+
+Preparation follow-up: hosted API startup policy tests passed, including checkout environment injection rejection; original server security tests passed through a test-only TypeScript compiler loader. A portable disposable-cluster regression runner is prepared. Host installation, standard full regressions, signer/database/service isolation and migration remain unverified; see the host receipt for exact limits.

@@ -57,3 +57,19 @@ Rehearse API/game restart, network loss, database unavailability, power/reboot r
 
 Follow-up fetch preserved owner commit 55956e0 (portal navigation/accessibility). Standalone faction-claim regression passed. Installer PowerShell syntax parsed without errors. No security-suite pass is claimed.
 
+
+## Continued preparation on the intended host
+
+The portable `scripts/Test-WindowsHost.ps1` accepts explicit Node, pnpm and PostgreSQL paths and a new test directory. It protects that directory before generating a test-only SCRAM password, creates a loopback-only disposable cluster on port 55433 by default, runs frozen installs, API/server builds, isolated API security tests, server security tests, English tests and a frontend production build. It stops only the cluster it created, restores the process environment and retains private artifacts for review. It never imports the realm, reads source authorities or opens public access. Run it from an ordinary host PowerShell terminal that permits ACL and child-process operations. TestRoot must not exist; no existing directory or database is reset.
+
+Example from the repository root (substitute your verified tool paths):
+
+```powershell
+./scripts/Test-WindowsHost.ps1 -NodeExe C:\verified-tools\node.exe -PnpmCjs C:\verified-tools\pnpm\bin\pnpm.cjs -PgBin C:\verified-tools\pgsql\bin -TestRoot C:\private-tests\aochain-new-run
+```
+
+The API now has a separate preparation entry point, `start:hosted`. Use a protected external environment file with `node --env-file=C:/ProgramData/AOCHAIN/config/api.env scripts/start-hosted.cjs`. Required: production mode, HOST=127.0.0.1, AOWEB_RUN_MIGRATIONS=0, loopback PostgreSQL, distinct operations/game credentials of at least 32 characters, and one matching HTTPS SITE_URL/CORS_ORIGIN. The launcher refuses checkout .env files to prevent configuration being loaded after validation. It also requires settlement paused and no API authority file paths. This is a preparation guard, not a signer implementation, database-role verifier or authorization to open testing. Legacy development startup remains available; host services must use the guarded entry point.
+
+The startup policy regression passes 20 invalid configuration cases, valid preparation, secret-free errors and checkout .env injection rejection. It is included in the API security runner. The original five server security test programs passed using a test-only TypeScript compiler loader without esbuild subprocesses: journal disk failure/replay, connection budgets, packet validation, connection identity and faction rewards. This is distinct from successfully running the standard pnpm test command, which remains blocked in this restricted session. API disposable-database tests and the complete frontend build remain outstanding.
+
+The new host runner was exercised in this restricted session and refused denied ACL protection before creating credentials or a cluster. No elevated-installation receipt has been observed; system Node remains 16.14.2 and the protected host directory is absent at this checkpoint.

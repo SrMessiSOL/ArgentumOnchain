@@ -30,6 +30,8 @@
         "test:vaults": "vitest run src/tests/vaults.integration.test.ts",
         "migrate": "node dist/migrate.js",
         "start": "pnpm run migrate && node dist/server.js",
+        "start:hosted": "node scripts/start-hosted.cjs",
+        "test:hosted-startup": "node scripts/start-hosted.test.cjs",
         "test:cosmetic-ownership": "vitest run src/tests/cosmetic-ownership-lifecycle.test.ts src/tests/cosmetic-inspection.test.ts",
         "test:security": "node scripts/security-regressions.cjs",
         "security:health": "tsx src/scripts/securityHealth.ts"
