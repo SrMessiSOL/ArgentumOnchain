@@ -50,7 +50,13 @@ export async function fetchApi(
 export async function proxyJsonResponse(
     response: Response,
 ): Promise<NextResponse> {
-    const result = normalizeErrorPayload(await response.json());
+    let body: unknown;
+    try { body = await response.json(); } catch {
+        return NextResponse.json({ error: "Backend unavailable." }, {
+            status: response.ok ? 502 : response.status,
+        });
+    }
+    const result = normalizeErrorPayload(body);
     return NextResponse.json(result, { status: response.status });
 }
 
