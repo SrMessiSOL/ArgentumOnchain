@@ -466,6 +466,7 @@ function Login(this: LoginApi) {
                     }),
                 })) as CharacterLookupResponse;
 
+                ws.sessionCredentialHash = (result as CharacterLookupResponse & {sessionCredentialHash?:string}).sessionCredentialHash;
                 const arenaResult = result as unknown as ArenaTicketResponse;
                 const { account, character } = result as CharacterLookupResponse;
 

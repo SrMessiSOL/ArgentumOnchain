@@ -6,6 +6,7 @@ type JournalOptions = {
     directory: string;
     allowCharacterSaves?: boolean;
     allowFloorSpawns?: boolean;
+    allowMarket?: boolean;
     submit: (endpoint: string, payload: string) => Promise<{ ok?: boolean }>;
     delay?: () => Promise<void>;
     warn?: () => void;
@@ -17,26 +18,40 @@ export class VaultJournal {
 
     private validate(entry: PendingVault): void {
         if (!uuid.test(entry.operationId) ||
-            !( (this.options.allowFloorSpawns === true && entry.endpoint === "/internal/floor-spawns") || /^\/internal\/vaults\/(account|clan)\/[0-9a-f-]{36}$/i.test(entry.endpoint) || (this.options.allowCharacterSaves === true && /^\/character_save\/[0-9a-f-]{36}$/i.test(entry.endpoint))) ||
+            !( (this.options.allowMarket === true && /^\/internal\/market\/(listings|buy|listings\/[0-9a-f-]{36}\/cancel|claims\/[0-9a-f-]{36}\/claim)$/.test(entry.endpoint)) || (this.options.allowFloorSpawns === true && entry.endpoint === "/internal/floor-spawns") || /^\/internal\/vaults\/(account|clan)\/[0-9a-f-]{36}$/i.test(entry.endpoint) || (this.options.allowCharacterSaves === true && /^\/character_save\/[0-9a-f-]{36}$/i.test(entry.endpoint))) ||
             JSON.parse(entry.payload).operationId !== entry.operationId) {
             throw new Error('Invalid pending vault journal entry');
         }
     }
 
-    async persist(entry: PendingVault): Promise<void> {
+    async persist(entry: PendingVault): Promise<void> { await this.persistWithReceipt(entry); }
+
+    async persistWithReceipt(entry: PendingVault): Promise<{ok?:boolean}> {
         this.validate(entry);
-        await fs.mkdir(this.options.directory, { recursive: true });
         const target = path.join(this.options.directory, `${entry.operationId}.json`);
         const temporary = `${target}.tmp`;
-        const file = await fs.open(temporary, 'wx');
-        try { await file.writeFile(JSON.stringify(entry), 'utf8'); await file.sync(); }
-        finally { await file.close(); }
-        // Never send the transfer until the journal record is complete.
-        await fs.rename(temporary, target);
-        await this.resolve(entry, target);
+        let failures=0;
+        let ownedTemporary=false;
+        for (;;) {
+            try {
+                await fs.mkdir(this.options.directory, { recursive: true });
+                if(ownedTemporary){await fs.unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});ownedTemporary=false;}
+                const file = await fs.open(temporary, 'wx');ownedTemporary=true;
+                try { await file.writeFile(JSON.stringify(entry), 'utf8'); await file.sync(); }
+                finally { await file.close(); }
+                // Keep the caller's guard held during disk failures too. Nothing is sent yet.
+                await fs.rename(temporary, target);
+                break;
+            } catch {
+                if(ownedTemporary)await fs.unlink(temporary).then(()=>{ownedTemporary=false;}).catch(()=>undefined);
+                if(failures++%12===0)this.options.warn?.();
+                await (this.options.delay?.()??new Promise<void>(resolve=>setTimeout(resolve,5000)));
+            }
+        }
+        return await this.resolve(entry, target);
     }
 
-    private async resolve(entry: PendingVault, target: string): Promise<void> {
+    private async resolve(entry: PendingVault, target: string): Promise<{ok?:boolean}> {
         let failures = 0;
         for (;;) {
             try {
@@ -44,7 +59,7 @@ export class VaultJournal {
                 if (receipt.ok !== true) throw new Error('Missing committed vault receipt');
                 // Failure to remove a confirmed record is retried too; never roll back after commit.
                 await fs.unlink(target);
-                return;
+                return receipt;
             } catch {
                 if (failures++ % 12 === 0) this.options.warn?.();
                 await (this.options.delay?.() ?? new Promise<void>(resolve => setTimeout(resolve, 5000)));

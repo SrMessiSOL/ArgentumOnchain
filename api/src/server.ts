@@ -1,3 +1,7 @@
+import {settlementPause} from './settlementPause';
+import {AuthBudget,authIdentity} from './authBudget';
+import {isIP} from 'node:net';
+import {isGameSessionActive} from './repositories/auth';
 import {spawnFloorItem} from "./repositories/floorSpawns";
 import fs from "node:fs";
 import path from "node:path";
@@ -135,14 +139,7 @@ const SLOW_CHARACTER_SAVE_LOG_THRESHOLD_MS = 1000;
 function isAuthorizedGameDataAdmin(session: {
     account: { _id: string; email: string };
 }): boolean {
-    if (
-        config.gameDataAdminAccountId &&
-        session.account._id === config.gameDataAdminAccountId
-    ) {
-        return true;
-    }
-
-    return session.account.email.toLowerCase() === config.gameDataAdminEmail;
+    return Boolean(config.gameDataAdminAccountId && session.account._id === config.gameDataAdminAccountId);
 }
 
 function isCharacterSaveRoute(method: string, path: string): boolean {
@@ -166,16 +163,11 @@ function getGameDataAdminProxyHeader(request: express.Request): string {
 }
 
 function getRequestIp(request: express.Request): string | null {
-    const forwardedFor = request
-        .header("x-forwarded-for")
-        ?.split(",")[0]
-        ?.trim();
-
-    if (forwardedFor) {
-        return forwardedFor;
-    }
-
-    return request.socket.remoteAddress?.trim() || null;
+    const peer=request.socket.remoteAddress?.trim()||'';
+    // Only our loopback frontend may identify the original gateway client.
+    const supplied=request.header('x-aochain-client-ip')?.trim();
+    if(['127.0.0.1','::1','::ffff:127.0.0.1'].includes(peer)&&supplied&&isIP(supplied))return supplied;
+    return peer||null;
 }
 
 async function getAuthorizedSession(request: express.Request) {
@@ -253,6 +245,9 @@ async function start(): Promise<void> {
             await pool.query(fs.readFileSync(path.resolve(__dirname,"..","character-receipts-schema.sql"),"utf8"));
             await pool.query(fs.readFileSync(path.resolve(__dirname,"..","floor-items-schema.sql"),"utf8"));
             await pool.query(fs.readFileSync(path.resolve(__dirname,"..","floor-spawns-schema.sql"),"utf8"));
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","market-receipts-schema.sql"),"utf8"));
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","session-credentials-migration.sql"),"utf8"));
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","gold-ledger-integrity.sql"),"utf8"));
         } else {
             // Runtime credentials must not own or alter schema objects.
             await pool.query("SELECT 1 FROM game_asset_operations LIMIT 0");
@@ -260,6 +255,7 @@ async function start(): Promise<void> {
             await pool.query("SELECT 1 FROM character_save_receipts LIMIT 0");
             await pool.query("SELECT 1 FROM dropped_floor_items LIMIT 0");
             await pool.query("SELECT 1 FROM floor_spawn_receipts LIMIT 0");
+            await pool.query("SELECT 1 FROM market_operation_receipts LIMIT 0");
         }
         startAssetRecovery();
         startEconomyRecovery();
@@ -273,6 +269,19 @@ async function start(): Promise<void> {
 }
 
 app.use(express.json({ limit: "2mb" }));
+app.use(settlementPause);
+const authBudget=new AuthBudget();
+app.use((request,response,next)=>{
+    if(request.method!=='POST'||!['/auth/login','/auth/register','/auth/password-reset/request','/auth/password-reset/confirm'].includes(request.path)){next();return;}
+    const ip=getRequestIp(request)||'unknown';
+    const identity=String(request.body?.identifier||request.body?.email||'').slice(0,254);
+    const windowMs=5*60*1000;
+    const allowed=authBudget.allow('ip:'+authIdentity(ip),60,windowMs)&&
+        (request.path!=='/auth/login'||authBudget.allow('login:'+authIdentity(identity),10,windowMs))&&
+        (request.path!=='/auth/register'||authBudget.allow('register:'+authIdentity(ip),10,30*60*1000));
+    if(!allowed){response.setHeader('Retry-After','300');response.status(429).json({error:'Too many authentication attempts. Please wait before trying again.'});return;}
+    next();
+});
 app.use((request, response, next) => {
     const startedAt = Date.now();
 
@@ -288,7 +297,7 @@ app.use((request, response, next) => {
             durationMs >= SLOW_CHARACTER_SAVE_LOG_THRESHOLD_MS
         ) {
             console.warn(
-                `[API][character-save][slow] ${request.method} ${request.originalUrl} -> ${response.statusCode} in ${durationMs}ms | pool total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`,
+                `[API][character-save][slow] ${request.method} ${request.route?.path ?? "[unmatched route]"} -> ${response.statusCode} in ${durationMs}ms | pool total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`,
             );
             return;
         }
@@ -298,7 +307,7 @@ app.use((request, response, next) => {
         }
 
         console.warn(
-            `[API][slow] ${request.method} ${request.originalUrl} -> ${response.statusCode} in ${durationMs}ms | pool total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`,
+            `[API][slow] ${request.method} ${request.route?.path ?? "[unmatched route]"} -> ${response.statusCode} in ${durationMs}ms | pool total=${pool.totalCount} idle=${pool.idleCount} waiting=${pool.waitingCount}`,
         );
     });
 
@@ -1788,6 +1797,11 @@ app.post("/arenas/rooms/:roomId/select-template", async (request, response) => {
     }
 });
 
+app.post('/internal/game-session/check',requireAuth,async(request,response,next)=>{
+    try {response.json({ok:true,active:await isGameSessionActive(String(request.body?.sessionCredentialHash??''),String(request.body?.characterId??''))});}
+    catch(error){next(error);}
+});
+
 app.post("/game-ticket/consume", requireAuth, async (request, response) => {
     try {
         const ticket =
@@ -2383,6 +2397,7 @@ app.post(
                 : request.params.listingId;
             response.json(
                 await cancelMarketListing({
+                    operationId: request.body?.operationId,
                     sellerCharacterId: request.body?.sellerCharacterId,
                     listingId: listingId ?? "",
                 }),
@@ -2424,6 +2439,8 @@ app.post(
                 : request.params.characterId;
             response.json(
                 await claimMarket({
+                    claimIds: request.body?.claimIds,
+                    operationId: request.body?.operationId,
                     characterId: characterId ?? "",
                     characterGold: request.body?.characterGold,
                     characterItems: request.body?.characterItems ?? [],

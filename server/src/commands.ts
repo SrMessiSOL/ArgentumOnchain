@@ -2890,7 +2890,7 @@ const command: CommandApi = {
                         break;
                     }
 
-                    const rewardResult = game.claimFactionRewards(clientId);
+                    const rewardResult = await game.claimFactionRewards(clientId);
 
                     if (!rewardResult.ok) {
                         await game.persistCharacterSnapshot(user, { connected: true });

@@ -94,6 +94,18 @@ CREATE TABLE IF NOT EXISTS clans (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE characters
+    ADD COLUMN IF NOT EXISTS clan_id UUID REFERENCES clans(id) ON DELETE SET NULL;
+
+CREATE TABLE IF NOT EXISTS clan_members (
+    clan_id UUID NOT NULL REFERENCES clans(id) ON DELETE CASCADE,
+    character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('leader', 'co_leader', 'member')),
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (clan_id, character_id),
+    UNIQUE (character_id)
+);
+
 ALTER TABLE clans
     DROP CONSTRAINT IF EXISTS clans_alignment_check;
 
@@ -143,18 +155,6 @@ WHERE cm.clan_id = im.clan_id
 ALTER TABLE clans
     ADD CONSTRAINT clans_alignment_check
     CHECK (alignment IN ('citizen', 'criminal'));
-
-ALTER TABLE characters
-    ADD COLUMN IF NOT EXISTS clan_id UUID REFERENCES clans(id) ON DELETE SET NULL;
-
-CREATE TABLE IF NOT EXISTS clan_members (
-    clan_id UUID NOT NULL REFERENCES clans(id) ON DELETE CASCADE,
-    character_id UUID NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
-    role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('leader', 'co_leader', 'member')),
-    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (clan_id, character_id),
-    UNIQUE (character_id)
-);
 
 ALTER TABLE clan_members
     DROP CONSTRAINT IF EXISTS clan_members_role_check;
@@ -586,3 +586,5 @@ CREATE TABLE IF NOT EXISTS dropped_floor_items (
 );
 
 CREATE TABLE IF NOT EXISTS floor_spawn_receipts(operation_id UUID PRIMARY KEY,payload_hash TEXT NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());
+
+CREATE TABLE IF NOT EXISTS market_operation_receipts(operation_id UUID PRIMARY KEY,payload_hash TEXT NOT NULL,response JSONB,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());

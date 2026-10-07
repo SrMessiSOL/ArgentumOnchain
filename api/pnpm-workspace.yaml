@@ -3,3 +3,11 @@ allowBuilds:
   bufferutil: false
   utf-8-validate: false
   bigint-buffer: false
+
+overrides:
+  "uuid": "11.1.1"
+  "esbuild": "0.28.1"
+  "vite": "7.3.5"
+  "postcss": "8.5.23"
+  "nanoid": "3.3.18"
+  "source-map-js": "1.2.2"

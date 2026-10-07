@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { z } from "zod";
 import type { PoolClient } from "pg";
 import pool from "../db";
@@ -14,6 +15,7 @@ const characterItemSchema = z.object({
 });
 
 const createMarketListingSchema = z.object({
+    operationId: z.string().uuid(),
     sellerCharacterId: z.string().uuid(),
     sellerAccountId: z.string().uuid().optional(),
     sellerName: z.string().trim().min(1).max(50),
@@ -27,6 +29,7 @@ const createMarketListingSchema = z.object({
 });
 
 const buyMarketListingSchema = z.object({
+    operationId: z.string().uuid(),
     buyerCharacterId: z.string().uuid(),
     buyerName: z.string().trim().min(1).max(50),
     listingId: z.string().uuid(),
@@ -43,11 +46,14 @@ const buyMarketListingSchema = z.object({
 });
 
 const cancelMarketListingSchema = z.object({
+    operationId: z.string().uuid(),
     sellerCharacterId: z.string().uuid(),
     listingId: z.string().uuid(),
 });
 
 const claimMarketSchema = z.object({
+    claimIds: z.array(z.string().uuid()).min(1).max(1000).refine(ids => new Set(ids).size === ids.length, "Duplicate claims"),
+    operationId: z.string().uuid(),
     characterId: z.string().uuid(),
     characterGold: z.coerce.number().int().min(0).max(2147483647),
     characterItems: z.array(characterItemSchema),
@@ -463,6 +469,19 @@ export async function getMarketClaims(characterId: string) {
     }
 }
 
+async function marketReplay<T>(client:PoolClient,operationId:string|undefined,action:string,payload:unknown):Promise<T|null>{
+ if(!operationId)return null;
+ const hash=createHash('sha256').update(JSON.stringify({action,payload})).digest('hex');
+ const inserted=await client.query('INSERT INTO market_operation_receipts(operation_id,payload_hash) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING operation_id',[operationId,hash]);
+ if(inserted.rowCount)return null;
+ const row=(await client.query('SELECT payload_hash,response FROM market_operation_receipts WHERE operation_id=$1 FOR UPDATE',[operationId])).rows[0];
+ if(!row||row.payload_hash!==hash||!row.response)throw Error('Market operation ID does not match original request');
+ return row.response as T;
+}
+async function recordMarketReceipt(client:PoolClient,operationId:string|undefined,response:unknown){
+ if(operationId)await client.query('UPDATE market_operation_receipts SET response=$2::jsonb WHERE operation_id=$1',[operationId,JSON.stringify(response)]);
+}
+
 export async function createMarketListing(payload: CreateMarketListingPayload) {
     const parsed = createMarketListingSchema.parse(payload);
     ensureUniqueCharacterSlots(parsed.characterItems);
@@ -470,6 +489,8 @@ export async function createMarketListing(payload: CreateMarketListingPayload) {
 
     try {
         await client.query("BEGIN");
+        const replay=await marketReplay<{ok:true;listing:MarketListingRecord}>(client,parsed.operationId,"createMarketListing",parsed);
+        if(replay){await client.query("COMMIT");return replay;}
         await ensureCharacterExists(client, parsed.sellerCharacterId);
         await expireMarketListings(client);
 
@@ -551,8 +572,10 @@ export async function createMarketListing(payload: CreateMarketListingPayload) {
             ],
         );
 
+        const response = {ok:true as const,...{ listing: mapMarketListing(result.rows[0]) }};
+        await recordMarketReceipt(client,parsed.operationId,response);
         await client.query("COMMIT");
-        return { listing: mapMarketListing(result.rows[0]) };
+        return response;
     } catch (error) {
         await client.query("ROLLBACK");
         throw error;
@@ -568,6 +591,8 @@ export async function buyMarketListing(payload: BuyMarketListingPayload) {
 
     try {
         await client.query("BEGIN");
+        const replay=await marketReplay<{ok:true;listing:MarketListingRecord}>(client,parsed.operationId,"buyMarketListing",parsed);
+        if(replay){await client.query("COMMIT");return replay;}
         await ensureCharacterExists(client, parsed.buyerCharacterId);
         await expireMarketListings(client);
 
@@ -692,8 +717,10 @@ export async function buyMarketListing(payload: BuyMarketListingPayload) {
             ],
         );
 
+        const response = {ok:true as const,...{ listing: mapMarketListing(listing) }};
+        await recordMarketReceipt(client,parsed.operationId,response);
         await client.query("COMMIT");
-        return { listing: mapMarketListing(listing) };
+        return response;
     } catch (error) {
         await client.query("ROLLBACK");
         throw error;
@@ -708,6 +735,8 @@ export async function cancelMarketListing(payload: CancelMarketListingPayload) {
 
     try {
         await client.query("BEGIN");
+        const replay=await marketReplay<{ok:true;listing:MarketListingRecord}>(client,parsed.operationId,"cancelMarketListing",parsed);
+        if(replay){await client.query("COMMIT");return replay;}
         await ensureCharacterExists(client, parsed.sellerCharacterId);
         await expireMarketListings(client);
 
@@ -790,8 +819,10 @@ export async function cancelMarketListing(payload: CancelMarketListingPayload) {
             ],
         );
 
+        const response = {ok:true as const,...{ listing: mapMarketListing(listing) }};
+        await recordMarketReceipt(client,parsed.operationId,response);
         await client.query("COMMIT");
-        return { listing: mapMarketListing(listing) };
+        return response;
     } catch (error) {
         await client.query("ROLLBACK");
         throw error;
@@ -897,6 +928,8 @@ export async function claimMarket(payload: ClaimMarketPayload) {
 
     try {
         await client.query("BEGIN");
+        const replay=await marketReplay<{ok:true;claims:MarketClaimRecord[]}>(client,parsed.operationId,"claimMarket",parsed);
+        if(replay){await client.query("COMMIT");return replay;}
         await ensureCharacterExists(client, parsed.characterId);
         await expireMarketListings(client);
 
@@ -921,14 +954,14 @@ export async function claimMarket(payload: ClaimMarketPayload) {
                        market_claims.created_at
                 FROM market_claims
                 LEFT JOIN market_listings ON market_listings.id = market_claims.source_listing_id
-                WHERE market_claims.owner_character_id = $1
+                WHERE market_claims.owner_character_id = $1 AND market_claims.id = ANY($2::uuid[])
                 ORDER BY market_claims.created_at ASC, market_claims.id ASC
                 FOR UPDATE OF market_claims
             `,
-            [parsed.characterId],
+            [parsed.characterId, parsed.claimIds],
         );
 
-        if (!claimsResult.rows.length) {
+        if (claimsResult.rows.length !== parsed.claimIds.length) {
             throw new Error("No tienes reclamos pendientes.");
         }
 
@@ -949,13 +982,15 @@ export async function claimMarket(payload: ClaimMarketPayload) {
         await client.query(
             `
                 DELETE FROM market_claims
-                WHERE owner_character_id = $1
+                WHERE owner_character_id = $1 AND id = ANY($2::uuid[])
             `,
-            [parsed.characterId],
+            [parsed.characterId, parsed.claimIds],
         );
 
+        const response = {ok:true as const,...{ claims: claimsResult.rows.map(mapMarketClaim) }};
+        await recordMarketReceipt(client,parsed.operationId,response);
         await client.query("COMMIT");
-        return { claims: claimsResult.rows.map(mapMarketClaim) };
+        return response;
     } catch (error) {
         await client.query("ROLLBACK");
         throw error;

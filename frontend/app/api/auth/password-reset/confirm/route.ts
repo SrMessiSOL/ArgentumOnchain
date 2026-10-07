@@ -1,18 +1,10 @@
+import {useSecureCookies} from "../../../../../lib/secure-cookies";
 import { NextResponse } from "next/server";
 import { AUTH_COOKIE_NAME } from "../../../../../lib/auth-session";
 import { fetchApi, proxyJsonResponse } from "../../shared";
 
 function shouldUseSecureCookies(request: Request): boolean {
-    const forwardedProto = request.headers
-        .get("x-forwarded-proto")
-        ?.split(",")[0]
-        ?.trim();
-
-    if (forwardedProto) {
-        return forwardedProto === "https";
-    }
-
-    return new URL(request.url).protocol === "https:";
+    return useSecureCookies(request.url);
 }
 
 export async function POST(request: Request) {
@@ -22,6 +14,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "x-aochain-client-ip": request.headers.get("x-aochain-client-ip") || "",
         },
         body: JSON.stringify(body),
         cache: "no-store",

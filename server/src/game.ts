@@ -4,6 +4,7 @@ import { bankOperations } from './bankOperationGuard';
 import { vaultRecovery } from './vaultRecovery';
 import { characterRecovery } from './characterRecovery';
 import { worldRecovery } from './worldRecovery';
+import { marketRecovery } from './marketRecovery';
 import { randomUUID } from 'node:crypto';
 import { PendingGoldRewards } from './pendingGoldRewards';
 import {
@@ -2605,7 +2606,7 @@ export type GameApi = {
     getFactionScore: (idUser: EntityId, faction: CharacterFaction) => number;
     addFactionScore: (idUser: EntityId, faction: CharacterFaction, amount: number) => number;
     getMaxEligibleFactionRank: (idUser: EntityId, faction: CharacterFaction) => number;
-    claimFactionRewards: (idUser: EntityId) => { ok: boolean; message: string; rank: number; grantedItems: number[] };
+    claimFactionRewards: (idUser: EntityId) => Promise<{ ok: boolean; message: string; rank: number; grantedItems: number[] }>;
     canUseFactionItem: (idUser: EntityId, idItem: number) => boolean;
     isRazaEnana: (idRaza: number) => boolean;
 };
@@ -3680,6 +3681,13 @@ async function removePersistedFloorItem(dropId: string): Promise<void> {
             await new Promise<void>(resolve => setTimeout(resolve,5000));
         }
     }
+}
+
+async function persistMarketOperation(user:GameCharacter,endpoint:string,body:Record<string,unknown>):Promise<any>{
+ const operationId=randomUUID();const payload=JSON.stringify({...body,operationId});
+ let receipt:any;
+ await queueCharacterPersistence(user._id!,async()=>{receipt=await marketRecovery.persistWithReceipt({operationId,endpoint,payload});});
+ return receipt;
 }
 
 async function persistCharacterPatch(user: RuntimeCharacter, patch: Record<string, unknown>): Promise<void> {
@@ -5319,9 +5327,7 @@ function Game(this: GameApi) {
         const nextGold = balance.clampGold(user.gold - publicationFee);
 
         try {
-            const result = (await funct.fetchUrl("/internal/market/listings", {
-                method: "POST",
-                body: JSON.stringify({
+            const result = (await persistMarketOperation(user,"/internal/market/listings",{
                     sellerCharacterId: user._id,
                     sellerAccountId: user.idAccount,
                     sellerName: user.nameCharacter,
@@ -5332,12 +5338,7 @@ function Game(this: GameApi) {
                     durationHours: safeDurationHours,
                     characterGold: nextGold,
                     characterItems: serializeInventory(nextInventory),
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: vars.tokenAuth,
-                },
-            })) as { listing: MarketListingSummary };
+                })) as { listing: MarketListingSummary };
 
             replaceInventoryRecord(user.inv, nextInventory);
             syncUnequippedItemVisuals(user, String(slot));
@@ -5403,9 +5404,7 @@ function Game(this: GameApi) {
         const nextGold = balance.clampGold(user.gold - listing.price);
 
         try {
-            await funct.fetchUrl("/internal/market/buy", {
-                method: "POST",
-                body: JSON.stringify({
+            await persistMarketOperation(user,"/internal/market/buy",{
                     buyerCharacterId: user._id,
                     buyerName: user.nameCharacter,
                     listingId: normalizedListingId,
@@ -5414,12 +5413,7 @@ function Game(this: GameApi) {
                     expectedPrice: expected?.price,
                     characterGold: nextGold,
                     characterItems: serializeInventory(user.inv),
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: vars.tokenAuth,
-                },
-            });
+                });
 
             user.gold = nextGold;
             handleProtocol.actGold(user.gold, client);
@@ -5464,16 +5458,9 @@ function Game(this: GameApi) {
         }
 
         try {
-            await funct.fetchUrl(`/internal/market/listings/${encodeURIComponent(resolvedListing.id)}/cancel`, {
-                method: "POST",
-                body: JSON.stringify({
+            await persistMarketOperation(user,`/internal/market/listings/${encodeURIComponent(resolvedListing.id)}/cancel`,{
                     sellerCharacterId: user._id,
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: vars.tokenAuth,
-                },
-            });
+                });
 
             logCharacterActivity(user, {
                 category: "economy",
@@ -5533,17 +5520,11 @@ function Game(this: GameApi) {
         }
 
         try {
-            await funct.fetchUrl(`/internal/market/claims/${encodeURIComponent(user._id)}/claim`, {
-                method: "POST",
-                body: JSON.stringify({
+            await persistMarketOperation(user,`/internal/market/claims/${encodeURIComponent(user._id)}/claim`,{
+                    claimIds: claims.map(claim => claim.id),
                     characterGold: nextGold,
                     characterItems: serializeInventory(nextInventory),
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: vars.tokenAuth,
-                },
-            });
+                });
 
             replaceInventoryRecord(user.inv, nextInventory);
             user.gold = nextGold;
@@ -9896,10 +9877,7 @@ function Game(this: GameApi) {
         );
     };
 
-    this.claimFactionRewards = function (idUser: EntityId) {
-        if (bankOperations.isBusy(idUser)) {
-            return { ok: false, message: "An inventory operation is still pending. Please wait.", rank: 0, grantedItems: [] };
-        }
+    this.claimFactionRewards = async function (idUser: EntityId) {
         const user = getCharacterById(idUser);
 
         if (!user) {
@@ -9916,7 +9894,6 @@ function Game(this: GameApi) {
         const claimedRank = getFactionRewardsValue(user, faction);
         const factionConfig = getFactionConfig(faction);
 
-        setFactionRankValue(user, faction, eligibleRank);
 
         if (eligibleRank <= claimedRank) {
             const nextRankConfig = factionConfig?.ranks.find((rank) => rank.rank > claimedRank) ?? null;
@@ -9954,6 +9931,8 @@ function Game(this: GameApi) {
         }
 
         const grantedItems: number[] = [];
+        const nextInventory=cloneInventoryRecord(user.inv);
+        const changedSlots:string[]=[];
         const rewardField = getRewardsFieldName(faction);
         const rankField = getRankFieldName(faction);
 
@@ -9966,25 +9945,23 @@ function Game(this: GameApi) {
                 continue;
             }
 
-            const addedSlots = addItemToRecord(user.inv, itemId, 1, {
+            const addedSlots = addItemToRecord(nextInventory, itemId, 1, {
                 maxSlots: 21,
                 equipped: 0,
             });
 
             if (addedSlots == null) {
-                const dropPos = this.findDropPosition(user.map, user.pos, user.id) ?? user.pos;
-                this.placeDroppedFloorItem(user.map, dropPos, itemId, 1);
-                this.renderDroppedFloorItem(user.map, dropPos, itemId);
-            } else {
-                withUserClient(idUser, (userClient) => {
-                    for (const slot of addedSlots) {
-                        handleProtocol.agregarUserInvItem(idUser, slot, userClient);
-                    }
-                });
+                return {ok:false,message:"Make room in your inventory before claiming faction rewards.",rank:eligibleRank,grantedItems:[]};
             }
+            changedSlots.push(...addedSlots.map(String));
 
             grantedItems.push(itemId);
         }
+
+        if(!user._id||!rewardField||!rankField)return {ok:false,message:"Character is not ready.",rank:eligibleRank,grantedItems:[]};
+        await persistCharacterPatch(user,{items:serializeInventory(nextInventory),[rewardField]:eligibleRank,[rankField]:eligibleRank});
+        replaceInventoryRecord(user.inv,nextInventory);
+        withUserClient(idUser,userClient=>{for(const slot of changedSlots)handleProtocol.agregarUserInvItem(idUser,slot,userClient);});
 
         if (rewardField) {
             user[rewardField] = eligibleRank;
@@ -10087,3 +10064,16 @@ const rawReorderInventory = game.reorderInventoryItem.bind(game);
 game.tirarItem = (ws, slot, amount) => bankOperations.run(ws.id!, () => rawDropItem(ws, slot, amount), undefined);
 game.agarrarItem = ws => bankOperations.run(ws.id!, () => rawPickupItem(ws), undefined);
 game.reorderInventoryItem = (id, source, target) => bankOperations.run(id, () => rawReorderInventory(id, source, target), undefined);
+
+const rawCreateMarketListing=game.createMarketListing.bind(game);
+const rawBuyMarketListing=game.buyMarketListing.bind(game);
+const rawCancelMarketListing=game.cancelMarketListing.bind(game);
+const rawClaimMarket=game.claimMarket.bind(game);
+const marketBusy={ok:false,message:'An inventory operation is still pending. Please wait.'};
+game.createMarketListing=(id,...args)=>bankOperations.run(id,()=>rawCreateMarketListing(id,...args),marketBusy);
+game.buyMarketListing=(id,...args)=>bankOperations.run(id,()=>rawBuyMarketListing(id,...args),marketBusy);
+game.cancelMarketListing=(id,...args)=>bankOperations.run(id,()=>rawCancelMarketListing(id,...args),marketBusy);
+game.claimMarket=id=>bankOperations.run(id,()=>rawClaimMarket(id),marketBusy);
+
+const rawClaimFactionRewards=game.claimFactionRewards.bind(game);
+game.claimFactionRewards=id=>bankOperations.run(id,()=>rawClaimFactionRewards(id),{ok:false,message:'An inventory operation is still pending. Please wait.',rank:0,grantedItems:[]});

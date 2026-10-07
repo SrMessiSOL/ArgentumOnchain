@@ -1,3 +1,4 @@
+import {credentialHash} from '../lib/sessionTokens';
 import { z } from "zod";
 import pool from "../db";
 import type { AuthSessionRecord } from "../types";
@@ -163,10 +164,11 @@ async function getSessionWithSelectedCharacter(token: string): Promise<AuthSessi
       SELECT token, account_id, selected_character_id, created_at, expires_at
       FROM auth_sessions
       WHERE token = $1
+        AND created_at > NOW() - INTERVAL '30 days'
         AND expires_at > NOW()
       LIMIT 1
     `,
-    [token],
+    [credentialHash(token)],
   );
 
   const session = sessionResult.rows[0] ?? null;

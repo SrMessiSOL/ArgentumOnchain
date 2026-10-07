@@ -466,6 +466,10 @@ export type DropItem = {
 };
 
 export type RuntimeClient = {
+    bufferedAmount?: number;
+    sessionCredentialHash?: string;
+    ping?: () => void;
+    terminate?: () => void;
     id?: EntityId;
     clientIp?: string;
     connectedAt?: number;

@@ -8,7 +8,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "x-forwarded-for": request.headers.get("x-forwarded-for") || "",
+            "x-aochain-client-ip": request.headers.get("x-aochain-client-ip") || "",
         },
         body: JSON.stringify(body),
         cache: "no-store",

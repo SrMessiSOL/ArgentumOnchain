@@ -1,2 +1,6 @@
 allowBuilds:
     esbuild: false
+
+overrides:
+  "esbuild": "0.28.1"
+  "brace-expansion@>=3": "5.0.12"

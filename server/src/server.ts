@@ -1,8 +1,10 @@
+import {ConnectionBudget,outboundWithinBudget} from './connectionBudget';
 import {InboundBudget,MAX_INBOUND_BYTES} from './inboundBudget';
 import { bankOperations } from './bankOperationGuard';
 import { vaultRecovery } from './vaultRecovery';
 import { characterRecovery } from './characterRecovery';
 import { worldRecovery } from './worldRecovery';
+import { marketRecovery } from './marketRecovery';
 import {CosmeticReplication, encodeCosmeticSnapshot} from './cosmeticReplication';
 import type { GameApi } from "./game";
 import type { HandleProtocolApi } from "./handleProtocol";
@@ -474,6 +476,7 @@ function trackClientActivity(ws: RuntimeClient, packageID: number) {
     await vaultRecovery.recover();
     await characterRecovery.recover();
     await worldRecovery.recover();
+    await marketRecovery.recover();
     await runtimeTiming.loadRuntimeTimingConfig();
 
     if (config.resetConnectedCharactersOnStartup) {
@@ -516,8 +519,41 @@ function trackClientActivity(ws: RuntimeClient, packageID: number) {
     console.log(textInitializeServer);
 })();
 
+const connectionBudget = new ConnectionBudget();
+
 wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnectionRequest) {
     ws.clientIp = getConnectionIp(request, ws);
+    const release = connectionBudget.acquire(ws.clientIp || 'unknown');
+    if (!release) { ws.terminate?.(); return; }
+    const rawSend = ws.send.bind(ws);
+    const disconnectSlowClient = () => {
+        ws.close(1008,'Connection too slow');
+        const timer=setTimeout(()=>ws.terminate?.(),2000);timer.unref();
+    };
+    ws.send = data => {
+        if (ws.readyState !== ws.OPEN) return;
+        const bytes=Buffer.isBuffer(data)?data.byteLength:typeof data==='string'?Buffer.byteLength(data):data instanceof ArrayBuffer?data.byteLength:Infinity;
+        if (!outboundWithinBudget(Number(ws.bufferedAmount??0),bytes)) {disconnectSlowClient();return;}
+        rawSend(data);
+    };
+    let alive=true;
+    ws.on('pong',()=>{alive=true;});
+    let sessionCheckInFlight=false;
+    const sessionCheck=setInterval(()=>{
+        if(sessionCheckInFlight||!ws.id||!ws.sessionCredentialHash)return;
+        const character=vars.personajes[ws.id];if(!character?._id)return;
+        sessionCheckInFlight=true;
+        void funct.fetchUrl('/internal/game-session/check',{method:'POST',headers:{Authorization:vars.tokenAuth,'Content-Type':'application/json'},body:JSON.stringify({sessionCredentialHash:ws.sessionCredentialHash,characterId:character._id})})
+            .then((result:{active?:boolean})=>{if(result.active!==true)ws.close(1008,'Session expired. Sign in again.');})
+            .catch(()=>ws.close(1013,'Session verification unavailable. Please reconnect.'))
+            .finally(()=>{sessionCheckInFlight=false;});
+    },30000);sessionCheck.unref();
+    const heartbeat=setInterval(()=>{
+        if(!alive){ws.terminate?.();return;}
+        alive=false;ws.ping?.();
+    },30000);heartbeat.unref();
+    ws.on('close',()=>{release();clearInterval(heartbeat);clearInterval(sessionCheck);});
+
     const inboundBudget = new InboundBudget();
     const authTimeout = setTimeout(() => {
         if (!ws.id || vars.clients[ws.id] !== ws) ws.close(1008, 'Login timed out');
@@ -544,8 +580,9 @@ wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnecti
             trackClientActivity(ws, packageID);
 
             protocol.handleData(ws, packageID);
-        } catch (err) {
-            funct.dumpError(err);
+        } catch {
+            console.warn('[Socket] Packet processing failed; closing the connection.');
+            ws.close(1008,'Invalid game packet');
         }
     });
 

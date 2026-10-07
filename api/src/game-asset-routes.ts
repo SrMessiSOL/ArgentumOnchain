@@ -1,3 +1,4 @@
+import {startOperationRecovery} from './operationRecovery';
 import {randomUUID} from 'node:crypto';
 import type {Express,Request} from 'express';
 import type {PoolClient} from 'pg';
@@ -141,4 +142,4 @@ export async function reconcileAssetOperation(id:string,account?:string){
   const state=proof==='complete'?'complete':'failed';await c.query('UPDATE game_asset_operations SET state=$2,completed_at=NOW() WHERE id=$1',[op.id,state]);return {state};
  });
 }
-export function startAssetRecovery(){let busy=false;const timer=setInterval(async()=>{if(busy)return;busy=true;try{const rows=(await pool.query("SELECT id FROM game_asset_operations WHERE state IN ('prepared','signed') ORDER BY created_at LIMIT 20")).rows;for(const r of rows)try{await reconcileAssetOperation(r.id);}catch{/* No unlock on RPC ambiguity. */}}catch{}finally{busy=false;}},5000);timer.unref();}
+export function startAssetRecovery(){startOperationRecovery('game_asset_operations',reconcileAssetOperation);}

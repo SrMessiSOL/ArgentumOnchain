@@ -12,6 +12,8 @@ export const walletEnglish = {
     "wallet.invalidProof": "The signature could not be verified. Please try again.",
     "wallet.expiredProof": "This request expired or was already used. Please start again.",
     "wallet.alreadyLinked": "This wallet is already linked to another game account.",
+    "wallet.reauthenticate": "Sign out and sign in again before changing your linked wallet, then retry within 10 minutes.",
+    "wallet.finishOperations": "Log out of the game, finish pending transfers and cancel active listings before changing your wallet.",
     "wallet.failed": "Wallet linking was cancelled or could not finish. Your game is unaffected.",
 };
 export type WalletTextKey = keyof typeof walletEnglish;
@@ -29,5 +31,7 @@ export const walletSpanish: Record<WalletTextKey, string> = {
     "wallet.invalidProof": "No se pudo verificar la firma. Intentá de nuevo.",
     "wallet.expiredProof": "La solicitud venció o ya fue utilizada. Volvé a empezar.",
     "wallet.alreadyLinked": "Esta wallet ya está vinculada a otra cuenta del juego.",
+    "wallet.reauthenticate": "Cerrá sesión e ingresá nuevamente antes de cambiar tu wallet vinculada. Reintentá dentro de 10 minutos.",
+    "wallet.finishOperations": "Salí del juego, completá las transferencias pendientes y cancelá las publicaciones activas antes de cambiar la wallet.",
     "wallet.failed": "Se canceló la vinculación o no pudo completarse. El juego no se ve afectado.",
 };

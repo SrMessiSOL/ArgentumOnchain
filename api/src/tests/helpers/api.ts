@@ -1085,7 +1085,7 @@ export async function createMarketListing(payload: unknown) {
                 "Content-Type": "application/json",
                 Authorization: API_AUTH,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({operationId:crypto.randomUUID(),...(payload as object)}),
         },
     );
 }
@@ -1099,7 +1099,7 @@ export async function buyMarketListing(payload: unknown) {
                 "Content-Type": "application/json",
                 Authorization: API_AUTH,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({operationId:crypto.randomUUID(),...(payload as object)}),
         },
     );
 }
@@ -1113,7 +1113,7 @@ export async function cancelMarketListing(listingId: string, payload: unknown) {
                 "Content-Type": "application/json",
                 Authorization: API_AUTH,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({operationId:crypto.randomUUID(),...(payload as object)}),
         },
     );
 }
@@ -1130,6 +1130,8 @@ export async function getMarketClaims(characterId: string) {
 }
 
 export async function claimMarket(characterId: string, payload: unknown) {
+    const claims=await getMarketClaims(characterId);
+    payload={claimIds:claims.data.claims?.map(claim=>claim.id)??[],...(payload as object)};
     return requestJson<{ claims?: MarketClaimResponse[]; error?: string }>(
         `/internal/market/claims/${encodeURIComponent(characterId)}/claim`,
         {
@@ -1138,7 +1140,7 @@ export async function claimMarket(characterId: string, payload: unknown) {
                 "Content-Type": "application/json",
                 Authorization: API_AUTH,
             },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({operationId:crypto.randomUUID(),...(payload as object)}),
         },
     );
 }

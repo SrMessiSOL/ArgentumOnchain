@@ -30,27 +30,29 @@
         "test:vaults": "vitest run src/tests/vaults.integration.test.ts",
         "migrate": "node dist/migrate.js",
         "start": "pnpm run migrate && node dist/server.js",
-        "test:cosmetic-ownership": "vitest run src/tests/cosmetic-ownership-lifecycle.test.ts src/tests/cosmetic-inspection.test.ts"
+        "test:cosmetic-ownership": "vitest run src/tests/cosmetic-ownership-lifecycle.test.ts src/tests/cosmetic-inspection.test.ts",
+        "test:security": "node scripts/security-regressions.cjs",
+        "security:health": "tsx src/scripts/securityHealth.ts"
     },
     "dependencies": {
-        "@aws-sdk/client-sesv2": "^3.1048.0",
+        "@aws-sdk/client-sesv2": "^3.1146.0",
         "@metaplex-foundation/mpl-core": "^1.10.0",
         "@metaplex-foundation/umi": "^1.6.0",
         "@metaplex-foundation/umi-bundle-defaults": "^1.6.0",
         "@solana/spl-token": "0.4.14",
         "@solana/web3.js": "1.99.0",
-        "bcryptjs": "^3.0.2",
+        "bcryptjs": "^3.0.3",
         "bs58": "6.0.0",
-        "express": "^5.1.0",
-        "pg": "^8.16.3",
-        "zod": "^4.1.11"
+        "express": "^5.2.1",
+        "pg": "^8.23.1",
+        "zod": "^4.6.5"
     },
     "devDependencies": {
-        "@types/express": "^5.0.3",
-        "@types/node": "^25.8.0",
-        "@types/pg": "^8.15.5",
-        "tsx": "^4.22.1",
+        "@types/express": "^5.0.6",
+        "@types/node": "^25.9.9",
+        "@types/pg": "^8.23.1",
+        "tsx": "^4.23.15",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.6"
+        "vitest": "^4.1.11"
     }
 }

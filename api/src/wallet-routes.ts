@@ -1,3 +1,4 @@
+import {credentialHash} from './lib/sessionTokens';
 import { createHash, createPublicKey, randomUUID, verify } from "node:crypto";
 import type { Express, Request, Response } from "express";
 import bs58 from "bs58";
@@ -15,7 +16,7 @@ async function session(req: Request, res: Response) {
     const token = req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];
     const auth = token ? await getPublicSessionByToken(token) : null;
     if (!auth || !token) { res.status(401).json({ error: "wallet.signIn" }); return null; }
-    return { accountId: auth.account._id, sessionHash: hash(token) };
+    return { accountId: auth.account._id, sessionHash: hash(token), credentialHash:credentialHash(token) };
 }
 
 export function installWalletRoutes(app: Express) {
@@ -55,6 +56,18 @@ export function installWalletRoutes(app: Express) {
                 AND session_hash=$2 AND expires_at > NOW() FOR UPDATE`, [auth.accountId, auth.sessionHash]);
             const challenge = result.rows[0];
             if (!challenge) throw new Error("wallet.expiredProof");
+            const linked=(await client.query('SELECT address FROM account_wallets WHERE account_id=$1 FOR UPDATE',[auth.accountId])).rows[0];
+            if(linked && linked.address!==challenge.address){
+                const fresh=(await client.query("SELECT 1 FROM auth_sessions WHERE token=$1 AND account_id=$2 AND created_at>NOW()-INTERVAL '10 minutes' AND expires_at>NOW()",[auth.credentialHash,auth.accountId])).rowCount;
+                if(!fresh)throw new Error('wallet.reauthenticate');
+                const pending=(await client.query(`SELECT 1 WHERE
+                    EXISTS(SELECT 1 FROM characters WHERE account_id=$1 AND (connected OR economy_lock IS NOT NULL OR economy_login_until>NOW())) OR
+                    EXISTS(SELECT 1 FROM economy_intents WHERE account_id=$1 AND state IN ('prepared','signed')) OR
+                    EXISTS(SELECT 1 FROM game_asset_operations WHERE account_id=$1 AND state IN ('prepared','signed')) OR
+                    EXISTS(SELECT 1 FROM character_sales WHERE seller_id=$1 AND state IN ('listed','reserved')) OR
+                    EXISTS(SELECT 1 FROM item_sales WHERE seller_id=$1 AND state IN ('listed','reserved'))`,[auth.accountId])).rowCount;
+                if(pending)throw new Error('wallet.finishOperations');
+            }
             const key = createPublicKey({ key: Buffer.concat([
                 Buffer.from("302a300506032b6570032100", "hex"), Buffer.from(bs58.decode(challenge.address)),
             ]), format: "der", type: "spki" });

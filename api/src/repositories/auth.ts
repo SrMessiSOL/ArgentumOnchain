@@ -1,3 +1,4 @@
+import {credentialHash} from '../lib/sessionTokens';
 import {assertPlayableCharacter} from "../game-asset-policy";
 import crypto from "crypto";
 import { z } from "zod";
@@ -436,7 +437,7 @@ async function createAuthSession(account: AccountRecord): Promise<string> {
       INSERT INTO auth_sessions (token, account_id, expires_at)
       VALUES ($1, $2, NOW() + ($3 * INTERVAL '1 millisecond'))
     `,
-        [token, account.id, SESSION_TTL_MS],
+        [credentialHash(token), account.id, SESSION_TTL_MS],
     );
 
     return token;
@@ -464,10 +465,11 @@ async function getSessionRecord(
       UPDATE auth_sessions
       SET expires_at = NOW() + ($2 * INTERVAL '1 millisecond')
       WHERE token = $1
+        AND created_at > NOW() - INTERVAL '30 days'
         AND expires_at > NOW()
       RETURNING token, account_id, selected_character_id, created_at, expires_at
     `,
-        [token, SESSION_TTL_MS],
+        [credentialHash(token), SESSION_TTL_MS],
     );
 
     return sessionResult.rows[0] ?? null;
@@ -1095,7 +1097,7 @@ export async function logoutSession(token: string): Promise<void> {
       DELETE FROM game_tickets
       WHERE auth_token = $1
     `,
-        [token],
+        [credentialHash(token)],
     );
 
     await pool.query(
@@ -1103,7 +1105,7 @@ export async function logoutSession(token: string): Promise<void> {
       DELETE FROM auth_sessions
       WHERE token = $1
     `,
-        [token],
+        [credentialHash(token)],
     );
 }
 
@@ -1120,11 +1122,12 @@ export async function createGameTicket(
         SELECT token, account_id, selected_character_id, created_at, expires_at
         FROM auth_sessions
         WHERE token = $1
+        AND created_at > NOW() - INTERVAL '30 days'
           AND expires_at > NOW()
         LIMIT 1
         FOR UPDATE
       `,
-            [token],
+            [credentialHash(token)],
         );
 
         const session = sessionResult.rows[0];
@@ -1187,8 +1190,8 @@ export async function createGameTicket(
         RETURNING expires_at
       `,
             [
-                ticket,
-                token,
+                credentialHash(ticket),
+                credentialHash(token),
                 session.account_id,
                 session.selected_character_id,
                 GAME_TICKET_TTL_MS,
@@ -1214,6 +1217,7 @@ export async function consumeGameTicket(
     clientIp?: string | null,
 ): Promise<
     | {
+          sessionCredentialHash: string;
           account: { _id: string; name: string; email: string };
           character: Awaited<
               ReturnType<typeof getCharactersByAccountId>
@@ -1234,10 +1238,11 @@ export async function consumeGameTicket(
         WHERE ticket = $1
           AND consumed_at IS NULL
           AND expires_at > NOW()
+          AND EXISTS (SELECT 1 FROM auth_sessions s WHERE s.token=game_tickets.auth_token AND s.expires_at>NOW() AND s.created_at>NOW()-INTERVAL '30 days')
         LIMIT 1
         FOR UPDATE
       `,
-            [ticket],
+            [credentialHash(ticket)],
         );
 
         const storedTicket = ticketResult.rows[0];
@@ -1299,7 +1304,7 @@ export async function consumeGameTicket(
         SET consumed_at = NOW()
         WHERE ticket = $1
       `,
-            [ticket],
+            [credentialHash(ticket)],
         );
 
         const accountResult = await client.query<AccountRecord>(
@@ -1381,6 +1386,7 @@ export async function consumeGameTicket(
                 name: account.name,
                 email: account.email,
             },
+            sessionCredentialHash: storedTicket.auth_token,
             character,
         };
     } catch (error) {
@@ -1400,10 +1406,11 @@ export async function selectSessionCharacter(
       SELECT token, account_id, selected_character_id, created_at, expires_at
       FROM auth_sessions
       WHERE token = $1
+        AND created_at > NOW() - INTERVAL '30 days'
         AND expires_at > NOW()
       LIMIT 1
     `,
-        [token],
+        [credentialHash(token)],
     );
 
     const session = sessionResult.rows[0];
@@ -1446,8 +1453,9 @@ export async function selectSessionCharacter(
       UPDATE auth_sessions
       SET selected_character_id = $2
       WHERE token = $1
+        AND created_at > NOW() - INTERVAL '30 days'
     `,
-        [token, characterId],
+        [credentialHash(token), characterId],
     );
 
     return getPublicSessionByToken(token);
@@ -1456,3 +1464,11 @@ export async function selectSessionCharacter(
 
 
 
+
+export async function isGameSessionActive(sessionCredentialHash:string,characterId:string):Promise<boolean> {
+    if(!/^sha256:[0-9a-f]{64}$/.test(sessionCredentialHash)||!z.string().uuid().safeParse(characterId).success)return false;
+    const result=await pool.query(`SELECT 1 FROM auth_sessions s JOIN characters c ON c.account_id=s.account_id
+        WHERE s.token=$1 AND s.expires_at>NOW() AND s.created_at>NOW()-INTERVAL '30 days'
+        AND c.id=$2 AND c.deleted_at IS NULL AND c.economy_lock IS NULL`,[sessionCredentialHash,characterId]);
+    return Boolean(result.rowCount);
+}

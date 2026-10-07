@@ -1,5 +1,8 @@
-param([switch]$VerifyRestore)
+param([switch]$VerifyRestore,[switch]$RequireQuiescent)
 $ErrorActionPreference='Stop'
+if($RequireQuiescent){
+ foreach($port in @(3101,7766)){if(Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue){throw 'Stop the API and game services before a checkpoint backup.'}}
+}
 $workspaceRoot=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $previousPgPassword=$env:PGPASSWORD
 $credentialFile=Join-Path $workspaceRoot 'work/database-admin.dpapi'
@@ -30,7 +33,7 @@ if(Test-Path -LiteralPath $runtimeFile){
  if($runtime.devnetEnabled -and (Test-Path -LiteralPath $runtime.issuerFile)){$secretBundle['dedicated-devnet-issuer.json']=[IO.File]::ReadAllText($runtime.issuerFile)}
 }
 Add-Type -AssemblyName System.Security.Cryptography.ProtectedData
-foreach($journalName in @('vault-operations','character-operations','world-operations')){
+foreach($journalName in @('vault-operations','character-operations','world-operations','market-operations')){
  $journalDirectory=Join-Path $workspaceRoot ('work/'+$journalName)
  if(Test-Path -LiteralPath $journalDirectory){
   foreach($entry in Get-ChildItem -LiteralPath $journalDirectory -Filter '*.json' -File){
@@ -44,6 +47,7 @@ $protectedFile="$archive.runtime.dpapi"
 [IO.File]::WriteAllBytes($protectedFile,$cipher)
 $roundTrip=[Security.Cryptography.ProtectedData]::Unprotect([IO.File]::ReadAllBytes($protectedFile),$null,[Security.Cryptography.DataProtectionScope]::CurrentUser)
 if([Convert]::ToBase64String($plain) -ne [Convert]::ToBase64String($roundTrip)){throw 'Protected runtime backup verification failed'}
+$report.quiescentVerified=[bool]$RequireQuiescent
 $report.runtimeBackup=$protectedFile
 $report.runtimeProtection='Windows DPAPI CurrentUser; restore requires this Windows user profile'
 $report.runtimeRoundTripVerified=$true

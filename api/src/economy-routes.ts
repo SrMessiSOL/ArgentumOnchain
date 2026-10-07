@@ -1,3 +1,4 @@
+import {startOperationRecovery} from './operationRecovery';
 import {prepareCharacterPurchase,signAssetSubmission} from "./game-asset-chain";
 import {itemEligibilitySql,requireTradableItem,itemQuantity,inventoryDelivery} from './item-economy';
 import {randomUUID} from 'node:crypto';
@@ -86,7 +87,7 @@ export async function reconcileIntent(intentId:string,accountId?:string){
  const state=proof==='complete'?'complete':'failed';await c.query('UPDATE economy_intents SET state=$2,completed_at=NOW() WHERE id=$1',[i.id,state]);return {state};
  });
 }
-export function startEconomyRecovery(){let busy=false;const timer=setInterval(async()=>{if(busy)return;busy=true;try{const rows=(await pool.query("SELECT id FROM economy_intents WHERE state IN ('prepared','signed') ORDER BY created_at LIMIT 20")).rows;for(const r of rows)try{await reconcileIntent(r.id);}catch{ /* Retry next pass without unlocking an unverified transaction. */ }}catch{/* Database unavailable; retry later. */}finally{busy=false;}},5000);timer.unref();}
+export function startEconomyRecovery(){startOperationRecovery('economy_intents',reconcileIntent);}
 
 
 

@@ -1,3 +1,4 @@
+import {credentialHash} from '../lib/sessionTokens';
 import crypto from "crypto";
 import { z } from "zod";
 import pool from "../db";
@@ -57,10 +58,11 @@ async function getSessionRecord(token: string): Promise<AuthSessionRecord | null
       SELECT token, account_id, selected_character_id, created_at, expires_at
       FROM auth_sessions
       WHERE token = $1
+        AND created_at > NOW() - INTERVAL '30 days'
         AND expires_at > NOW()
       LIMIT 1
     `,
-    [token],
+    [credentialHash(token)],
   );
 
   return sessionResult.rows[0] ?? null;
@@ -453,7 +455,7 @@ export async function createArenaGameTicket(token: string, roomId: string, paylo
       VALUES ($1, $2, $3, NULL, 'arena', $4, $5, NOW() + ($6 * INTERVAL '1 millisecond'))
       RETURNING expires_at
     `,
-    [ticket, token, session.account_id, room.id, templateId, ARENA_GAME_TICKET_TTL_MS],
+    [credentialHash(ticket), credentialHash(token), session.account_id, room.id, templateId, ARENA_GAME_TICKET_TTL_MS],
   );
 
   return {
