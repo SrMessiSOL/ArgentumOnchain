@@ -72,6 +72,7 @@ try {
   Run-Check "$package assets" (Join-Path $repo $package) @('scripts/copy-assets.cjs')
  }
  $env:TOKEN_AUTH='test-only-operations-'+[Guid]::NewGuid().ToString('N')
+ Run-Check 'Offline signer policy and journal' (Join-Path $repo 'api') @('scripts/signer-policy.test.cjs')
  $env:GAME_SERVICE_TOKEN='test-only-game-'+[Guid]::NewGuid().ToString('N')
  Run-Check 'API isolated security suite' (Join-Path $repo 'api') @('scripts/security-regressions.cjs')
  Run-Check 'Server security suite' (Join-Path $repo 'server') @($PnpmCjs,'run','test:security')
