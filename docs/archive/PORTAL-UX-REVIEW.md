@@ -39,3 +39,9 @@ Shared final portal stylesheet unifies slate cards, boundaries, form surfaces, f
 
 ## Evidence and limits
 Screenshots: work/portal-play-v59.png and work/portal-modal-mobile-v59.png in the task workspace. No purchase, mint, stake, gold transfer or signature was submitted. The test account has no staked character, so entry into live gameplay was not exercised in this pass. Recovery logic compiled but a real pending-operation fixture and signed wallet journey were not replayed. Image-resource checks do not prove every atlas frame visually perfect. This is a portal review, not a full security or production-readiness audit.
+
+## 2026-10-07 responsive portal refinement
+
+Refined shared header, mobile navigation, profile spacing, card text wrapping, empty/loading states, focus indicators and modal presentation. The homepage Gold card now opens profile gold management. Mobile navigation closes on Escape and returns focus to its toggle. Modal headings label their dialog; focus trapping includes visible textarea controls and Escape does not propagate to a parent dialog.
+
+Validation: English regression suite and production TypeScript/build passed (aochain-ui-20261007-v69). Browser inspection at 320x568, 390x844 and 1280x800 checked home, signed-in profile, expanded navigation, wallet modal and character-management modal. At 320x568 the character dialog measured y=12 to y=556 with internal scrolling and no horizontal page overflow. Keyboard focus stayed inside the wallet dialog and returned to Manage character after closing. No browser console errors were captured during these checks. Wallet signing and financial transactions were not exercised. Only the website service was restarted; gameplay was not restarted.

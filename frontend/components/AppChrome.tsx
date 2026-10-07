@@ -20,7 +20,7 @@ import {
     Wallet,
     Store,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { AuthErrorResponse, AuthSession } from "@/lib/auth";
 
 type AppChromeProps = {
@@ -53,6 +53,8 @@ export default function AppChrome({ children }: AppChromeProps) {
 
     const ux=locale==='es'?uxSpanish:uxEnglish;
     const [menuOpen,setMenuOpen]=useState(false);
+    const menuButton=useRef<HTMLButtonElement>(null);
+    useEffect(()=>{if(!menuOpen)return;const close=(event:KeyboardEvent)=>{if(event.key==='Escape'){setMenuOpen(false);menuButton.current?.focus();}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close);},[menuOpen]);
     const pathname = usePathname();
     useEffect(()=>{setMenuOpen(false);},[pathname]);
     const router = useRouter();
@@ -103,7 +105,7 @@ export default function AppChrome({ children }: AppChromeProps) {
         <>
             <a className="realm-skip-link" href="#realm-content">{ux.skip}</a>
             <header className="realm-header sticky top-0 z-50 border-b border-white/8 bg-[#05080d]/92 backdrop-blur-xl">
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+                <div className="realm-header-inner mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
                     <Link href="/" className="realm-brand-link" aria-label={copy.fullName}><img src="/brand/mark.svg" alt=""/><span className="realm-wordmark"><b>AO<span>CHAIN</span></b><small>{copy.fullName}</small></span></Link>
 
                     <nav aria-label={ux.navigation} className="portal-global-nav hidden items-center gap-2 rounded-2xl border border-white/6 bg-black/20 p-1 lg:flex">
@@ -137,7 +139,7 @@ export default function AppChrome({ children }: AppChromeProps) {
                         })}
                     </nav>
 
-                    <div className="flex items-center gap-3"><HeaderWallet session={session} loading={sessionLoading}/><LanguageSelector /><button type="button" className="realm-menu-toggle lg:hidden" aria-expanded={menuOpen} onKeyDown={event=>{if(event.key === "Escape")setMenuOpen(false);}} aria-controls="realm-mobile-navigation" aria-label={menuOpen?ux.close:ux.menu} onClick={()=>setMenuOpen(v=>!v)}>{menuOpen?<X size={20}/>:<Menu size={20}/>}</button>
+                    <div className="realm-header-actions flex items-center gap-3"><HeaderWallet session={session} loading={sessionLoading}/><LanguageSelector /><button type="button" ref={menuButton} className="realm-menu-toggle lg:hidden" aria-expanded={menuOpen} onKeyDown={event=>{if(event.key === "Escape")setMenuOpen(false);}} aria-controls="realm-mobile-navigation" aria-label={menuOpen?ux.close:ux.menu} onClick={()=>setMenuOpen(v=>!v)}>{menuOpen?<X size={20}/>:<Menu size={20}/>}</button>
                         {session ? (
                             <>
                                 <Link href="/profile" className="hidden text-sm text-stone-200 sm:inline">
@@ -163,7 +165,7 @@ export default function AppChrome({ children }: AppChromeProps) {
                 </div>
             </header>
 
-            <div id="realm-mobile-navigation" className={`realm-mobile-navigation ${menuOpen?"is-open":""} lg:hidden border-b border-white/8 bg-[#05080d]/92 px-4 py-2 backdrop-blur-xl`}>
+            <div id="realm-mobile-navigation" hidden={!menuOpen} className={`realm-mobile-navigation ${menuOpen?"is-open":""} lg:hidden border-b border-white/8 bg-[#05080d]/92 px-4 py-2 backdrop-blur-xl`}>
                 <nav onKeyDown={event=>{if(event.key === "Escape")setMenuOpen(false);}} aria-label={ux.navigation} className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto">
                     {navItems.map((item) => {
                         const Icon = item.icon;
