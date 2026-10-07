@@ -12,7 +12,7 @@ type PersistedNpcRespawnCooldown = NpcRespawnEntry & {
     respawnAt: number;
 };
 
-const NPC_RESPAWN_COOLDOWNS_PATH = path.resolve(__dirname, "../jsons/npcRespawnCooldowns.json");
+const NPC_RESPAWN_COOLDOWNS_PATH = process.env.AOWEB_NPC_RESPAWN_FILE || path.resolve(__dirname, "../jsons/npcRespawnCooldowns.json");
 const persistedCooldowns = new Map<string, PersistedNpcRespawnCooldown>();
 const scheduledRespawns = new Map<string, NodeJS.Timeout>();
 
@@ -22,6 +22,7 @@ export function buildNpcRespawnKey(entry: NpcRespawnEntry): string {
 
 function persistNpcRespawnCooldowns(): void {
     const rows = [...persistedCooldowns.values()].sort((left, right) => left.respawnAt - right.respawnAt);
+    fs.mkdirSync(path.dirname(NPC_RESPAWN_COOLDOWNS_PATH), { recursive: true });
     fs.writeFileSync(NPC_RESPAWN_COOLDOWNS_PATH, `${JSON.stringify(rows, null, 2)}\n`, "utf8");
 }
 

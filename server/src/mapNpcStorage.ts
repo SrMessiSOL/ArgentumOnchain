@@ -17,7 +17,9 @@ function getMapDir(mapNum: number): string {
 }
 
 function getMapNpcsPath(mapNum: number): string {
-    return path.join(getMapDir(mapNum), "npcs.json");
+    return process.env.AOWEB_MAP_NPC_STATE_DIR
+        ? path.join(process.env.AOWEB_MAP_NPC_STATE_DIR, `mapa_${mapNum}`, "npcs.json")
+        : path.join(getMapDir(mapNum), "npcs.json");
 }
 
 function toFiniteNumber(value: unknown): number | null {
@@ -75,7 +77,8 @@ function sortPlacements(placements: MapNpcPlacement[]): MapNpcPlacement[] {
 }
 
 function readMapNpcFile(mapNum: number): MapNpcPlacement[] {
-    const filePath = getMapNpcsPath(mapNum);
+    const statePath = getMapNpcsPath(mapNum);
+    const filePath = fs.existsSync(statePath) ? statePath : path.join(getMapDir(mapNum), "npcs.json");
 
     if (!fs.existsSync(filePath)) {
         return [];
@@ -124,7 +127,7 @@ export function writeMapNpcPlacements(mapNum: number, placements: MapNpcPlacemen
 
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
 
-    if (normalized.length === 0) {
+    if (normalized.length === 0 && !process.env.AOWEB_MAP_NPC_STATE_DIR) {
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
