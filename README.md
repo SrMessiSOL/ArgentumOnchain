@@ -1,10 +1,12 @@
 # AOCHAIN — Argentum Onchain
 
-AOCHAIN is a browser-first, English-first fork of [AOWeb](https://github.com/dcatanzaro/aoweb), bringing the existing Argentum Online world to a shared multiplayer realm with Solana devnet ownership and trading.
+AOCHAIN is a browser-first, English-first fork of [AOWeb](https://github.com/dcatanzaro/aoweb), bringing the existing Argentum Online world to a shared multiplayer realm with Solana ownership and trading, built toward a mainnet launch.
 
 The project keeps the original game: maps, classes, races, combat, spells, NPCs, crafting, inventory, banking, factions, parties, clans and progression. It adds an English presentation layer, a redesigned player website, wallet integration, character assets, item exports and SPL gold.
 
-**Current stage: community devnet testing.** Gameplay runs on an authoritative game server and PostgreSQL. Solana handles asset ownership and economic settlement. Movement, combat and NPC AI stay off-chain. The minting and staking system currently trusts the game operator; it is not a trustless staking contract or a mainnet release.
+Gameplay runs on an authoritative game server and PostgreSQL. Solana handles asset ownership and economic settlement. Movement, combat and NPC AI stay off-chain. The minting and staking system currently trusts the game operator; it is not a trustless staking contract.
+
+**Release path:** community testing on devnet, followed by mainnet launch after security hardening, operational validation and network migration. Devnet is a temporary testing stage, not the final product network. The current code enforces devnet and does not yet enable mainnet transactions.
 
 ## What changed from upstream
 
@@ -60,7 +62,7 @@ Staking uses Metaplex delegated freeze authority and wallet authorization. The o
 
 Items remain off-chain unless exported. Exported quantities are absent from the character bundle, preventing the same item from remaining in a sold character and also existing as a wallet receipt. Item marketplace rules exclude newbie gear, equipped items and other ineligible stock. Website item sales and wallet exports have separate lifecycle checks.
 
-Gold withdrawals mint; deposits burn. There is no fixed reserve of pre-minted tokens being transferred back and forth. This is an operator-controlled bridge for the devnet test economy. See [economy design](CHARACTER-ECONOMY-PLAN.md), [economy validation](CHARACTER-ECONOMY-VALIDATION.md) and [item marketplace validation](ITEM-MARKETPLACE-VALIDATION.md).
+Gold withdrawals mint; deposits burn. There is no fixed reserve of pre-minted tokens being transferred back and forth. This is an operator-controlled bridge for the game economy. See [economy design](CHARACTER-ECONOMY-PLAN.md), [economy validation](CHARACTER-ECONOMY-VALIDATION.md) and [item marketplace validation](ITEM-MARKETPLACE-VALIDATION.md).
 
 All chain flows validate prepared transaction contents and wallet signatures. Signed bytes and operation receipts support retries and recovery. An ambiguous RPC response does not authorize a refund or unlock: the operation stays reserved until reconciliation establishes its outcome. A wallet showing a transaction does not alone prove database settlement completed.
 
@@ -75,7 +77,7 @@ Website API routes --> Node/Express API <--> Authoritative game server
                            +--> PostgreSQL: accounts, world state, snapshots,
                            |    reservations, ledgers and operation receipts
                            |
-                           +--> Solana devnet: Core assets, SPL gold,
+                           +--> Solana: Core assets, SPL gold,
                                 wallet authorization and finalized settlement
 ```
 
@@ -143,11 +145,11 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open `http://localhost:3000`. Without the devnet asset configuration, wallet-dependent creation/staking/settlement is unavailable; starting the services alone does not enable those flows.
+Open `http://localhost:3000`. Without the Solana asset configuration, wallet-dependent creation/staking/settlement is unavailable; starting the services alone does not enable those flows.
 
-### 3. Enable the devnet asset system
+### 3. Configure Solana for community testing
 
-Configure the API with a dedicated devnet issuer/authority stored outside the repository:
+The current community-testing deployment uses devnet. Configure the API with a dedicated test issuer/authority stored outside the repository:
 
 - `AOWEB_DEVNET_RPC`: devnet RPC URL; the chain genesis is verified.
 - `AOWEB_GOLD_MINT`: configured zero-decimal SPL mint.
@@ -156,7 +158,7 @@ Configure the API with a dedicated devnet issuer/authority stored outside the re
 - `AOWEB_DEVNET_METADATA_URL`: public metadata base URL used by the asset flows.
 - `AOWEB_CHARACTER_ACHIEVEMENTS=1`: enables the character achievement mode used by the trial.
 
-The mint must match the configured authority and expected mint policy. Issuers need test SOL. These settings do not automatically create/fund a mint or deploy a new program. Use HTTPS for wallet-facing public testing and durable metadata hosting before a broader release. Mainnet is outside the current implementation scope.
+The mint must match the configured authority and expected mint policy. Issuers need test SOL. These settings do not automatically create/fund a mint or deploy a new program. Use HTTPS for wallet-facing public testing and durable metadata hosting before a broader release. Before mainnet launch, migrate the network guards and configuration, provision production authorities and metadata, and complete the release checks below. Changing the RPC URL alone does not enable mainnet.
 
 ## Prepared Windows trial and hosting
 
@@ -208,15 +210,15 @@ pnpm run test:english
 pnpm build
 ```
 
-The API security runner creates and drops isolated temporary databases. Other integration tests are not necessarily isolated: never run them against the live realm. Chain health checks require the same devnet configuration as the service and do not repair data.
+The API security runner creates and drops isolated temporary databases. Other integration tests are not necessarily isolated: never run them against the live realm. Chain health checks require the same network configuration as the service and do not repair data.
 
 Set `AOWEB_SETTLEMENT_PAUSED=1` and restart the API to block new settlement requests while retaining recovery/status paths. A pause cannot revoke a transaction already signed in a wallet.
 
 Read [the remediation report](SECURITY-REMEDIATION.md) for exact validation, remaining dependency advisories and the incident procedure, and [the security policy](SECURITY.md) for handling sensitive reports.
 
-## Remaining release work
+## Road to mainnet
 
-Signer isolation, narrower internal authorization, unreported-transaction discovery, account recovery/email verification/MFA, complete reconciliation, storage/backup policies, stable origins/metadata, broader fault/load/wallet rehearsals and an independent security review remain open. The game-server dependency scan was clean on October 7; API/frontend advisories remain documented. The project is not presented as fully audited or mainnet-ready.
+Signer isolation, narrower internal authorization, unreported-transaction discovery, account recovery/email verification/MFA, complete reconciliation, storage/backup policies, stable origins/metadata, broader fault/load/wallet rehearsals and an independent security review remain open. The game-server dependency scan was clean on October 7; API/frontend advisories remain documented. Mainnet launch follows completion of these release requirements and a validated network migration; it is not enabled in the current testing build.
 
 Some validation documents contain historical URLs, build IDs and superseded early-stage notes. Use their dated evidence and limitations, rather than assuming an old preview remains online.
 
