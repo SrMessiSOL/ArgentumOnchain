@@ -1,4 +1,5 @@
 const path=require('node:path'),{spawnSync}=require('node:child_process'),{Client}=require('pg');
+require('./start-hosted.test.cjs');
 const api=path.resolve(__dirname,'..');
 const connectionString=process.env.AOCHAIN_SECURITY_ADMIN_DATABASE_URL;
 if(!connectionString){console.error('Set AOCHAIN_SECURITY_ADMIN_DATABASE_URL to a local database administrator URL. All test databases are disposable.');process.exit(1);}
