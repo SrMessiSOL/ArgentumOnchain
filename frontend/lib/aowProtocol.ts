@@ -77,6 +77,7 @@ export const CLIENT_PACKET_ID = {
     selfMapMetaDelta: 79,
     spellVisual: 80,
     entityVitalsDelta: 81,
+    cosmeticSnapshot: 82,
 } as const;
 
 export type PanelShare = {
@@ -509,6 +510,7 @@ export interface ConsolePacket {
     italica: number;
     channel?: Exclude<ChatChannel, "local">;
     senderName?: string;
+    npcName?: string;
 }
 
 export interface DialogPacket {
@@ -605,6 +607,7 @@ export interface EntityVitalsDelta {
 }
 
 export type ParsedServerPacket =
+    | {type:"cosmeticSnapshot";payload:{map:number;entries:Array<{id:number;kind:"explorer"|"first-hunt"}>}}
     | { type: "getMyCharacter"; payload: CharacterSnapshot }
     | { type: "getCharacter"; payload: CharacterSnapshot }
     | { type: "getNpc"; payload: CharacterSnapshot }
@@ -1513,6 +1516,7 @@ function parseServerPacketById(
                 : undefined;
             const hasSenderName = reader.canReadBytes(1) ? reader.getByte() : 0;
             const senderName = hasSenderName ? reader.getString() : undefined;
+            const npcName = reader.canReadBytes(2) ? reader.getString() : undefined;
             return {
                 type: "console",
                 payload: {
@@ -1522,6 +1526,7 @@ function parseServerPacketById(
                     italica,
                     channel,
                     senderName,
+                    npcName,
                 },
             };
         }
@@ -1540,6 +1545,18 @@ function parseServerPacketById(
                     writeToConsole: reader.getByte(),
                 },
             };
+        }
+        case CLIENT_PACKET_ID.cosmeticSnapshot: {
+            const map=reader.getShort();
+            const count=reader.getShort();
+            if(count>2048)throw new Error('Invalid cosmetic snapshot');
+            const entries:Array<{id:number;kind:"explorer"|"first-hunt"}>=[];
+            for(let i=0;i<count;i++){
+                const id=reader.getDouble(),kind=reader.getByte();
+                if(!Number.isFinite(id)||!Number.isInteger(id)||id<=0||![1,2].includes(kind))throw new Error('Invalid cosmetic entry');
+                entries.push({id,kind:kind===2?'first-hunt':'explorer'});
+            }
+            return {type:"cosmeticSnapshot",payload:{map,entries}};
         }
         case CLIENT_PACKET_ID.globalNotice:
             return {

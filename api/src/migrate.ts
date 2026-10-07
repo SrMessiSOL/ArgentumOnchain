@@ -7,6 +7,9 @@ async function migrate(): Promise<void> {
     const schemaSql = fs.readFileSync(schemaPath, "utf8");
 
     await pool.query(schemaSql);
+    await pool.query(fs.readFileSync(path.resolve(__dirname, "..", "wallet-schema.sql"), "utf8"));
+    await pool.query(fs.readFileSync(path.resolve(__dirname, "..", "preferences-schema.sql"), "utf8"));
+    await pool.query(fs.readFileSync(path.resolve(__dirname, "..", "cosmetics-schema.sql"), "utf8"));
     await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_market_listings_active_price_created
       ON market_listings(price ASC, created_at ASC)
@@ -17,6 +20,8 @@ async function migrate(): Promise<void> {
       ON market_listings(seller_character_id, created_at DESC)
       WHERE status = 'active'
   `);
+    await pool.query(fs.readFileSync(path.resolve(__dirname, "..", "economy-schema.sql"), "utf8"));
+    await pool.query(fs.readFileSync(path.resolve(__dirname, "..", "game-assets-schema.sql"), "utf8"));
     console.log("Database schema applied successfully");
 }
 
@@ -28,3 +33,4 @@ void migrate()
     .finally(async () => {
         await pool.end();
     });
+

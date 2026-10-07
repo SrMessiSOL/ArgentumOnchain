@@ -1,16 +1,24 @@
 "use client";
+import {useGameWallet} from './GameWalletProvider';
+import HeaderWallet from './HeaderWallet';
+import { LocalizedLabel } from '@/components/LocalizedText';
+import { useI18n, LanguageSelector } from "@/components/I18nProvider";
 
+import {portalEnglish,portalSpanish} from '@/lib/portal-copy';
+import {brandEnglish,brandSpanish} from '@/lib/brand-copy';
+import {uxEnglish,uxSpanish} from "@/lib/ux-copy";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-    Home,
-    Swords,
+    Menu, X, Home,
     Trophy,
     UserRound,
     ScrollText,
     LogIn,
     LogOut,
     MessageCircle,
+    Wallet,
+    Store,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { AuthErrorResponse, AuthSession } from "@/lib/auth";
@@ -19,18 +27,12 @@ type AppChromeProps = {
     children: React.ReactNode;
 };
 
-const navItems = [
-    { href: "/", label: "Inicio", icon: Home },
-    { href: "/characters", label: "Personajes", icon: UserRound },
-    { href: "/arenas", label: "Arenas", icon: Swords },
-    { href: "/ranking", label: "Ranking", icon: Trophy },
-    { href: "/wiki/equipment", label: "Wiki", icon: ScrollText },
-    {
-        href: "https://discord.gg/sf8rWAvgxs",
-        label: "Discord",
-        icon: MessageCircle,
-        external: true,
-    },
+const navItems: {href:string;label:string;icon:typeof UserRound;external?:boolean}[] = [
+ {href:'/characters',label:'play',icon:UserRound},
+ {href:'/character-market',label:'market',icon:Store},
+ {href:'/profile',label:'collection',icon:Wallet},
+ {href:'/wiki',label:'guide',icon:ScrollText},
+
 ];
 
 function isActivePath(pathname: string, href: string) {
@@ -46,8 +48,17 @@ function isActivePath(pathname: string, href: string) {
 }
 
 export default function AppChrome({ children }: AppChromeProps) {
+    const { locale, t: localizeKey, text: localizeText } = useI18n();
+    const copy=locale==='es'?brandSpanish:brandEnglish;const portal=locale==='es'?portalSpanish:portalEnglish;
+
+    const ux=locale==='es'?uxSpanish:uxEnglish;
+    const [menuOpen,setMenuOpen]=useState(false);
     const pathname = usePathname();
+    useEffect(()=>{setMenuOpen(false);},[pathname]);
     const router = useRouter();
+    const gameWallet=useGameWallet();
+    async function signOut(){await fetch("/api/auth/signout",{method:"POST"});await gameWallet.disconnect();setSession(null);router.push("/login");router.refresh();}
+    const [sessionLoading,setSessionLoading]=useState(true);
     const [session, setSession] = useState<AuthSession | null>(null);
 
     useEffect(() => {
@@ -70,12 +81,12 @@ export default function AppChrome({ children }: AppChromeProps) {
             })
             .then((result) => {
                 if (!cancelled) {
-                    setSession(result);
+                    setSession(result);setSessionLoading(false);
                 }
             })
             .catch(() => {
                 if (!cancelled) {
-                    setSession(null);
+                    setSession(null);setSessionLoading(false);
                 }
             });
 
@@ -85,23 +96,17 @@ export default function AppChrome({ children }: AppChromeProps) {
     }, [pathname]);
 
     if (pathname === "/play") {
-        return <>{children}</>;
+        return <><div className="fixed bottom-2 left-2 z-50"><LanguageSelector /></div>{children}</>;
     }
 
     return (
         <>
-            <header className="sticky top-0 z-50 border-b border-white/8 bg-[#05080d]/92 backdrop-blur-xl">
+            <a className="realm-skip-link" href="#realm-content">{ux.skip}</a>
+            <header className="realm-header sticky top-0 z-50 border-b border-white/8 bg-[#05080d]/92 backdrop-blur-xl">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
-                    <Link href="/" className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-300 text-sm font-black text-stone-950">
-                            AO
-                        </div>
-                        <span className="text-3xl font-semibold tracking-wide text-stone-100">
-                            AOWeb
-                        </span>
-                    </Link>
+                    <Link href="/" className="realm-brand-link" aria-label={copy.fullName}><img src="/brand/mark.svg" alt=""/><span className="realm-wordmark"><b>AO<span>CHAIN</span></b><small>{copy.fullName}</small></span></Link>
 
-                    <nav className="hidden items-center gap-2 rounded-2xl border border-white/6 bg-black/20 p-1 md:flex">
+                    <nav aria-label={ux.navigation} className="portal-global-nav hidden items-center gap-2 rounded-2xl border border-white/6 bg-black/20 p-1 lg:flex">
                         {navItems.map((item) => {
                             const Icon = item.icon;
                             const active = item.external
@@ -111,6 +116,7 @@ export default function AppChrome({ children }: AppChromeProps) {
                             return (
                                 <Link
                                     key={item.href}
+                                    aria-current={active ? "page" : undefined}
                                     href={item.href}
                                     target={
                                         item.external ? "_blank" : undefined
@@ -125,49 +131,40 @@ export default function AppChrome({ children }: AppChromeProps) {
                                     }`}
                                 >
                                     <Icon className="h-4 w-4" />
-                                    {item.label}
+                                    {portal[item.label as keyof typeof portal]}
                                 </Link>
                             );
                         })}
                     </nav>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3"><HeaderWallet session={session} loading={sessionLoading}/><LanguageSelector /><button type="button" className="realm-menu-toggle lg:hidden" aria-expanded={menuOpen} onKeyDown={event=>{if(event.key === "Escape")setMenuOpen(false);}} aria-controls="realm-mobile-navigation" aria-label={menuOpen?ux.close:ux.menu} onClick={()=>setMenuOpen(v=>!v)}>{menuOpen?<X size={20}/>:<Menu size={20}/>}</button>
                         {session ? (
                             <>
-                                <span className="hidden text-sm text-stone-200 sm:inline">
+                                <Link href="/profile" className="hidden text-sm text-stone-200 sm:inline">
                                     {session.account.name}
-                                </span>
-                                <button
+                                </Link>
+                                <LocalizedLabel><button
                                     type="button"
-                                    onClick={async () => {
-                                        await fetch("/api/auth/signout", {
-                                            method: "POST",
-                                        });
-                                        setSession(null);
-                                        router.push("/login");
-                                        router.refresh();
-                                    }}
-                                    className="inline-flex items-center justify-center rounded-full p-2 text-stone-400 transition hover:bg-white/5 hover:text-stone-100"
-                                    aria-label="Cerrar sesion"
+                                    onClick={signOut}
+                                    className="hidden sm:inline-flex items-center justify-center rounded-full p-2 text-stone-400 transition hover:bg-white/5 hover:text-stone-100"
+                                    aria-label={localizeKey("nav.logout")}
                                 >
                                     <LogOut className="h-4 w-4" />
-                                </button>
+                                </button></LocalizedLabel>
                             </>
                         ) : (
                             <Link
                                 href="/login"
-                                className="inline-flex items-center gap-2 rounded-xl border border-white/8 px-4 py-2 text-sm text-stone-200 transition hover:bg-white/5"
+                                className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-white/8 px-4 py-2 text-sm text-stone-200 transition hover:bg-white/5"
                             >
-                                <LogIn className="h-4 w-4" />
-                                Ingresar
-                            </Link>
+                                <LogIn className="h-4 w-4" />{localizeKey("nav.login")}</Link>
                         )}
                     </div>
                 </div>
             </header>
 
-            <div className="md:hidden border-b border-white/8 bg-[#05080d]/92 px-4 py-2 backdrop-blur-xl">
-                <nav className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto">
+            <div id="realm-mobile-navigation" className={`realm-mobile-navigation ${menuOpen?"is-open":""} lg:hidden border-b border-white/8 bg-[#05080d]/92 px-4 py-2 backdrop-blur-xl`}>
+                <nav onKeyDown={event=>{if(event.key === "Escape")setMenuOpen(false);}} aria-label={ux.navigation} className="mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const active = item.external
@@ -177,6 +174,7 @@ export default function AppChrome({ children }: AppChromeProps) {
                         return (
                             <Link
                                 key={item.href}
+                                aria-current={active ? "page" : undefined}
                                 href={item.href}
                                 target={item.external ? "_blank" : undefined}
                                 rel={item.external ? "noreferrer" : undefined}
@@ -187,14 +185,16 @@ export default function AppChrome({ children }: AppChromeProps) {
                                 }`}
                             >
                                 <Icon className="h-4 w-4" />
-                                {item.label}
+                                {portal[item.label as keyof typeof portal]}
                             </Link>
                         );
                     })}
+                    {session?<button className="realm-mobile-account" onClick={signOut}><LogOut size={16}/>{localizeKey('nav.logout')}</button>:<Link className="realm-mobile-account" href="/login"><LogIn size={16}/>{localizeKey('nav.login')}</Link>}
                 </nav>
             </div>
 
-            {children}
+            <div id="realm-content" tabIndex={-1} className="realm-frame">{children}</div>
+            <footer className="realm-footer"><div className="realm-footer-top"><Link href="/" className="realm-brand-link"><img src="/brand/mark.svg" alt=""/><span className="realm-wordmark"><b>AO<span>CHAIN</span></b><small>{copy.fullName}</small></span></Link><nav><Link href="/characters">{copy.play}</Link><Link href="/character-market">{copy.market}</Link><Link href="/wiki">{portal.guide}</Link><Link href="/ranking">{portal.rankings}</Link></nav></div><div className="realm-footer-bottom"><span>{copy.footer}<br/>{copy.credit}</span><span>{copy.test}</span></div></footer>
         </>
     );
 }

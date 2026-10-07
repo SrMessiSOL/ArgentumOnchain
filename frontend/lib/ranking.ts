@@ -20,6 +20,7 @@ export type RankingResponse = {
 };
 
 export type RankingPageData = RankingResponse & {
+    unavailable?: boolean;
     headSpritesById: Record<string, RankingHeadSprite | null>;
 };
 

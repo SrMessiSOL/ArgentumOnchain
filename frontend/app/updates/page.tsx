@@ -1,3 +1,5 @@
+import {translateSource} from '@/lib/i18n';
+import { LocalizedText } from '@/components/LocalizedText';
 import type { Metadata } from "next";
 import UpdatesPanel from "@/components/UpdatesPanel";
 import changelogEntries from "@/data/changelog.json";
@@ -7,13 +9,13 @@ import { buildPageMetadata } from "@/lib/seo";
 const latestFeatures = changelogEntries[0]?.features ?? [];
 const nextFocus = roadmapEntries[0];
 
-const updatesDescription = `Segui el changelog de AOWeb y el roadmap publico con mejoras como ${latestFeatures[0] ?? "nuevas funciones"}, ${latestFeatures[1] ?? "ajustes continuos"} y proximos objetivos en ${nextFocus?.title ?? "el juego"}.`;
+const updatesDescription = `Follow the AOCHAIN changelog and public roadmap: ${translateSource(latestFeatures[0] ?? 'New features','en')}. Next: ${translateSource(nextFocus?.title ?? 'Game improvements','en')}.`;
 
 export const metadata: Metadata = buildPageMetadata({
     title: "Updates, changelog y roadmap",
     description: updatesDescription,
     path: "/updates",
-    keywords: ["updates AOWeb", "roadmap Argentum Online", "changelog MMORPG"],
+    keywords: ["updates AOCHAIN", "roadmap Argentum Online", "changelog MMORPG"],
     imagePath: "/updates/opengraph-image",
     twitterImagePath: "/updates/twitter-image",
 });
@@ -24,11 +26,9 @@ export default function UpdatesPage() {
             <div className="mx-auto max-w-4xl">
                 <div className="mb-8">
                     <p className="text-[11px] uppercase tracking-[0.34em] text-cyan-200/75">
-                        AOWeb
+                        AOCHAIN
                     </p>
-                    <h1 className="mt-3 text-3xl font-semibold text-white md:text-4xl">
-                        Changelog y roadmap
-                    </h1>
+                    <h1 className="mt-3 text-3xl font-semibold text-white md:text-4xl"><LocalizedText source={"Changelog y roadmap "} /></h1>
                 </div>
 
                 <UpdatesPanel mode="full" backHref="/characters" />

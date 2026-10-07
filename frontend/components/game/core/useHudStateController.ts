@@ -1,5 +1,7 @@
 import {
     useCallback,
+    useEffect,
+    useRef,
     type Dispatch,
     type RefObject,
     type SetStateAction,
@@ -24,6 +26,7 @@ import {
     setVisibilityIfChanged,
 } from "../rendering/textStyles";
 import { shouldHighlightClanTag } from "../rendering/visibility";
+import {useI18n} from '../../I18nProvider';
 
 type UseHudStateControllerOptions = {
     playerHudRef: RefObject<PlayerHudState | null>;
@@ -62,11 +65,13 @@ export function useHudStateController({
     preloadGraphicIds,
     collectSpellGraphicIds,
 }: UseHudStateControllerOptions) {
+    const {locale}=useI18n();
+    const localeRef=useRef(locale);localeRef.current=locale;
     const updateSeguroIndicators = useCallback(
         (hud: PlayerHudState | null) => {
             if (seguroTextRef.current) {
                 const combatSeguroActive = Boolean(hud?.seguroActivado);
-                const nextSeguroText = `Seguro: ${combatSeguroActive ? "ON" : "OFF"}`;
+                const nextSeguroText = `${localeRef.current==='en'?'Safety':'Seguro'}: ${combatSeguroActive ? "ON" : "OFF"}`;
                 const nextSeguroStyle = getHudStatusTextStyle(
                     combatSeguroActive ? 0x34c759 : 0xff3b30,
                 );
@@ -95,6 +100,7 @@ export function useHudStateController({
         },
         [clanSeguroTextRef, seguroTextRef],
     );
+    useEffect(()=>{updateSeguroIndicators(playerHudRef.current);},[locale,playerHudRef,updateSeguroIndicators]);
 
     const refreshVisibleClanTagStyles = useCallback(
         (

@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText } from '@/components/LocalizedText';
 import React from "react";
 import type { RetosState } from "../lib/aowProtocol";
 
@@ -44,15 +45,13 @@ export default function RetosModal({
     }, [onClose]);
 
     return (
-        <div className="fixed inset-0 z-[92] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
-            <div className="w-full max-w-2xl rounded-[18px] border border-white/10 bg-stone-950/96 text-stone-100 shadow-2xl">
+        <div className="game-modal-backdrop fixed inset-0 z-[92] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
+            <div className="game-modal-panel w-full max-w-2xl rounded-[18px] border border-white/10 bg-stone-950/96 text-stone-100 shadow-2xl">
                 <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
                     <div>
-                        <div className="text-sm font-semibold text-white">
-                            Retos
-                        </div>
+                        <div className="text-sm font-semibold text-white"><LocalizedText source={"Retos "} /></div>
                         <div className="text-xs text-stone-400">
-                            {currentCharacterName ?? "Personaje"}
+                            {currentCharacterName ?? <LocalizedText source="Personaje" />}
                         </div>
                     </div>
 
@@ -61,16 +60,12 @@ export default function RetosModal({
                             type="button"
                             onClick={onRefresh}
                             className="rounded-md border border-white/10 px-2.5 py-1 text-xs text-stone-300 transition hover:border-white/20 hover:text-white"
-                        >
-                            Refrescar
-                        </button>
+                        ><LocalizedText source={"Refrescar "} /></button>
                         <button
                             type="button"
                             onClick={onClose}
                             className="rounded-md border border-white/10 px-2.5 py-1 text-xs text-stone-300 transition hover:border-white/20 hover:text-white"
-                        >
-                            Cerrar
-                        </button>
+                        ><LocalizedText source={"Cerrar "} /></button>
                     </div>
                 </div>
 
@@ -83,9 +78,9 @@ export default function RetosModal({
                                 disabled={actionKey !== null}
                                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-left text-sm transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {actionKey === "create-1"
+                                <LocalizedText source={actionKey === "create-1"
                                     ? "Crear 1vs1..."
-                                    : "Crear 1vs1"}
+                                    : "Crear 1vs1"} />
                             </button>
 
                             <button
@@ -94,43 +89,35 @@ export default function RetosModal({
                                 disabled={actionKey !== null}
                                 className="rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-left text-sm transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {actionKey === "create-2"
+                                <LocalizedText source={actionKey === "create-2"
                                     ? "Crear 2vs2..."
-                                    : "Crear 2vs2"}
+                                    : "Crear 2vs2"} />
                             </button>
                         </div>
 
                         {error ? (
                             <div className="rounded-lg border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
-                                {error}
+                                <LocalizedText source={error} />
                             </div>
                         ) : null}
 
                         {info ? (
                             <div className="rounded-lg border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-                                {info}
+                                <LocalizedText source={info} />
                             </div>
                         ) : null}
 
-                        <p className="pt-1 text-xs text-stone-500">
-                            Vivo y en zona segura. En 2vs2, party de 2.
-                        </p>
+                        <p className="pt-1 text-xs text-stone-500"><LocalizedText source={"Vivo y en zona segura. En 2vs2, party de 2. "} /></p>
                     </section>
 
                     <section className="rounded-lg border border-white/10 bg-black/20">
-                        <div className="border-b border-white/10 px-3 py-2 text-sm font-medium text-white">
-                            Retos abiertos
-                        </div>
+                        <div className="border-b border-white/10 px-3 py-2 text-sm font-medium text-white"><LocalizedText source={"Retos abiertos "} /></div>
 
                         <div className="max-h-[360px] space-y-2 overflow-y-auto p-3">
                             {loading ? (
-                                <div className="rounded-lg border border-white/10 px-3 py-3 text-sm text-stone-400">
-                                    Cargando retos...
-                                </div>
+                                <div className="rounded-lg border border-white/10 px-3 py-3 text-sm text-stone-400"><LocalizedText source={"Cargando retos... "} /></div>
                             ) : challenges.length === 0 ? (
-                                <div className="rounded-lg border border-white/10 px-3 py-3 text-sm text-stone-400">
-                                    No hay retos abiertos.
-                                </div>
+                                <div className="rounded-lg border border-white/10 px-3 py-3 text-sm text-stone-400"><LocalizedText source={"No hay retos abiertos. "} /></div>
                             ) : (
                                 challenges.map((challenge) => {
                                     const isOwnChallenge =
@@ -161,15 +148,12 @@ export default function RetosModal({
                                                                     {
                                                                         participant.name
                                                                     }
-                                                                </span>{" "}
-                                                                · Nivel{" "}
+                                                                </span>{" "}<LocalizedText source={"Â· Nivel"} />{" "}
                                                                 {
                                                                     participant.level
                                                                 }{" "}
-                                                                ·{" "}
-                                                                {
-                                                                    participant.className
-                                                                }
+                                                                Â·{" "}
+                                                                <LocalizedText source={participant.className} />
                                                             </div>
                                                         ),
                                                     )}
@@ -194,8 +178,8 @@ export default function RetosModal({
                                                 `${isOwnChallenge ? "cancel" : "join"}-${challenge.id}`
                                                     ? "..."
                                                     : isOwnChallenge
-                                                      ? "Cancelar"
-                                                      : "Unirte"}
+                                                      ? <LocalizedText source={"Cancelar"} />
+                                                      : <LocalizedText source={"Unirte"} />}
                                             </button>
                                         </article>
                                     );

@@ -1,5 +1,2 @@
-import { redirect } from "next/navigation";
-
-export default function WikiPage() {
-  redirect("/wiki/equipment");
-}
+import {redirect} from "next/navigation";
+export default function Page(){redirect("/wiki/npcs");}

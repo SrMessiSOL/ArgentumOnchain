@@ -7,7 +7,7 @@ const { initializeCraftingRecipesFromApi } = require("./gameDataSync");
 class LoadCraftingRecipes {
     async initialize() {
         await this.load();
-        console.log("Recetas de crafting cargadas.");
+        console.log("Crafting recipes loaded.");
     }
 
     async load() {
@@ -16,10 +16,10 @@ class LoadCraftingRecipes {
         try {
             const result = await initializeCraftingRecipesFromApi();
             console.log(
-                `[GAME DATA] Crafting hidratado desde DB: ${result.loadedRecipes}. Version aplicada: ${result.currentVersion}.`,
+                `[GAME DATA] Crafting loaded from DB: ${result.loadedRecipes}. Applied version: ${result.currentVersion}.`,
             );
         } catch {
-            console.warn("[GAME DATA] No se pudo hidratar crafting desde API al iniciar. Se usan datos locales.");
+            console.warn("[GAME DATA] Could not load crafting from API at startup. Using local data.");
         }
     }
 }

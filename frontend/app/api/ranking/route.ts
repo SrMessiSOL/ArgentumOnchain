@@ -35,7 +35,7 @@ export async function GET(request: Request) {
                 break;
             } catch (error) {
                 console.error(
-                    `No se pudo cargar el ranking desde ${apiBaseUrl}:`,
+                    `Could not load rankings from ${apiBaseUrl}:`,
                     error,
                 );
             }
@@ -59,10 +59,10 @@ export async function GET(request: Request) {
             },
         });
     } catch (error) {
-        console.error("No se pudo cargar el ranking:", error);
+        console.error("Could not load rankings:", error);
         return NextResponse.json({
             characters: [],
             headSpritesById: {},
-        } satisfies RankingPageData);
+        } satisfies RankingPageData, {status: 503});
     }
 }

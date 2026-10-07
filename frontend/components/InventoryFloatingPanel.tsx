@@ -1,6 +1,11 @@
+"use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 /* eslint-disable @next/next/no-img-element */
 
-"use client";
+
+import {localizeItemDetails} from '../lib/game-i18n';
+import ExplorerCosmetic from "./ExplorerCosmetic";
+import { useI18n } from "@/components/I18nProvider";
 
 import Image from "next/image";
 import React from "react";
@@ -492,6 +497,7 @@ function ItemGraphic({
     graphicData?: GraphicData;
     name: string;
 }) {
+    const {text: localizeText} = useI18n();
     if (!graphicData?.numFile) {
         return <div className="h-8 w-8 rounded-md bg-black/20" />;
     }
@@ -503,8 +509,8 @@ function ItemGraphic({
 
     return (
         <div className="relative h-8 w-8 overflow-hidden rounded-sm">
-            <div
-                aria-label={name}
+            <LocalizedLabel><div
+                aria-label={localizeText(name)}
                 className="absolute left-1/2 top-1/2 bg-no-repeat"
                 style={{
                     width: graphicData.width,
@@ -514,7 +520,7 @@ function ItemGraphic({
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: "center",
                 }}
-            />
+            /></LocalizedLabel>
         </div>
     );
 }
@@ -530,6 +536,7 @@ function VitalBarsCanvas({
     mana: number;
     maxMana: number;
 }) {
+    const {t: localizeKey}=useI18n();
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
     React.useEffect(() => {
@@ -637,7 +644,7 @@ function VitalBarsCanvas({
 
         drawBar({
             y: 0,
-            label: "Vida",
+            label: localizeKey("hud.health"),
             value: hp,
             max: maxHp,
             startColor: "#951212",
@@ -651,7 +658,7 @@ function VitalBarsCanvas({
             startColor: "#0e436f",
             endColor: "#2fb8ed",
         });
-    }, [hp, mana, maxHp, maxMana]);
+    }, [hp, mana, maxHp, maxMana, localizeKey]);
 
     return (
         <canvas
@@ -724,6 +731,8 @@ export default function InventoryFloatingPanel({
     onSendCommand,
     selectedCharacterId,
 }: InventoryFloatingPanelProps) {
+    const { t: localizeKey, text: localizeText, locale } = useI18n();
+
     const items = React.useMemo(() => hud?.inventory ?? [], [hud?.inventory]);
     const spells = React.useMemo(() => hud?.spells ?? [], [hud?.spells]);
     const [buffExpiryAt, setBuffExpiryAt] = React.useState({
@@ -1231,24 +1240,24 @@ export default function InventoryFloatingPanel({
     function formatClanAlignment(alignment: ClanAlignment) {
         switch (alignment) {
             case "citizen":
-                return "Ciudadano";
+                return localizeText("Ciudadano");
             case "criminal":
-                return "Criminal";
+                return localizeText("Criminal");
         }
     }
 
     function formatClassName(classId: number) {
-        return classLabels[classId] ?? `Clase ${classId}`;
+        return localizeText(classLabels[classId] ?? `Clase ${classId}`);
     }
 
     function formatClanRole(role: ClanMember["role"]) {
         switch (role) {
             case "leader":
-                return "Lider";
+                return localizeText("Lider");
             case "co_leader":
-                return "Co-lider";
+                return localizeText("Co-lider");
             default:
-                return "Miembro";
+                return localizeText("Miembro");
         }
     }
 
@@ -1373,10 +1382,9 @@ export default function InventoryFloatingPanel({
             return;
         }
 
-        const confirmed = window.confirm(
-            memberName
+        const confirmed = window.confirm(localizeText(memberName
                 ? `¿Seguro que quieres echar a ${memberName} del clan?`
-                : "¿Seguro que quieres echar a este miembro del clan?",
+                : "¿Seguro que quieres echar a este miembro del clan?"),
         );
 
         if (!confirmed) {
@@ -1419,7 +1427,7 @@ export default function InventoryFloatingPanel({
     function handleDeleteClan() {
         if (
             clanDeleteSubmitting ||
-            clanDeleteConfirmationText.trim() !== "BORRAR"
+            !["BORRAR", "DELETE"].includes(clanDeleteConfirmationText.trim())
         ) {
             return;
         }
@@ -1450,10 +1458,9 @@ export default function InventoryFloatingPanel({
             return;
         }
 
-        const confirmed = window.confirm(
-            memberName
+        const confirmed = window.confirm(localizeText(memberName
                 ? `¿Seguro que quieres transferir el liderazgo del clan a ${memberName}? Dejarás de ser el lider.`
-                : "¿Seguro que quieres transferir el liderazgo del clan? Dejarás de ser el lider.",
+                : "¿Seguro que quieres transferir el liderazgo del clan? Dejarás de ser el lider."),
         );
 
         if (!confirmed) {
@@ -1602,7 +1609,7 @@ export default function InventoryFloatingPanel({
         : isAdmin
           ? WORLD_MAP_GENERAL_SRC
           : WORLD_MAP_SRC;
-    const adminWorldMapAlt = "Mapa del mundo completo";
+    const adminWorldMapAlt = localizeText("Mapa del mundo completo");
     const minimapMarkerPosition = React.useMemo(() => {
         if (isChallengeInstanceMap) {
             return null;
@@ -2314,26 +2321,24 @@ export default function InventoryFloatingPanel({
                                     {hud?.level ?? "-"}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-[9px] uppercase tracking-[0.3em] text-amber-200/70">
-                                        Personaje
-                                    </p>
+                                    <p className="text-[9px] uppercase tracking-[0.3em] text-amber-200/70">{localizeKey("hud.character")}</p>
                                     <h3 className="truncate text-[24px] font-semibold leading-none text-[#efe2c5]">
-                                        {hud?.nameCharacter || "Aventurero"}
+                                        {hud?.nameCharacter || "Adventurer"}<ExplorerCosmetic compact />
                                     </h3>
                                 </div>
-                                <button
+                                <LocalizedLabel><button
                                     type="button"
                                     onClick={() => setIsSettingsOpen(true)}
                                     className="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-200/15 bg-black/20 text-amber-100/80 transition hover:border-amber-300/45 hover:bg-black/35 hover:text-amber-50"
                                     aria-label={
                                         hardwareAccelerationWarning
                                             ? "Abrir ajustes. Revisar aceleración gráfica"
-                                            : "Abrir ajustes"
+                                            : localizeKey("hud.settings")
                                     }
                                     title={
                                         hardwareAccelerationWarning
                                             ? "Revisar aceleración gráfica"
-                                            : "Abrir ajustes"
+                                            : localizeKey("hud.settings")
                                     }
                                 >
                                     <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.16),transparent_62%)] opacity-0 transition group-hover:opacity-100" />
@@ -2345,21 +2350,16 @@ export default function InventoryFloatingPanel({
                                     {hardwareAccelerationWarning ? (
                                         <>
                                             <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-rose-500 ring-2 ring-[#1a120d]" />
-                                            <span className="sr-only">
-                                                Advertencia de aceleración
-                                                gráfica
-                                            </span>
+                                            <span className="sr-only"><LocalizedText source={"Advertencia de aceleración gráfica "} /></span>
                                         </>
                                     ) : null}
-                                </button>
+                                </button></LocalizedLabel>
                             </div>
 
                             {!isMaxLevelCharacter ? (
                                 <div className="mt-3">
                                     <div className="mb-1 flex flex-nowrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.14em] text-stone-300/82">
-                                        <span className="shrink-0">
-                                            Experiencia
-                                        </span>
+                                        <span className="shrink-0">{localizeKey("hud.experience")}</span>
                                         <span className="shrink-0 whitespace-nowrap text-[10px] tracking-[0.08em] text-right text-amber-100 tabular-nums">
                                             {expLabel}
                                         </span>
@@ -2384,9 +2384,7 @@ export default function InventoryFloatingPanel({
                                             ? "border-amber-300/70 bg-[linear-gradient(180deg,#7d2e12,#4f1608)] text-amber-50 shadow-[0_0_0_1px_rgba(251,191,36,0.12),inset_0_1px_0_rgba(255,220,180,0.18)]"
                                             : "border-[#4a3424] bg-[#241813] text-stone-300 hover:border-amber-400/40 hover:text-stone-100"
                                     }`}
-                                >
-                                    Inventario
-                                </button>
+                                >{localizeKey("hud.inventory")}</button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("spells")}
@@ -2395,9 +2393,7 @@ export default function InventoryFloatingPanel({
                                             ? "border-amber-300/70 bg-[linear-gradient(180deg,#7d2e12,#4f1608)] text-amber-50 shadow-[0_0_0_1px_rgba(251,191,36,0.12),inset_0_1px_0_rgba(255,220,180,0.18)]"
                                             : "border-[#4a3424] bg-[#241813] text-stone-300 hover:border-amber-400/40 hover:text-stone-100"
                                     }`}
-                                >
-                                    Hechizos
-                                </button>
+                                >{localizeKey("hud.spells")}</button>
                             </div>
 
                             {activeTab === "inventory" ? (
@@ -2528,11 +2524,11 @@ export default function InventoryFloatingPanel({
                                     {hoveredItem ? (
                                         <div className="rounded-2xl border border-amber-200/15 bg-black/45 px-3 py-2 text-[11px] leading-4 text-stone-200">
                                             <p className="font-semibold text-amber-100">
-                                                {hoveredItem.name}
+                                                {localizeText(hoveredItem.name)}
                                             </p>
                                             {hoveredItem.details ? (
                                                 <p className="mt-1 whitespace-pre-wrap text-stone-300/90">
-                                                    {hoveredItem.details}
+                                                    {localizeItemDetails(hoveredItem.details, locale)}
                                                 </p>
                                             ) : null}
                                         </div>
@@ -2543,10 +2539,10 @@ export default function InventoryFloatingPanel({
                                     {spells.length ? (
                                         <div className="flex min-h-0 flex-1 flex-col gap-2">
                                             <div className="flex min-h-0 flex-1 items-start gap-1.5">
-                                                <div
+                                                <LocalizedLabel><div
                                                     ref={spellListRef}
                                                     role="listbox"
-                                                    aria-label="Lista de hechizos"
+                                                    aria-label={localizeText("Lista de hechizos")}
                                                     aria-activedescendant={
                                                         selectedSpell
                                                             ? `spell-option-${selectedSpell.slot}`
@@ -2634,18 +2630,18 @@ export default function InventoryFloatingPanel({
                                                                 }}
                                                             >
                                                                 <span className="block truncate">
-                                                                    {spell.name}
+                                                                    {localizeText(spell.name)}
                                                                 </span>
                                                             </button>
                                                         ),
                                                     )}
-                                                </div>
+                                                </div></LocalizedLabel>
 
                                                 <div className="flex w-4 shrink-0 flex-col gap-1">
-                                                    <button
+                                                    <LocalizedLabel><button
                                                         type="button"
-                                                        aria-label="Subir hechizo seleccionado"
-                                                        title="Subir hechizo seleccionado"
+                                                        aria-label={localizeText("Subir hechizo seleccionado")}
+                                                        title={localizeText("Subir hechizo seleccionado")}
                                                         disabled={
                                                             !selectedSpell ||
                                                             !canMoveSelectedSpellUp
@@ -2661,12 +2657,12 @@ export default function InventoryFloatingPanel({
                                                         className="flex h-7 items-center justify-center rounded-[6px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] text-stone-100 shadow-[inset_0_1px_0_rgba(255,240,210,0.18)] transition hover:border-[#c39a6a] hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-35"
                                                     >
                                                         <ChevronUp className="h-4 w-4" />
-                                                    </button>
+                                                    </button></LocalizedLabel>
 
-                                                    <button
+                                                    <LocalizedLabel><button
                                                         type="button"
-                                                        aria-label="Bajar hechizo seleccionado"
-                                                        title="Bajar hechizo seleccionado"
+                                                        aria-label={localizeText("Bajar hechizo seleccionado")}
+                                                        title={localizeText("Bajar hechizo seleccionado")}
                                                         disabled={
                                                             !selectedSpell ||
                                                             !canMoveSelectedSpellDown
@@ -2682,12 +2678,12 @@ export default function InventoryFloatingPanel({
                                                         className="flex h-7 items-center justify-center rounded-[6px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] text-stone-100 shadow-[inset_0_1px_0_rgba(255,240,210,0.18)] transition hover:border-[#c39a6a] hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-35"
                                                     >
                                                         <ChevronDown className="h-4 w-4" />
-                                                    </button>
+                                                    </button></LocalizedLabel>
 
-                                                    <button
+                                                    <LocalizedLabel><button
                                                         type="button"
-                                                        aria-label="Informacion del hechizo seleccionado"
-                                                        title="Informacion del hechizo"
+                                                        aria-label={localizeText("Informacion del hechizo seleccionado")}
+                                                        title={localizeText("Informacion del hechizo")}
                                                         disabled={
                                                             !selectedSpell
                                                         }
@@ -2701,14 +2697,13 @@ export default function InventoryFloatingPanel({
                                                         className="mt-3 flex h-7 items-center justify-center rounded-[6px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] text-[12px] font-bold leading-none text-stone-100 shadow-[inset_0_1px_0_rgba(255,240,210,0.18)] transition hover:border-[#c39a6a] hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-35"
                                                     >
                                                         i
-                                                    </button>
+                                                    </button></LocalizedLabel>
                                                 </div>
                                             </div>
                                         </div>
                                     ) : (
                                         <div className="rounded-[20px] border border-dashed border-white/10 bg-white/3 px-4 py-6 text-center text-sm text-stone-400">
-                                            Este personaje no tiene hechizos
-                                            disponibles.
+                                            {localizeText("Este personaje no tiene hechizos disponibles.")}
                                         </div>
                                     )}
 
@@ -2721,16 +2716,14 @@ export default function InventoryFloatingPanel({
                                         }}
                                         disabled={!selectedSpell}
                                         className="shrink-0 w-full rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-stone-950 transition hover:bg-amber-200 focus:outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
-                                    >
-                                        Lanzar
-                                    </button>
+                                    >{localizeKey("hud.cast")}</button>
                                 </div>
                             )}
                         </section>
 
                         <section className="relative rounded-[22px] border border-[#5e4529] bg-[#19110d]/95 p-3 shadow-[inset_0_1px_0_rgba(255,214,170,0.08)]">
                             <p className="text-center text-[10px] font-semibold tracking-[0.04em] text-[#cbb18e]">
-                                {mapName || "Sin mapa cargado"}
+                                {localizeText(mapName || "Sin mapa cargado")}
                             </p>
 
                             <div className="mt-2 flex items-start gap-3">
@@ -2759,26 +2752,23 @@ export default function InventoryFloatingPanel({
                                             }
                                             className="inline-flex min-w-0 items-center justify-center gap-2 rounded-[10px] border border-[#4f3f2b] bg-[linear-gradient(180deg,#2d2218_0%,#17100a_100%)] px-3 py-1.5 text-center text-[11px] font-semibold text-amber-100 transition hover:border-[#8c6a43]"
                                         >
-                                            <Shield className="h-4 w-4 text-amber-300" />
-                                            Clanes
-                                        </button>
+                                            <Shield className="h-4 w-4 text-amber-300" />{localizeKey("hud.clans")}</button>
                                     </div>
                                 </div>
 
                                 <div className="w-[92px] shrink-0">
-                                    <button
+                                    <LocalizedLabel><button
                                         ref={worldMapTriggerRef}
                                         type="button"
                                         onClick={() => setIsWorldMapOpen(true)}
                                         className="relative block h-[92px] w-[92px] overflow-hidden rounded-[10px] border border-[#705134] bg-[#0b0705] text-left shadow-[inset_0_1px_0_rgba(255,220,180,0.1)] transition hover:border-[#9b744f] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
-                                        aria-label="Abrir mapa del mundo"
+                                        aria-label={localizeKey("hud.worldMap")}
                                     >
                                         {mapPreviewSrc && !mapPreviewErrored ? (
-                                            <img
+                                            <LocalizedLabel><img
                                                 src={mapPreviewSrc}
                                                 alt={
-                                                    mapName ||
-                                                    `Mapa ${hud?.map ?? ""}`
+                                                    localizeText(mapName || "Mapa")
                                                 }
                                                 width={MINIMAP_PREVIEW_SIZE}
                                                 height={MINIMAP_PREVIEW_SIZE}
@@ -2804,12 +2794,11 @@ export default function InventoryFloatingPanel({
                                                 onError={() =>
                                                     setMapPreviewErrored(true)
                                                 }
-                                            />
+                                            /></LocalizedLabel>
                                         ) : isChallengeInstanceMap ? (
                                             <div className="h-[92px] w-[92px] bg-black" />
                                         ) : (
-                                            <div className="flex h-[92px] w-[92px] items-center justify-center bg-[linear-gradient(180deg,#3d2a1d,#1a120d)] text-[10px] font-semibold text-stone-300">
-                                                Mapa {hud?.map ?? "-"}
+                                            <div className="flex h-[92px] w-[92px] items-center justify-center bg-[linear-gradient(180deg,#3d2a1d,#1a120d)] text-[10px] font-semibold text-stone-300">{localizeKey("characters.map")}{hud?.map ?? "-"}
                                             </div>
                                         )}
                                         {minimapMarkerPosition ? (
@@ -2826,7 +2815,7 @@ export default function InventoryFloatingPanel({
                                         ) : null}
                                         {clanMinimapMarkerPositions.map(
                                             (marker) => (
-                                                <span
+                                                <LocalizedLabel><span
                                                     key={`clan-${marker.id}`}
                                                     data-testid={`minimap-clan-marker-${marker.id}`}
                                                     title={marker.title}
@@ -2837,12 +2826,12 @@ export default function InventoryFloatingPanel({
                                                         transform:
                                                             "translate(-50%, -50%)",
                                                     }}
-                                                />
+                                                /></LocalizedLabel>
                                             ),
                                         )}
                                         {partyMinimapMarkerPositions.map(
                                             (marker) => (
-                                                <span
+                                                <LocalizedLabel><span
                                                     key={marker.id}
                                                     data-testid={`minimap-party-marker-${marker.id}`}
                                                     title={marker.title}
@@ -2853,14 +2842,14 @@ export default function InventoryFloatingPanel({
                                                         transform:
                                                             "translate(-50%, -50%)",
                                                     }}
-                                                />
+                                                /></LocalizedLabel>
                                             ),
                                         )}
-                                    </button>
+                                    </button></LocalizedLabel>
                                     <div className="mt-1 text-center text-[10px] text-amber-100/85">
                                         {hud
-                                            ? `Mapa ${hud.map} (${hud.pos.x}, ${hud.pos.y})`
-                                            : "Mapa - (-, -)"}
+                                            ? `${localizeText("Mapa")} ${hud.map} (${hud.pos.x}, ${hud.pos.y})`
+                                            : `${localizeText("Mapa")} - (-, -)`}
                                     </div>
                                 </div>
                             </div>
@@ -2917,7 +2906,7 @@ export default function InventoryFloatingPanel({
                                         <span className="inline-flex h-4 w-4 items-center justify-center">
                                             <Image
                                                 src="/graphics/23003.png"
-                                                alt="Agilidad"
+                                                alt={localizeKey("hud.strength")}
                                                 width={14}
                                                 height={14}
                                                 className="h-3.5 w-3.5 object-contain opacity-90"
@@ -2939,7 +2928,7 @@ export default function InventoryFloatingPanel({
                                         <span className="inline-flex h-4 w-4 items-center justify-center">
                                             <Image
                                                 src="/graphics/23000.png"
-                                                alt="Agilidad"
+                                                alt={localizeKey("hud.agility")}
                                                 width={14}
                                                 height={14}
                                                 className="h-3.5 w-3.5 object-contain opacity-90"
@@ -2969,19 +2958,14 @@ export default function InventoryFloatingPanel({
             {dropItem ? (
                 <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/35 px-4 backdrop-blur-[2px]">
                     <div className="w-full max-w-xs rounded-[24px] border border-amber-200/20 bg-[#120c08]/95 p-4 text-stone-100 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/75">
-                            Tirar item
-                        </p>
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/75">{localizeKey("controls.drop")}</p>
                         <h3 className="mt-2 text-lg font-semibold text-stone-50">
-                            {dropItem.name}
+                            {localizeText(dropItem.name)}
                         </h3>
-                        <p className="mt-1 text-sm text-stone-400">
-                            Cantidad disponible: {formatNumber(dropItem.amount)}
+                        <p className="mt-1 text-sm text-stone-400"><LocalizedText source={"Cantidad disponible: "} />{formatNumber(dropItem.amount)}
                         </p>
 
-                        <label className="mt-4 block text-xs uppercase tracking-[0.22em] text-stone-400">
-                            Cantidad
-                        </label>
+                        <label className="mt-4 block text-xs uppercase tracking-[0.22em] text-stone-400">{localizeKey("hud.amount")}</label>
                         <input
                             type="number"
                             min={1}
@@ -2999,23 +2983,17 @@ export default function InventoryFloatingPanel({
                                 type="button"
                                 onClick={closeDropDialog}
                                 className="flex-1 rounded-2xl border border-stone-700 bg-stone-900/80 px-4 py-3 text-sm font-semibold text-stone-200 transition hover:border-stone-500 hover:bg-stone-800"
-                            >
-                                Cancelar
-                            </button>
+                            >{localizeKey("common.cancel")}</button>
                             <button
                                 type="button"
                                 onClick={submitDropAllRequest}
                                 className="flex-1 rounded-2xl border border-rose-400/35 bg-rose-500/12 px-4 py-3 text-sm font-semibold text-rose-100 transition hover:border-rose-300/55 hover:bg-rose-500/18"
-                            >
-                                Tirar todo
-                            </button>
+                            ><LocalizedText source={"Tirar todo "} /></button>
                             <button
                                 type="button"
                                 onClick={submitDropRequest}
                                 className="col-span-2 rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200"
-                            >
-                                Tirar
-                            </button>
+                            >{localizeKey("hud.drop")}</button>
                         </div>
                     </div>
                 </div>
@@ -3033,12 +3011,8 @@ export default function InventoryFloatingPanel({
                           >
                               <div className="flex items-center justify-between gap-4 border-b border-amber-200/10 bg-[linear-gradient(180deg,rgba(127,78,35,0.28),rgba(18,12,8,0))] px-4 py-3 sm:px-5">
                                   <div>
-                                      <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72">
-                                          Navegacion
-                                      </p>
-                                      <h3 className="mt-1 text-lg font-semibold text-[#f2e5ca] sm:text-xl">
-                                          Mapa del mundo
-                                      </h3>
+                                      <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72">{localizeText("Navegacion")}</p>
+                                      <h3 className="mt-1 text-lg font-semibold text-[#f2e5ca] sm:text-xl">{localizeKey("hud.mapTitle")}</h3>
                                       {isAdmin ? (
                                           <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-stone-300">
                                               <button
@@ -3051,43 +3025,39 @@ export default function InventoryFloatingPanel({
                                                   }
                                                   className="rounded-[10px] border border-sky-700/60 bg-sky-950/60 px-3 py-2 text-left font-semibold text-sky-100 transition hover:border-sky-500 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-900 disabled:text-stone-400"
                                               >
-                                                  {worldMapPlayersLoading
+                                                  <LocalizedText source={worldMapPlayersLoading
                                                       ? "Cargando jugadores..."
-                                                      : "Cargar todos los jugadores en el mapa"}
+                                                      : "Cargar todos los jugadores en el mapa"} />
                                               </button>
                                               <span className="text-stone-400">
-                                                  {worldMapPlayerMarkers.length}{" "}
-                                                  visibles
-                                              </span>
+                                                  {worldMapPlayerMarkers.length}{" "}<LocalizedText source={"visibles "} /></span>
                                               {worldMapPlayersSampledAt ? (
-                                                  <span className="text-stone-500">
-                                                      Snapshot listo
-                                                  </span>
+                                                  <span className="text-stone-500"><LocalizedText source={"Snapshot listo "} /></span>
                                               ) : null}
                                           </div>
                                       ) : null}
                                       {isAdmin && worldMapPlayersError ? (
                                           <p className="mt-2 text-xs text-rose-300">
-                                              {worldMapPlayersError}
+                                              <LocalizedText source={worldMapPlayersError} />
                                           </p>
                                       ) : null}
                                   </div>
-                                  <button
+                                  <LocalizedLabel><button
                                       type="button"
                                       onClick={closeWorldMap}
                                       className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-700 bg-black/20 text-stone-300 transition hover:border-stone-500 hover:text-white"
-                                      aria-label="Cerrar mapa del mundo"
+                                      aria-label={localizeText("Cerrar mapa del mundo")}
                                   >
                                       <X
                                           aria-hidden="true"
                                           className="h-4 w-4"
                                           strokeWidth={1.8}
                                       />
-                                  </button>
+                                  </button></LocalizedLabel>
                               </div>
 
                               <div className="flex h-[calc(100vh-7rem)] items-center justify-center bg-[#0b0705] p-2 sm:p-3">
-                                  <div
+                                  <LocalizedLabel><div
                                       className="relative inline-block"
                                       onContextMenu={handleWorldMapContextMenu}
                                       title={
@@ -3096,16 +3066,16 @@ export default function InventoryFloatingPanel({
                                               : undefined
                                       }
                                   >
-                                      <img
+                                      <LocalizedLabel><img
                                           src={worldMapAssetSrc}
                                           alt={adminWorldMapAlt}
                                           className="block max-h-[calc(100vh-8.5rem)] max-w-full object-contain"
-                                      />
+                                      /></LocalizedLabel>
                                       {worldMapMarkerPosition ? (
                                           <div className="pointer-events-none absolute inset-0">
                                               {worldMapPlayerMarkers.map(
                                                   (marker) => (
-                                                      <div
+                                                      <LocalizedLabel><div
                                                           key={marker.id}
                                                           className="pointer-events-auto absolute h-[8px] w-[8px] rounded-full border border-white/70 bg-sky-400 shadow-[0_0_0_1px_rgba(8,47,73,0.9),0_0_6px_rgba(56,189,248,0.7)]"
                                                           style={{
@@ -3118,7 +3088,7 @@ export default function InventoryFloatingPanel({
                                                           aria-label={
                                                               marker.title
                                                           }
-                                                      />
+                                                      /></LocalizedLabel>
                                                   ),
                                               )}
                                               <div
@@ -3139,7 +3109,7 @@ export default function InventoryFloatingPanel({
                                           <div className="pointer-events-none absolute inset-0">
                                               {worldMapPlayerMarkers.map(
                                                   (marker) => (
-                                                      <div
+                                                      <LocalizedLabel><div
                                                           key={marker.id}
                                                           className="pointer-events-auto absolute h-[8px] w-[8px] rounded-full border border-white/70 bg-sky-400 shadow-[0_0_0_1px_rgba(8,47,73,0.9),0_0_6px_rgba(56,189,248,0.7)]"
                                                           style={{
@@ -3152,12 +3122,12 @@ export default function InventoryFloatingPanel({
                                                           aria-label={
                                                               marker.title
                                                           }
-                                                      />
+                                                      /></LocalizedLabel>
                                                   ),
                                               )}
                                           </div>
                                       ) : null}
-                                  </div>
+                                  </div></LocalizedLabel>
                               </div>
                           </div>
                       </div>,
@@ -3176,13 +3146,11 @@ export default function InventoryFloatingPanel({
                                         className="h-3.5 w-3.5"
                                         strokeWidth={1.9}
                                     />
-                                    <p>Ajustes</p>
+                                    <p><LocalizedText source={"Ajustes"} /></p>
                                 </div>
-                                <h3 className="mt-1 text-xl font-semibold text-[#f2e5ca]">
-                                    Configuración
-                                </h3>
+                                <h3 className="mt-1 text-xl font-semibold text-[#f2e5ca]"><LocalizedText source={"Configuración "} /></h3>
                             </div>
-                            <button
+                            <LocalizedLabel><button
                                 type="button"
                                 onClick={() => setIsSettingsOpen(false)}
                                 className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-700 bg-black/20 text-stone-300 transition hover:border-stone-500 hover:text-white"
@@ -3193,7 +3161,7 @@ export default function InventoryFloatingPanel({
                                     className="h-4 w-4"
                                     strokeWidth={1.8}
                                 />
-                            </button>
+                            </button></LocalizedLabel>
                         </div>
 
                         <div className="space-y-4 px-5 py-5">
@@ -3204,20 +3172,12 @@ export default function InventoryFloatingPanel({
                                             !
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-[11px] uppercase tracking-[0.26em] text-rose-200/85">
-                                                Rendimiento del navegador
-                                            </p>
-                                            <p className="mt-1 text-sm font-semibold text-rose-50">
-                                                Parece que la aceleración por
-                                                hardware no está activa.
-                                            </p>
-                                            <p className="mt-3 text-sm leading-6 text-rose-100/85">
-                                                Esto suele causar tirones, menos
-                                                FPS o una experiencia más
-                                                pesada. Para activarla en{" "}
+                                            <p className="text-[11px] uppercase tracking-[0.26em] text-rose-200/85"><LocalizedText source={"Rendimiento del navegador "} /></p>
+                                            <p className="mt-1 text-sm font-semibold text-rose-50"><LocalizedText source={"Parece que la aceleración por hardware no está activa. "} /></p>
+                                            <p className="mt-3 text-sm leading-6 text-rose-100/85"><LocalizedText source={"Esto suele causar tirones, menos FPS o una experiencia más pesada. Para activarla en"} />{" "}
                                                 {
-                                                    hardwareAccelerationWarning
-                                                        .help.browserLabel
+                                                    localizeText(hardwareAccelerationWarning
+                                                        .help.browserLabel)
                                                 }
                                                 :
                                             </p>
@@ -3231,7 +3191,7 @@ export default function InventoryFloatingPanel({
                                                             <span className="font-semibold text-rose-200">
                                                                 {index + 1}.
                                                             </span>
-                                                            <span>{step}</span>
+                                                            <span><LocalizedText source={step} /></span>
                                                         </li>
                                                     ),
                                                 )}
@@ -3250,13 +3210,8 @@ export default function InventoryFloatingPanel({
                                         />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-[11px] uppercase tracking-[0.26em] text-amber-200/78">
-                                            Sonido
-                                        </p>
-                                        <p className="mt-1 text-sm text-stone-300">
-                                            Ajusta el volumen general de efectos
-                                            del juego.
-                                        </p>
+                                        <p className="text-[11px] uppercase tracking-[0.26em] text-amber-200/78"><LocalizedText source={"Sonido "} /></p>
+                                        <p className="mt-1 text-sm text-stone-300"><LocalizedText source={"Ajusta el volumen general de efectos del juego. "} /></p>
                                     </div>
                                     <div className="rounded-full border border-amber-300/20 bg-black/30 px-3 py-1 text-sm font-semibold text-amber-100">
                                         {Math.round(soundVolume * 100)}%
@@ -3264,7 +3219,7 @@ export default function InventoryFloatingPanel({
                                 </div>
 
                                 <div className="mt-4">
-                                    <input
+                                    <LocalizedLabel><input
                                         type="range"
                                         min="0"
                                         max="100"
@@ -3278,10 +3233,10 @@ export default function InventoryFloatingPanel({
                                         }
                                         className="h-2 w-full cursor-pointer appearance-none rounded-full bg-amber-200/15 accent-amber-400"
                                         aria-label="Volumen general"
-                                    />
+                                    /></LocalizedLabel>
                                     <div className="mt-2 flex justify-between text-[10px] uppercase tracking-[0.2em] text-stone-500">
-                                        <span>Silencio</span>
-                                        <span>Máximo</span>
+                                        <span><LocalizedText source={"Silencio"} /></span>
+                                        <span><LocalizedText source={"Máximo"} /></span>
                                     </div>
                                 </div>
                             </section>
@@ -3302,12 +3257,8 @@ export default function InventoryFloatingPanel({
                                         />
                                     </span>
                                     <span>
-                                        <span className="block text-[11px] uppercase tracking-[0.24em] text-amber-200/78">
-                                            Teclas
-                                        </span>
-                                        <span className="mt-1 block text-sm font-semibold">
-                                            Ir a configuración de teclas
-                                        </span>
+                                        <span className="block text-[11px] uppercase tracking-[0.24em] text-amber-200/78"><LocalizedText source={"Teclas "} /></span>
+                                        <span className="mt-1 block text-sm font-semibold"><LocalizedText source={"Ir a configuración de teclas "} /></span>
                                     </span>
                                 </span>
                                 <Settings2
@@ -3331,16 +3282,14 @@ export default function InventoryFloatingPanel({
                     >
                         <div className="flex items-center justify-between gap-4 border-b border-amber-200/10 bg-[linear-gradient(180deg,rgba(127,78,35,0.28),rgba(18,12,8,0))] px-4 py-3">
                             <div>
-                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72">
-                                    Party (15% mas experiencia)
-                                </p>
+                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72"><LocalizedText source={"Party (15% mas experiencia) "} /></p>
                                 <h3 className="mt-1 text-lg font-semibold text-[#f2e5ca]">
-                                    {partyMembers.length
+                                    <LocalizedText source={partyMembers.length
                                         ? `Miembros ${partyMembers.length}/4`
-                                        : "Crear o unirte a una party"}
+                                        : "Crear o unirte a una party"} />
                                 </h3>
                             </div>
-                            <button
+                            <LocalizedLabel><button
                                 type="button"
                                 onClick={() => setIsPartyModalOpen(false)}
                                 className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-700 bg-black/20 text-stone-300 transition hover:border-stone-500 hover:text-white"
@@ -3351,7 +3300,7 @@ export default function InventoryFloatingPanel({
                                     className="h-4 w-4"
                                     strokeWidth={1.8}
                                 />
-                            </button>
+                            </button></LocalizedLabel>
                         </div>
 
                         <div className="space-y-3 px-4 py-4">
@@ -3389,7 +3338,7 @@ export default function InventoryFloatingPanel({
                                                         </div>
                                                         <div className="mt-1 text-[11px] text-stone-400">
                                                             {member.online
-                                                                ? `Mapa ${member.map} (${member.pos.x}, ${member.pos.y})`
+                                                                ? localizeText(`Mapa ${member.map} (${member.pos.x}, ${member.pos.y})`)
                                                                 : "Offline"}
                                                         </div>
                                                     </div>
@@ -3407,9 +3356,7 @@ export default function InventoryFloatingPanel({
                                                             }}
                                                             className="inline-flex h-9 items-center justify-center rounded-[10px] border border-rose-700/60 bg-rose-950/70 px-3 text-[11px] font-semibold text-rose-100 transition hover:border-rose-500 hover:bg-rose-900/80"
                                                         >
-                                                            <UserRoundX className="mr-1.5 h-3.5 w-3.5" />
-                                                            Echar
-                                                        </button>
+                                                            <UserRoundX className="mr-1.5 h-3.5 w-3.5" /><LocalizedText source={"Echar "} /></button>
                                                     ) : null}
                                                 </div>
                                             );
@@ -3425,23 +3372,17 @@ export default function InventoryFloatingPanel({
                                         className="flex w-full items-center justify-center rounded-[14px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-4 py-3 text-[12px] font-bold text-amber-100 transition hover:border-[#c39a6a] hover:text-amber-50"
                                     >
                                         <DoorOpen className="mr-2 h-4 w-4" />
-                                        {isPartyLeader
+                                        <LocalizedText source={isPartyLeader
                                             ? "Cerrar party"
-                                            : "Salir de la party"}
+                                            : "Salir de la party"} />
                                     </button>
                                 </>
                             ) : (
                                 <div className="rounded-[16px] border border-white/8 bg-white/4 px-4 py-4 text-sm text-stone-300">
-                                    <p className="font-semibold text-stone-100">
-                                        Aun no estás en una party.
-                                    </p>
-                                    <p className="mt-2 leading-6 text-stone-400">
-                                        Escribe{" "}
-                                        <code>/party nombredeusuario</code> para
-                                        invitar a otro jugador. El usuario
-                                        invitado tiene que escribir{" "}
-                                        <code>/aceptar</code> para unirse.
-                                    </p>
+                                    <p className="font-semibold text-stone-100"><LocalizedText source={"Aun no estás en una party. "} /></p>
+                                    <p className="mt-2 leading-6 text-stone-400"><LocalizedText source={"Escribe"} />{" "}
+                                        <code>{localizeText('/party nombredeusuario')}</code><LocalizedText source={" para invitar a otro jugador. El usuario invitado tiene que escribir"} />{" "}
+                                        <code>{localizeText('/aceptar')}</code><LocalizedText source={" para unirse. "} /></p>
                                 </div>
                             )}
                         </div>
@@ -3460,17 +3401,15 @@ export default function InventoryFloatingPanel({
                     >
                         <div className="flex items-center justify-between gap-4 border-b border-amber-200/10 bg-[linear-gradient(180deg,rgba(127,78,35,0.28),rgba(18,12,8,0))] px-4 py-3">
                             <div>
-                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72">
-                                    Clanes
-                                </p>
+                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72">{localizeKey("hud.clans")}</p>
                                 <h3 className="mt-1 text-lg font-semibold text-[#f2e5ca]">
                                     {clanView === "detail" && detailClan
                                         ? `<${detailClan.name}>`
                                         : clanView === "create"
-                                          ? "Crear clan"
+                                          ? <LocalizedText source={"Crear clan"} />
                                           : currentClan
                                             ? `<${currentClan.name}>`
-                                            : "Clanes disponibles"}
+                                            : <LocalizedText source={"Clanes disponibles"} />}
                                 </h3>
                             </div>
                             <div className="flex items-center gap-2">
@@ -3479,18 +3418,14 @@ export default function InventoryFloatingPanel({
                                         type="button"
                                         onClick={() => setClanView("create")}
                                         className="rounded-[10px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-3 py-2 text-[11px] font-bold text-amber-100 transition hover:border-[#c39a6a]"
-                                    >
-                                        Crear clan
-                                    </button>
+                                    ><LocalizedText source={"Crear clan "} /></button>
                                 ) : null}
                                 {currentClan ? (
                                     <button
                                         type="button"
                                         onClick={() => setClanView("list")}
                                         className="rounded-[10px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-3 py-2 text-[11px] font-bold text-amber-100 transition hover:border-[#c39a6a]"
-                                    >
-                                        Ver clanes
-                                    </button>
+                                    ><LocalizedText source={"Ver clanes "} /></button>
                                 ) : null}
                                 {clanView === "detail" ? (
                                     <button
@@ -3501,27 +3436,21 @@ export default function InventoryFloatingPanel({
                                             )
                                         }
                                         className="rounded-[10px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-3 py-2 text-[11px] font-bold text-amber-100 transition hover:border-[#c39a6a]"
-                                    >
-                                        Volver
-                                    </button>
+                                    >{localizeKey("common.back")}</button>
                                 ) : null}
                                 {clanView === "create" ? (
                                     <button
                                         type="button"
                                         onClick={() => setClanView("list")}
                                         className="rounded-[10px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-3 py-2 text-[11px] font-bold text-amber-100 transition hover:border-[#c39a6a]"
-                                    >
-                                        Volver
-                                    </button>
+                                    >{localizeKey("common.back")}</button>
                                 ) : null}
                                 <button
                                     type="button"
                                     onClick={() => void refreshClanOverview()}
                                     className="rounded-[10px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-3 py-2 text-[11px] font-bold text-amber-100 transition hover:border-[#c39a6a]"
-                                >
-                                    Refrescar
-                                </button>
-                                <button
+                                ><LocalizedText source={"Refrescar "} /></button>
+                                <LocalizedLabel><button
                                     type="button"
                                     onClick={closeClanModal}
                                     className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-700 bg-black/20 text-stone-300 transition hover:border-stone-500 hover:text-white"
@@ -3532,7 +3461,7 @@ export default function InventoryFloatingPanel({
                                         className="h-4 w-4"
                                         strokeWidth={1.8}
                                     />
-                                </button>
+                                </button></LocalizedLabel>
                             </div>
                         </div>
 
@@ -3541,9 +3470,7 @@ export default function InventoryFloatingPanel({
                                 <div>
                                     <section className="rounded-[18px] border border-white/8 bg-white/4 p-4">
                                         <div className="flex items-center justify-between gap-2">
-                                            <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                                Clanes disponibles
-                                            </p>
+                                            <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Clanes disponibles "} /></p>
                                             <span className="text-[11px] text-stone-400">
                                                 {clanOverview?.clans.length ??
                                                     0}
@@ -3564,24 +3491,21 @@ export default function InventoryFloatingPanel({
                                                                 <div className="mt-1 text-xs text-stone-400">
                                                                     {formatClanAlignment(
                                                                         clan.alignment,
-                                                                    )}{" "}
-                                                                    • Lider{" "}
+                                                                    )}{" "}<LocalizedText source={"• Lider"} />{" "}
                                                                     {
                                                                         clan.leaderName
                                                                     }
                                                                 </div>
-                                                                <div className="mt-1 text-xs text-stone-500">
-                                                                    Miembros{" "}
+                                                                <div className="mt-1 text-xs text-stone-500"><LocalizedText source={"Miembros"} />{" "}
                                                                     {
                                                                         clan.memberCount
-                                                                    }{" "}
-                                                                    • Minimo{" "}
+                                                                    }{" "}<LocalizedText source={"• Minimo"} />{" "}
                                                                     {
                                                                         clan.minJoinLevel
                                                                     }
                                                                 </div>
                                                             </div>
-                                                            <button
+                                                            <LocalizedLabel><button
                                                                 type="button"
                                                                 onClick={() =>
                                                                     openClanDetail(
@@ -3590,9 +3514,7 @@ export default function InventoryFloatingPanel({
                                                                 }
                                                                 aria-label={`Ver clan ${clan.name}`}
                                                                 className="shrink-0 rounded-[10px] border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-3 py-2 text-[11px] font-bold text-amber-100 transition hover:border-[#c39a6a]"
-                                                            >
-                                                                Ver clan
-                                                            </button>
+                                                            ><LocalizedText source={"Ver clan "} /></button></LocalizedLabel>
                                                         </div>
                                                     </div>
                                                 ),
@@ -3602,10 +3524,7 @@ export default function InventoryFloatingPanel({
                                             !(
                                                 clanOverview?.clans.length ?? 0
                                             ) ? (
-                                                <div className="rounded-[14px] border border-white/8 bg-white/3 px-3 py-4 text-sm text-stone-400">
-                                                    No hay clanes creados
-                                                    todavía.
-                                                </div>
+                                                <div className="rounded-[14px] border border-white/8 bg-white/3 px-3 py-4 text-sm text-stone-400"><LocalizedText source={"No hay clanes creados todavía. "} /></div>
                                             ) : null}
                                         </div>
                                     </section>
@@ -3614,15 +3533,11 @@ export default function InventoryFloatingPanel({
 
                             {clanView === "create" && !currentClan ? (
                                 <section className="rounded-[18px] border border-white/8 bg-white/4 p-4">
-                                    <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                        Crear clan
-                                    </p>
+                                    <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Crear clan "} /></p>
                                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
                                         <label className="sm:col-span-2">
-                                            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                                                Nombre del clan
-                                            </span>
-                                            <input
+                                            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-400"><LocalizedText source={"Nombre del clan "} /></span>
+                                            <LocalizedLabel><input
                                                 type="text"
                                                 value={clanCreateName}
                                                 onChange={(event) =>
@@ -3633,13 +3548,11 @@ export default function InventoryFloatingPanel({
                                                 maxLength={18}
                                                 placeholder="Nombre del clan"
                                                 className="w-full rounded-2xl border border-stone-700 bg-stone-950/90 px-4 py-3 text-sm outline-none transition focus:border-amber-400"
-                                            />
+                                            /></LocalizedLabel>
                                         </label>
                                         <label>
-                                            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">
-                                                Nivel minimo
-                                            </span>
-                                            <input
+                                            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-stone-400"><LocalizedText source={"Nivel minimo "} /></span>
+                                            <LocalizedLabel><input
                                                 type="number"
                                                 min={1}
                                                 value={clanCreateMinLevel}
@@ -3650,63 +3563,50 @@ export default function InventoryFloatingPanel({
                                                 }
                                                 placeholder="Nivel minimo"
                                                 className="w-full rounded-2xl border border-stone-700 bg-stone-950/90 px-4 py-3 text-sm outline-none transition focus:border-amber-400"
-                                            />
+                                            /></LocalizedLabel>
                                         </label>
                                     </div>
-                                    <p className="mt-3 text-xs text-stone-400">
-                                        Para crear un clan debes ser nivel 30 y
-                                        pagar 1.500.000 de oro.
-                                    </p>
+                                    <p className="mt-3 text-xs text-stone-400"><LocalizedText source={"Para crear un clan debes ser nivel 30 y pagar 1.500.000 de oro. "} /></p>
                                     <button
                                         type="button"
                                         onClick={handleCreateClan}
                                         className="mt-4 w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200"
-                                    >
-                                        Crear clan
-                                    </button>
+                                    ><LocalizedText source={"Crear clan "} /></button>
                                 </section>
                             ) : null}
 
                             {clanView === "detail" && detailClan ? (
                                 <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
                                     <section className="rounded-[18px] border border-white/8 bg-white/4 p-4">
-                                        <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                            Información del clan
-                                        </p>
+                                        <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Información del clan "} /></p>
                                         <h4 className="mt-2 text-xl font-semibold text-stone-100">
                                             {`<${detailClan.name}>`}
                                         </h4>
                                         <p className="mt-1 text-sm text-stone-400">
                                             {formatClanAlignment(
                                                 detailClan.alignment,
-                                            )}{" "}
-                                            • Lider {detailClan.leaderName}
+                                            )}{" "}<LocalizedText source={"• Lider "} />{detailClan.leaderName}
                                         </p>
-                                        <p className="mt-1 text-sm text-stone-400">
-                                            Miembros {detailClan.memberCount} •
-                                            Nivel minimo{" "}
+                                        <p className="mt-1 text-sm text-stone-400"><LocalizedText source={"Miembros "} />{detailClan.memberCount}<LocalizedText source={" • Nivel minimo"} />{" "}
                                             {detailClan.minJoinLevel}
                                         </p>
                                         {!currentClan ? (
                                             <>
                                                 {hasPendingRequestToSelectedClan ? (
-                                                    <div className="mt-3 rounded-[14px] border border-amber-300/20 bg-amber-400/10 px-3 py-3 text-sm text-amber-100">
-                                                        Ya enviaste una
-                                                        solicitud a este clan.
-                                                    </div>
+                                                    <div className="mt-3 rounded-[14px] border border-amber-300/20 bg-amber-400/10 px-3 py-3 text-sm text-amber-100"><LocalizedText source={"Ya enviaste una solicitud a este clan. "} /></div>
                                                 ) : !canRequestJoinSelectedClan ? (
                                                     <div className="mt-3 rounded-[14px] border border-rose-400/25 bg-rose-500/10 px-3 py-3 text-sm text-rose-100">
                                                         {missingClanJoinRequirements.map(
                                                             (issue) => (
                                                                 <p key={issue}>
-                                                                    {issue}
+                                                                    <LocalizedText source={issue} />
                                                                 </p>
                                                             ),
                                                         )}
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <textarea
+                                                        <LocalizedLabel><textarea
                                                             value={
                                                                 clanRequestMessage
                                                             }
@@ -3719,7 +3619,7 @@ export default function InventoryFloatingPanel({
                                                             placeholder="Mensaje opcional para el lider"
                                                             rows={6}
                                                             className="mt-4 w-full rounded-2xl border border-stone-700 bg-stone-950/90 px-4 py-3 text-sm outline-none transition focus:border-amber-400"
-                                                        />
+                                                        /></LocalizedLabel>
                                                         <button
                                                             type="button"
                                                             onClick={
@@ -3730,9 +3630,9 @@ export default function InventoryFloatingPanel({
                                                             }
                                                             className="mt-4 w-full rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
                                                         >
-                                                            {clanRequestSubmitting
+                                                            <LocalizedText source={clanRequestSubmitting
                                                                 ? "Enviando solicitud..."
-                                                                : "Enviar solicitud"}
+                                                                : "Enviar solicitud"} />
                                                         </button>
                                                     </>
                                                 )}
@@ -3741,9 +3641,7 @@ export default function InventoryFloatingPanel({
                                     </section>
 
                                     <section className="rounded-[18px] border border-white/8 bg-white/4 p-4">
-                                        <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                            Miembros
-                                        </p>
+                                        <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Miembros "} /></p>
                                         <div className="mt-3 max-h-[320px] space-y-2 overflow-y-auto pr-1">
                                             {detailClan.members.map(
                                                 (member) => (
@@ -3757,12 +3655,11 @@ export default function InventoryFloatingPanel({
                                                         <div className="mt-1 text-xs text-stone-400">
                                                             {formatClassName(
                                                                 member.classId,
-                                                            )}{" "}
-                                                            • Nivel{" "}
+                                                            )}{" "}<LocalizedText source={"• Nivel"} />{" "}
                                                             {member.level} •{" "}
-                                                            {member.criminal
+                                                            <LocalizedText source={member.criminal
                                                                 ? "Criminal"
-                                                                : "Ciudadano"}
+                                                                : "Ciudadano"} />
                                                             {member.online ===
                                                             null ? null : (
                                                                 <>
@@ -3794,11 +3691,9 @@ export default function InventoryFloatingPanel({
                                 <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
                                     <div className="space-y-4">
                                         <section className="relative rounded-[18px] border border-white/8 bg-white/4 p-4">
-                                            <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                                Tu clan
-                                            </p>
+                                            <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Tu clan "} /></p>
                                             {isClanLeader ? (
-                                                <button
+                                                <LocalizedLabel><button
                                                     type="button"
                                                     onClick={() => {
                                                         setIsClanDeleteDialogOpen(
@@ -3816,7 +3711,7 @@ export default function InventoryFloatingPanel({
                                                     className="absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/8 bg-black/20 text-stone-400 opacity-70 transition hover:border-rose-500/50 hover:bg-rose-950/40 hover:text-rose-200 hover:opacity-100 disabled:cursor-not-allowed disabled:border-white/5 disabled:bg-black/10 disabled:text-stone-600"
                                                 >
                                                     <Trash2 className="h-3.5 w-3.5" />
-                                                </button>
+                                                </button></LocalizedLabel>
                                             ) : null}
                                             <h4 className="mt-2 text-xl font-semibold text-stone-100">
                                                 {`<${currentClan.name}>`}
@@ -3824,13 +3719,10 @@ export default function InventoryFloatingPanel({
                                             <p className="mt-1 text-sm text-stone-400">
                                                 {formatClanAlignment(
                                                     currentClan.alignment,
-                                                )}{" "}
-                                                • Lider {currentClan.leaderName}
+                                                )}{" "}<LocalizedText source={"• Lider "} />{currentClan.leaderName}
                                             </p>
-                                            <p className="mt-1 text-sm text-stone-400">
-                                                Miembros{" "}
-                                                {currentClan.memberCount} •
-                                                Nivel minimo{" "}
+                                            <p className="mt-1 text-sm text-stone-400"><LocalizedText source={"Miembros"} />{" "}
+                                                {currentClan.memberCount}<LocalizedText source={" • Nivel minimo"} />{" "}
                                                 {currentClan.minJoinLevel}
                                             </p>
                                             {!isClanLeader && (
@@ -3842,17 +3734,15 @@ export default function InventoryFloatingPanel({
                                                     }
                                                     className="mt-4 w-full rounded-2xl border border-[#8b6a47] bg-[linear-gradient(180deg,#46331f_0%,#26180e_100%)] px-4 py-3 text-sm font-semibold text-amber-100 transition hover:border-[#c39a6a] disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-900 disabled:text-stone-400"
                                                 >
-                                                    {clanLeaveSubmitting
+                                                    <LocalizedText source={clanLeaveSubmitting
                                                         ? "Saliendo del clan..."
-                                                        : "Salir del clan"}
+                                                        : "Salir del clan"} />
                                                 </button>
                                             )}
                                         </section>
 
                                         <section className="rounded-[18px] border border-white/8 bg-white/4 p-4">
-                                            <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                                Miembros
-                                            </p>
+                                            <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Miembros "} /></p>
                                             <div className="mt-3 max-h-[300px] space-y-2 overflow-y-auto pr-1">
                                                 {currentClan.members.map(
                                                     (member) => {
@@ -3889,16 +3779,14 @@ export default function InventoryFloatingPanel({
                                                                             •{" "}
                                                                             {formatClassName(
                                                                                 member.classId,
-                                                                            )}{" "}
-                                                                            •
-                                                                            Nivel{" "}
+                                                                            )}{" "}<LocalizedText source={"• Nivel"} />{" "}
                                                                             {
                                                                                 member.level
                                                                             }{" "}
                                                                             •{" "}
-                                                                            {member.criminal
+                                                                            <LocalizedText source={member.criminal
                                                                                 ? "Criminal"
-                                                                                : "Ciudadano"}
+                                                                                : "Ciudadano"} />
                                                                             {member.online ===
                                                                             null ? null : (
                                                                                 <>
@@ -3923,7 +3811,7 @@ export default function InventoryFloatingPanel({
                                                                     canManageRole ||
                                                                     canKick ? (
                                                                         <div>
-                                                                            <button
+                                                                            <LocalizedLabel><button
                                                                                 type="button"
                                                                                 onClick={(
                                                                                     event,
@@ -3948,7 +3836,7 @@ export default function InventoryFloatingPanel({
                                                                                 className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-white/10 bg-black/20 text-stone-300 transition hover:border-white/20 hover:text-stone-100"
                                                                             >
                                                                                 <MoreHorizontal className="h-4 w-4" />
-                                                                            </button>
+                                                                            </button></LocalizedLabel>
                                                                         </div>
                                                                     ) : null}
                                                                 </div>
@@ -3963,9 +3851,7 @@ export default function InventoryFloatingPanel({
                                     <div className="space-y-4">
                                         {canReviewClanRequests ? (
                                             <section className="rounded-[18px] border border-white/8 bg-white/4 p-4">
-                                                <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                                    Solicitudes
-                                                </p>
+                                                <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Solicitudes "} /></p>
                                                 <div className="mt-3 max-h-[420px] space-y-2 overflow-y-auto pr-1">
                                                     {currentClan.requests
                                                         .length ? (
@@ -3985,15 +3871,14 @@ export default function InventoryFloatingPanel({
                                                                     <div className="mt-1 text-xs text-stone-400">
                                                                         {formatClassName(
                                                                             request.classId,
-                                                                        )}{" "}
-                                                                        • Nivel{" "}
+                                                                        )}{" "}<LocalizedText source={"• Nivel"} />{" "}
                                                                         {
                                                                             request.level
                                                                         }{" "}
                                                                         •{" "}
-                                                                        {request.criminal
+                                                                        <LocalizedText source={request.criminal
                                                                             ? "Criminal"
-                                                                            : "Ciudadano"}{" "}
+                                                                            : "Ciudadano"} />{" "}
                                                                         •{" "}
                                                                         <span
                                                                             className={
@@ -4008,11 +3893,10 @@ export default function InventoryFloatingPanel({
                                                                         </span>
                                                                     </div>
                                                                     <p className="mt-2 text-sm text-stone-300">
-                                                                        {request.message ||
-                                                                            "Sin mensaje"}
+                                                                        {request.message || <LocalizedText source="Sin mensaje" />}
                                                                     </p>
                                                                     <div className="mt-3 flex gap-2">
-                                                                        <button
+                                                                        <LocalizedLabel><button
                                                                             type="button"
                                                                             onClick={() =>
                                                                                 handleClanReviewAction(
@@ -4026,13 +3910,13 @@ export default function InventoryFloatingPanel({
                                                                             )}
                                                                             className="flex-1 rounded-2xl bg-emerald-300 px-3 py-2 text-sm font-semibold text-stone-950 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
                                                                         >
-                                                                            {clanReviewActionId ===
+                                                                            <LocalizedText source={clanReviewActionId ===
                                                                             request.id
-                                                                                ? "Procesando..."
-                                                                                : "Aceptar"}
-                                                                        </button>
+                                                                                ? localizeKey("auth.pending")
+                                                                                : "Aceptar"} />
+                                                                        </button></LocalizedLabel>
                                                                         {isClanLeader ? (
-                                                                            <button
+                                                                            <LocalizedLabel><button
                                                                                 type="button"
                                                                                 onClick={() =>
                                                                                     handleClanReviewAction(
@@ -4046,34 +3930,25 @@ export default function InventoryFloatingPanel({
                                                                                 )}
                                                                                 className="flex-1 rounded-2xl border border-rose-700/60 bg-rose-950/70 px-3 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-500 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-900 disabled:text-stone-400"
                                                                             >
-                                                                                {clanReviewActionId ===
+                                                                                <LocalizedText source={clanReviewActionId ===
                                                                                 request.id
-                                                                                    ? "Procesando..."
-                                                                                    : "Rechazar"}
-                                                                            </button>
+                                                                                    ? localizeKey("auth.pending")
+                                                                                    : "Rechazar"} />
+                                                                            </button></LocalizedLabel>
                                                                         ) : null}
                                                                     </div>
                                                                 </div>
                                                             ),
                                                         )
                                                     ) : (
-                                                        <div className="rounded-[14px] border border-white/8 bg-white/3 px-3 py-4 text-sm text-stone-400">
-                                                            No hay solicitudes
-                                                            pendientes.
-                                                        </div>
+                                                        <div className="rounded-[14px] border border-white/8 bg-white/3 px-3 py-4 text-sm text-stone-400"><LocalizedText source={"No hay solicitudes pendientes. "} /></div>
                                                     )}
                                                 </div>
                                             </section>
                                         ) : (
                                             <section className="rounded-[18px] border border-white/8 bg-white/4 p-4">
-                                                <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78">
-                                                    Estado del clan
-                                                </p>
-                                                <p className="mt-3 text-sm text-stone-300">
-                                                    Aquí puedes ver la
-                                                    información general del clan
-                                                    y sus miembros.
-                                                </p>
+                                                <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/78"><LocalizedText source={"Estado del clan "} /></p>
+                                                <p className="mt-3 text-sm text-stone-300"><LocalizedText source={"Aquí puedes ver la información general del clan y sus miembros. "} /></p>
                                             </section>
                                         )}
                                     </div>
@@ -4081,14 +3956,12 @@ export default function InventoryFloatingPanel({
                             ) : null}
 
                             {clanLoading ? (
-                                <div className="mt-4 rounded-[14px] border border-white/8 bg-white/3 px-3 py-4 text-sm text-stone-400">
-                                    Cargando clanes...
-                                </div>
+                                <div className="mt-4 rounded-[14px] border border-white/8 bg-white/3 px-3 py-4 text-sm text-stone-400"><LocalizedText source={"Cargando clanes... "} /></div>
                             ) : null}
 
                             {clanError ? (
                                 <div className="mt-4 rounded-[14px] border border-rose-400/25 bg-rose-500/10 px-3 py-4 text-sm text-rose-100">
-                                    {clanError}
+                                    <LocalizedText source={clanError} />
                                 </div>
                             ) : null}
                         </div>
@@ -4107,28 +3980,16 @@ export default function InventoryFloatingPanel({
                                             <Trash2 className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <p className="text-lg font-semibold text-white">
-                                                Borrar clan
-                                            </p>
-                                            <p className="mt-2 text-sm leading-6 text-stone-300">
-                                                Se eliminara el clan para todos
-                                                los miembros, online y offline.
-                                            </p>
-                                            <p className="mt-3 text-sm leading-6 text-stone-400">
-                                                Escribe{" "}
-                                                <span className="font-semibold text-white">
-                                                    BORRAR
-                                                </span>{" "}
-                                                para confirmar.
-                                            </p>
+                                            <p className="text-lg font-semibold text-white"><LocalizedText source={"Borrar clan "} /></p>
+                                            <p className="mt-2 text-sm leading-6 text-stone-300"><LocalizedText source={"Se eliminara el clan para todos los miembros, online y offline. "} /></p>
+                                            <p className="mt-3 text-sm leading-6 text-stone-400"><LocalizedText source={"Escribe"} />{" "}
+                                                <span className="font-semibold text-white"><LocalizedText source={"BORRAR "} /></span>{" "}<LocalizedText source={"para confirmar. "} /></p>
                                         </div>
                                     </div>
 
                                     <label className="mt-6 block">
-                                        <span className="text-xs font-medium uppercase tracking-[0.22em] text-stone-400">
-                                            Confirmacion
-                                        </span>
-                                        <input
+                                        <span className="text-xs font-medium uppercase tracking-[0.22em] text-stone-400"><LocalizedText source={"Confirmacion "} /></span>
+                                        <LocalizedLabel><input
                                             type="text"
                                             value={clanDeleteConfirmationText}
                                             onChange={(event) =>
@@ -4141,7 +4002,7 @@ export default function InventoryFloatingPanel({
                                             disabled={clanDeleteSubmitting}
                                             className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-stone-500 focus:border-rose-400/50 focus:bg-white/7 disabled:cursor-not-allowed disabled:opacity-60"
                                             placeholder="BORRAR"
-                                        />
+                                        /></LocalizedLabel>
                                     </label>
 
                                     <div className="mt-6 flex justify-end gap-3">
@@ -4150,22 +4011,19 @@ export default function InventoryFloatingPanel({
                                             onClick={closeClanDeleteDialog}
                                             disabled={clanDeleteSubmitting}
                                             className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-stone-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                            Cancelar
-                                        </button>
+                                        >{localizeKey("common.cancel")}</button>
                                         <button
                                             type="button"
                                             onClick={handleDeleteClan}
                                             disabled={
                                                 clanDeleteSubmitting ||
-                                                clanDeleteConfirmationText.trim() !==
-                                                    "BORRAR"
+                                                !["BORRAR", "DELETE"].includes(clanDeleteConfirmationText.trim())
                                             }
                                             className="rounded-full border border-rose-400/35 bg-rose-500/15 px-4 py-2 text-sm font-medium text-rose-100 transition hover:border-rose-400/55 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                             {clanDeleteSubmitting
-                                                ? "Borrando..."
-                                                : "Confirmar borrado"}
+                                                ? localizeKey("characters.deleting")
+                                                : localizeKey("characters.deleteConfirm")}
                                         </button>
                                     </div>
                                 </div>
@@ -4188,11 +4046,9 @@ export default function InventoryFloatingPanel({
                                     />
                                     <p>Hotkeys</p>
                                 </div>
-                                <h3 className="mt-1 text-xl font-semibold text-[#f2e5ca]">
-                                    Configuración de teclas
-                                </h3>
+                                <h3 className="mt-1 text-xl font-semibold text-[#f2e5ca]"><LocalizedText source={"Configuración de teclas "} /></h3>
                             </div>
-                            <button
+                            <LocalizedLabel><button
                                 type="button"
                                 onClick={() => setIsHotkeySettingsOpen(false)}
                                 className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-700 bg-black/20 text-stone-300 transition hover:border-stone-500 hover:text-white"
@@ -4203,7 +4059,7 @@ export default function InventoryFloatingPanel({
                                     className="h-4 w-4"
                                     strokeWidth={1.8}
                                 />
-                            </button>
+                            </button></LocalizedLabel>
                         </div>
 
                         <div className="max-h-[70vh] overflow-y-auto px-5 py-4">
@@ -4214,7 +4070,7 @@ export default function InventoryFloatingPanel({
                                         className="rounded-[22px] border border-[#4f3926] bg-[#19110d]/92 p-4"
                                     >
                                         <h4 className="text-[11px] uppercase tracking-[0.26em] text-amber-200/78">
-                                            {section.title}
+                                            <LocalizedText source={section.title} />
                                         </h4>
                                         <div className="mt-3 space-y-3">
                                             {section.items.map((item) => (
@@ -4225,12 +4081,10 @@ export default function InventoryFloatingPanel({
                                                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                                                         <div className="min-w-0 md:max-w-[52%]">
                                                             <p className="text-sm font-semibold text-stone-100">
-                                                                {item.label}
+                                                                {localizeText(item.label)}
                                                             </p>
                                                             <p className="mt-1 text-xs leading-5 text-stone-400">
-                                                                {
-                                                                    item.description
-                                                                }
+                                                                <LocalizedText source={item.description} />
                                                             </p>
                                                         </div>
                                                         <div className="flex flex-wrap gap-2 md:justify-end">
@@ -4271,13 +4125,13 @@ export default function InventoryFloatingPanel({
                                                                                     : "border-amber-200/15 bg-[#241813] text-stone-100 hover:border-amber-300/45 hover:bg-[#2f1d14]"
                                                                             }`}
                                                                         >
-                                                                            {isListening
+                                                                            <LocalizedText source={isListening
                                                                                 ? "Presiona una tecla"
                                                                                 : code.length
                                                                                   ? formatHotkeyBinding(
                                                                                         code,
                                                                                     )
-                                                                                  : "Sin asignar"}
+                                                                                  : "Sin asignar"} />
                                                                         </button>
                                                                     );
                                                                 },
@@ -4293,13 +4147,9 @@ export default function InventoryFloatingPanel({
                         </div>
 
                         <div className="flex flex-col gap-3 border-t border-amber-200/10 px-5 py-4 text-xs text-stone-400 md:flex-row md:items-center md:justify-between">
-                            <p>
-                                Click en una tecla para reasignarla. `Esc`
-                                cancela la captura y `Backspace` o `Delete`
-                                limpian el atajo.
-                            </p>
+                            <p><LocalizedText source={"Click en una tecla para reasignarla. `Esc` cancela la captura y `Backspace` o `Delete` limpian el atajo. "} /></p>
                             {hotkeyError ? (
-                                <p className="text-rose-300">{hotkeyError}</p>
+                                <p className="text-rose-300"><LocalizedText source={hotkeyError} /></p>
                             ) : null}
                             <button
                                 type="button"
@@ -4309,9 +4159,7 @@ export default function InventoryFloatingPanel({
                                     )
                                 }
                                 className="rounded-2xl border border-amber-300/30 px-4 py-2 text-sm font-semibold text-amber-100 transition hover:border-amber-300/55 hover:bg-amber-200/10"
-                            >
-                                Restaurar defaults
-                            </button>
+                            ><LocalizedText source={"Restaurar defaults "} /></button>
                         </div>
                     </div>
                 </div>
@@ -4372,10 +4220,10 @@ export default function InventoryFloatingPanel({
                                   )}
                                   className="rounded-[10px] border border-amber-700/60 bg-amber-950/55 px-3 py-2 text-left text-[11px] font-semibold text-amber-100 transition hover:border-amber-500 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-900 disabled:text-stone-400"
                               >
-                                  {clanLeadershipTransferActionId ===
+                                  <LocalizedText source={clanLeadershipTransferActionId ===
                                   clanMemberActionTarget.characterId
-                                      ? "Procesando..."
-                                      : "Transferir liderazgo"}
+                                      ? localizeKey("auth.pending")
+                                      : "Transferir liderazgo"} />
                               </button>
                               <button
                                   type="button"
@@ -4393,13 +4241,13 @@ export default function InventoryFloatingPanel({
                               >
                                   {clanRoleActionId ===
                                   clanMemberActionTarget.characterId
-                                      ? "Procesando..."
+                                      ? localizeKey("auth.pending")
                                       : clanMemberActionTarget.role ===
                                           "co_leader"
-                                        ? "Quitar co-lider"
-                                        : "Hacer co-lider"}
+                                        ? <LocalizedText source={"Quitar co-lider"} />
+                                        : <LocalizedText source={"Hacer co-lider"} />}
                               </button>
-                              <button
+                              <LocalizedLabel><button
                                   type="button"
                                   onClick={() =>
                                       handleClanKick(
@@ -4411,11 +4259,11 @@ export default function InventoryFloatingPanel({
                                   disabled={Boolean(clanKickActionId)}
                                   className="rounded-[10px] border border-rose-700/60 bg-rose-950/70 px-3 py-2 text-left text-[11px] font-semibold text-rose-100 transition hover:border-rose-500 disabled:cursor-not-allowed disabled:border-stone-700 disabled:bg-stone-900 disabled:text-stone-400"
                               >
-                                  {clanKickActionId ===
+                                  <LocalizedText source={clanKickActionId ===
                                   clanMemberActionTarget.characterId
-                                      ? "Procesando..."
-                                      : "Echar"}
-                              </button>
+                                      ? localizeKey("auth.pending")
+                                      : "Echar"} />
+                              </button></LocalizedLabel>
                           </div>
                       </div>,
                       portalTarget ?? document.body,
@@ -4433,33 +4281,29 @@ export default function InventoryFloatingPanel({
                     >
                         <div className="flex items-start justify-between gap-4 border-b border-amber-200/10 bg-[linear-gradient(180deg,rgba(127,78,35,0.28),rgba(18,12,8,0))] px-5 py-4">
                             <div>
-                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72">
-                                    Hechizo
-                                </p>
+                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/72">{localizeText("Hechizo")}</p>
                                 <h3 className="mt-1 text-xl font-semibold text-[#f2e5ca]">
-                                    {selectedSpell.name}
+                                    {localizeText(selectedSpell.name)}
                                 </h3>
                             </div>
-                            <button
+                            <LocalizedLabel><button
                                 type="button"
                                 onClick={() => setIsSpellInfoOpen(false)}
                                 className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-700 bg-black/20 text-stone-300 transition hover:border-stone-500 hover:text-white"
-                                aria-label="Cerrar informacion del hechizo"
+                                aria-label={localizeText("Cerrar informacion del hechizo")}
                             >
                                 <X
                                     aria-hidden="true"
                                     className="h-4 w-4"
                                     strokeWidth={1.8}
                                 />
-                            </button>
+                            </button></LocalizedLabel>
                         </div>
 
                         <div className="space-y-4 px-5 py-4">
                             <div className="rounded-[18px] border border-[#4f3926] bg-[#19110d]/92 p-4">
                                 <div className="flex items-center justify-between gap-4 text-sm">
-                                    <span className="text-stone-300">
-                                        Mana requerida
-                                    </span>
+                                    <span className="text-stone-300">{localizeKey("hud.manaCost")}</span>
                                     <span className="font-semibold text-amber-100">
                                         {selectedSpell.manaRequired}
                                     </span>
@@ -4467,9 +4311,7 @@ export default function InventoryFloatingPanel({
 
                                 {selectedSpellRequiredLevel ? (
                                     <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                                        <span className="text-stone-300">
-                                            Nivel requerido
-                                        </span>
+                                        <span className="text-stone-300"><LocalizedText source={"Nivel requerido "} /></span>
                                         <span className="font-semibold text-amber-100">
                                             {selectedSpellRequiredLevel}
                                         </span>
@@ -4478,9 +4320,7 @@ export default function InventoryFloatingPanel({
 
                                 {selectedSpellDamageLabel ? (
                                     <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-                                        <span className="text-stone-300">
-                                            Daño
-                                        </span>
+                                        <span className="text-stone-300">{localizeKey("hud.damage")}</span>
                                         <span className="font-semibold text-amber-100">
                                             {selectedSpellDamageLabel}
                                         </span>
@@ -4489,7 +4329,7 @@ export default function InventoryFloatingPanel({
 
                                 {selectedSpellData?.desc ? (
                                     <p className="mt-4 text-sm leading-6 text-stone-300/92">
-                                        {selectedSpellData.desc}
+                                        {localizeText(selectedSpellData.desc)}
                                     </p>
                                 ) : null}
                             </div>
@@ -4498,9 +4338,7 @@ export default function InventoryFloatingPanel({
                                 type="button"
                                 onClick={() => setIsSpellInfoOpen(false)}
                                 className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200"
-                            >
-                                Cerrar
-                            </button>
+                            >{localizeKey("common.close")}</button>
                         </div>
                     </div>
                 </div>

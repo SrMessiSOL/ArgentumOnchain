@@ -17,11 +17,12 @@ type CookieRequest = Pick<Request, "headers" | "url">;
 export async function fetchApi(
     path: string,
     init?: RequestInit,
+    timeoutMs = API_REQUEST_TIMEOUT_MS,
 ): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(
         () => controller.abort(),
-        API_REQUEST_TIMEOUT_MS,
+        timeoutMs,
     );
 
     try {
@@ -33,7 +34,7 @@ export async function fetchApi(
         if (error instanceof Error && error.name === "AbortError") {
             return NextResponse.json(
                 {
-                    error: `La API no respondio dentro de ${API_REQUEST_TIMEOUT_MS}ms.`,
+                    error: `La API no respondio dentro de ${timeoutMs}ms.`,
                 },
                 { status: 504 },
             );
@@ -74,6 +75,7 @@ export async function forwardSessionJsonRequest(
     path: string,
     init: RequestInit,
     request: CookieRequest,
+    timeoutMs = API_REQUEST_TIMEOUT_MS,
 ): Promise<NextResponse> {
     const token = await getSessionTokenFromCookie();
 
@@ -91,7 +93,7 @@ export async function forwardSessionJsonRequest(
         ...init,
         headers,
         cache: "no-store",
-    });
+    }, timeoutMs);
 
     if (response.status === 401) {
         const cleared = await clearSessionCookie(request);

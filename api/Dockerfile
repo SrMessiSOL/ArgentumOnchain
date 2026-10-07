@@ -29,6 +29,9 @@ RUN pnpm install --prod --frozen-lockfile
 
 COPY --from=build /app/dist ./dist
 COPY schema.sql ./schema.sql
+COPY wallet-schema.sql ./wallet-schema.sql
+COPY preferences-schema.sql ./preferences-schema.sql
+COPY cosmetics-schema.sql ./cosmetics-schema.sql
 
 EXPOSE 3100
 

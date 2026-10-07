@@ -225,7 +225,7 @@ const arenaManager = {
         };
 
         this.instances[roomId] = instance;
-        funct.sendTelegramMessage(`[Servidor-PVP] Instancia creada para sala ${roomId} en mapa ${mapId}.`);
+        funct.sendTelegramMessage(`[Server-PVP] Instance created for room ${roomId} on map ${mapId}.`);
         return instance;
     },
 
@@ -324,7 +324,7 @@ const arenaManager = {
         delete vars.mapData[instance.mapId];
         delete vars.mapa[instance.mapId];
         delete this.instances[roomId];
-        funct.sendTelegramMessage(`[Servidor-PVP] Instancia destruida para sala ${roomId}.`);
+        funct.sendTelegramMessage(`[Server-PVP] Instance destroyed for room ${roomId}.`);
     },
 
     async onPlayerDisconnected(character: RuntimeCharacter | undefined) {

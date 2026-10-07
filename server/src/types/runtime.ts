@@ -151,6 +151,7 @@ export type MapTile = {
 };
 
 export type MapObjectInfo = {
+    dropId?: string;
     objIndex: number;
     amount: number;
     cleanupSource?: "drop";
@@ -501,7 +502,7 @@ export type RuntimeClient = {
     readyState: number;
     on: (event: string, listener: (...args: unknown[]) => void) => void;
     send: (data: unknown) => void;
-    close: () => void;
+    close: (code?: number, reason?: string) => void;
     _socket?: {
         remoteAddress?: string;
     };

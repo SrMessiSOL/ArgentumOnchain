@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -382,12 +383,12 @@ function ArenasPageContent() {
 
                 {error ? (
                     <div className="rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
-                        {error}
+                        <LocalizedText source={error} />
                     </div>
                 ) : null}
                 {info ? (
                     <div className="rounded-2xl bg-emerald-500/12 px-4 py-3 text-sm text-emerald-200">
-                        {info}
+                        <LocalizedText source={info} />
                     </div>
                 ) : null}
 
@@ -395,21 +396,15 @@ function ArenasPageContent() {
                     <section className="rounded-[28px] border border-white/8 bg-stone-950/80 p-5 shadow-2xl backdrop-blur-md">
                         <div className="flex items-center justify-between gap-3">
                             <div>
-                                <p className="text-xs uppercase tracking-[0.24em] text-stone-400">
-                                    Crear sala
-                                </p>
-                                <h2 className="mt-2 text-xl font-semibold text-white">
-                                    Nueva arena
-                                </h2>
+                                <p className="text-xs uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Crear sala "} /></p>
+                                <h2 className="mt-2 text-xl font-semibold text-white"><LocalizedText source={"Nueva arena "} /></h2>
                             </div>
                         </div>
 
                         <div className="mt-5 space-y-3">
                             <div>
-                                <p className="mb-2 px-1 text-xs uppercase tracking-[0.24em] text-stone-400">
-                                    Nombre de sala
-                                </p>
-                                <input
+                                <p className="mb-2 px-1 text-xs uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Nombre de sala "} /></p>
+                                <LocalizedLabel><input
                                     autoComplete="off"
                                     value={createForm.name}
                                     onChange={(event) =>
@@ -420,7 +415,7 @@ function ArenasPageContent() {
                                     }
                                     placeholder="Nombre de la sala"
                                     className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-300/40"
-                                />
+                                /></LocalizedLabel>
                             </div>
 
                             <div className="grid gap-3 sm:grid-cols-2">
@@ -437,9 +432,7 @@ function ArenasPageContent() {
                                             ? "border-cyan-300/55 bg-cyan-300/12 text-cyan-100"
                                             : "border-white/10 bg-white/5 text-stone-300"
                                     }`}
-                                >
-                                    Sala publica
-                                </button>
+                                ><LocalizedText source={"Sala publica "} /></button>
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -453,16 +446,12 @@ function ArenasPageContent() {
                                             ? "border-amber-300/55 bg-amber-300/12 text-amber-100"
                                             : "border-white/10 bg-white/5 text-stone-300"
                                     }`}
-                                >
-                                    Sala privada
-                                </button>
+                                ><LocalizedText source={"Sala privada "} /></button>
                             </div>
 
                             <div>
-                                <p className="mb-2 px-1 text-xs uppercase tracking-[0.24em] text-stone-400">
-                                    Maxima cantidad de jugadores
-                                </p>
-                                <input
+                                <p className="mb-2 px-1 text-xs uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Maxima cantidad de jugadores "} /></p>
+                                <LocalizedLabel><input
                                     autoComplete="off"
                                     value={createForm.capacity}
                                     onChange={(event) =>
@@ -473,7 +462,7 @@ function ArenasPageContent() {
                                     }
                                     placeholder="Cantidad maxima de jugadores"
                                     className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-300/40"
-                                />
+                                /></LocalizedLabel>
                             </div>
 
                             {!createForm.isPublic ? (
@@ -481,7 +470,7 @@ function ArenasPageContent() {
                                     <p className="mb-2 px-1 text-xs uppercase tracking-[0.24em] text-stone-400">
                                         Password
                                     </p>
-                                    <input
+                                    <LocalizedLabel><input
                                         autoComplete="off"
                                         value={createForm.password}
                                         onChange={(event) =>
@@ -492,7 +481,7 @@ function ArenasPageContent() {
                                         }
                                         placeholder="Password de la sala"
                                         className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-300/40"
-                                    />
+                                    /></LocalizedLabel>
                                 </div>
                             ) : null}
 
@@ -502,9 +491,9 @@ function ArenasPageContent() {
                                 disabled={loading || actionRoomId === "create"}
                                 className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:opacity-70"
                             >
-                                {actionRoomId === "create"
+                                <LocalizedText source={actionRoomId === "create"
                                     ? "Creando..."
-                                    : "Crear sala"}
+                                    : "Crear sala"} />
                             </button>
                         </div>
                     </section>
@@ -514,15 +503,12 @@ function ArenasPageContent() {
                             <div className="space-y-5">
                                 <div className="flex flex-wrap items-center justify-between gap-3">
                                     <div>
-                                        <p className="text-xs uppercase tracking-[0.24em] text-stone-400">
-                                            Sala activa
-                                        </p>
+                                        <p className="text-xs uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Sala activa "} /></p>
                                         <h2 className="mt-2 text-2xl font-semibold text-white">
                                             {activeRoom.name}
                                         </h2>
                                         <p className="mt-2 text-sm text-stone-300">
-                                            {activeRoom.connectedPlayers}{" "}
-                                            conectados - Mapa {activeRoom.mapId}
+                                            {activeRoom.connectedPlayers}{" "}<LocalizedText source={"conectados - Mapa "} />{activeRoom.mapId}
                                         </p>
                                     </div>
 
@@ -534,31 +520,25 @@ function ArenasPageContent() {
                                                 actionRoomId === activeRoom.id
                                             }
                                             className="rounded-full border border-white/10 px-4 py-2 text-sm text-stone-200 transition hover:border-white/25 hover:bg-white/5"
-                                        >
-                                            Salir
-                                        </button>
+                                        ><LocalizedText source={"Salir "} /></button>
                                     </div>
                                 </div>
 
                                 <div className="rounded-2xl border border-white/8 bg-white/5 p-4 text-sm text-stone-300">
-                                    <p>
-                                        Creador:{" "}
+                                    <p><LocalizedText source={"Creador:"} />{" "}
                                         <span className="font-semibold text-white">
                                             {activeRoom.owner.name}
                                         </span>
                                     </p>
-                                    <p className="mt-2 break-all">
-                                        Link privado:{" "}
+                                    <p className="mt-2 break-all"><LocalizedText source={"Link privado:"} />{" "}
                                         <span className="text-cyan-200">
-                                            {shareLink || "Generando..."}
+                                            {shareLink || <LocalizedText source="Generando..." />}
                                         </span>
                                     </p>
                                 </div>
 
                                 <div>
-                                    <p className="text-xs uppercase tracking-[0.24em] text-stone-400">
-                                        Elegir personaje PvP
-                                    </p>
+                                    <p className="text-xs uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Elegir personaje PvP "} /></p>
                                     <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                                         {PVP_CHARACTER_TEMPLATES.map(
                                             (template) => {
@@ -588,7 +568,7 @@ function ArenasPageContent() {
                                                         }`}
                                                     >
                                                         <p className="text-lg font-semibold text-white">
-                                                            {template.name}
+                                                            <LocalizedText source={template.name} />
                                                         </p>
                                                     </button>
                                                 );
@@ -601,20 +581,14 @@ function ArenasPageContent() {
                             <div>
                                 <div className="flex items-center justify-between gap-3">
                                     <div>
-                                        <p className="text-xs uppercase tracking-[0.24em] text-stone-400">
-                                            Salas publicas
-                                        </p>
-                                        <h2 className="mt-2 text-2xl font-semibold text-white">
-                                            Unirse a una arena
-                                        </h2>
+                                        <p className="text-xs uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Salas publicas "} /></p>
+                                        <h2 className="mt-2 text-2xl font-semibold text-white"><LocalizedText source={"Unirse a una arena "} /></h2>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => void refreshRooms()}
                                         className="rounded-full border border-white/10 px-4 py-2 text-sm text-stone-200 transition hover:border-white/25 hover:bg-white/5"
-                                    >
-                                        Actualizar
-                                    </button>
+                                    ><LocalizedText source={"Actualizar "} /></button>
                                 </div>
 
                                 <div className="mt-5 space-y-3">
@@ -632,20 +606,17 @@ function ArenasPageContent() {
                                                         <p className="mt-2 text-xs uppercase tracking-[0.24em] text-stone-400">
                                                             {
                                                                 room.connectedPlayers
-                                                            }{" "}
-                                                            conectados -
-                                                            capacidad{" "}
+                                                            }{" "}<LocalizedText source={"conectados - capacidad"} />{" "}
                                                             {room.capacity}
                                                         </p>
-                                                        <p className="mt-2 text-sm text-stone-300">
-                                                            Creador:{" "}
+                                                        <p className="mt-2 text-sm text-stone-300"><LocalizedText source={"Creador:"} />{" "}
                                                             {room.owner.name}
                                                         </p>
                                                     </div>
 
                                                     <div className="flex min-w-[220px] flex-col gap-2">
                                                         {!room.isPublic ? (
-                                                            <input
+                                                            <LocalizedLabel><input
                                                                 autoComplete="off"
                                                                 value={
                                                                     joinPasswords[
@@ -669,7 +640,7 @@ function ArenasPageContent() {
                                                                 }
                                                                 placeholder="Password"
                                                                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition focus:border-amber-300/40"
-                                                            />
+                                                            /></LocalizedLabel>
                                                         ) : null}
 
                                                         <button
@@ -685,20 +656,17 @@ function ArenasPageContent() {
                                                             }
                                                             className="rounded-2xl bg-cyan-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-70"
                                                         >
-                                                            {actionRoomId ===
+                                                            <LocalizedText source={actionRoomId ===
                                                             room.id
                                                                 ? "Entrando..."
-                                                                : "Unirse"}
+                                                                : "Unirse"} />
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="rounded-[24px] border border-dashed border-white/10 bg-white/4 p-6 text-sm text-stone-400">
-                                            No hay salas publicas activas. Crea
-                                            la primera.
-                                        </div>
+                                        <div className="rounded-[24px] border border-dashed border-white/10 bg-white/4 p-6 text-sm text-stone-400"><LocalizedText source={"No hay salas publicas activas. Crea la primera. "} /></div>
                                     )}
                                 </div>
                             </div>

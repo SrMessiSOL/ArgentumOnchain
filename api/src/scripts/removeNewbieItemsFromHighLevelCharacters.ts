@@ -72,7 +72,7 @@ async function main() {
   const newbieItemIds = loadNewbieItemIds();
 
   if (newbieItemIds.length === 0) {
-    throw new Error("No se encontraron items newbie en dist/jsons/objs.json");
+    throw new Error("No newbie items found in dist/jsons/objs.json");
   }
 
   const client = await pool.connect();
@@ -97,7 +97,7 @@ async function main() {
 
     if (affectedCharacters.length === 0) {
       await client.query("COMMIT");
-      console.log("No se encontraron personajes nivel 13+ con items newbie en inventario.");
+      console.log("No level 13+ characters found with newbie items in their inventory.");
       return;
     }
 
@@ -221,8 +221,8 @@ async function main() {
 
     await client.query("COMMIT");
 
-    console.log(`Items newbie eliminados: ${deletedItems}`);
-    console.log(`Personajes actualizados: ${updatedCharacters}`);
+    console.log(`Newbie items removed: ${deletedItems}`);
+    console.log(`Characters updated: ${updatedCharacters}`);
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

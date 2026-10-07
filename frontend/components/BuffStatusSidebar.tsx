@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import React from "react";
 import type { PlayerHudState } from "../lib/aowProtocol";
 import type { RuntimeTimingConfig } from "../lib/runtime-config";
@@ -369,18 +370,18 @@ export default function BuffStatusSidebar({
                         className="relative h-[60px] w-[60px] rounded-[18px] border border-white/10 bg-stone-950/95 p-[4px] shadow-[0_18px_36px_rgba(0,0,0,0.38)]"
                     >
                         <div className="absolute inset-[4px] overflow-hidden rounded-[14px] bg-stone-900/95">
-                            <img
+                            <LocalizedLabel><img
                                 src={entry.iconSrc}
                                 alt=""
                                 className="h-full w-full object-cover opacity-75"
                                 draggable={false}
-                            />
+                            /></LocalizedLabel>
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),transparent_52%),linear-gradient(180deg,rgba(12,10,9,0.12),rgba(12,10,9,0.8))]" />
                             <div
                                 className="absolute inset-x-0 top-0 px-1.5 pt-1 text-[9px] font-semibold uppercase tracking-[0.18em]"
                                 style={{ color: entry.accent }}
                             >
-                                {entry.label}
+                                <LocalizedText source={entry.label} />
                             </div>
                             <div className="absolute inset-x-0 bottom-0 px-1.5 pb-1 text-center text-[11px] font-semibold text-stone-50 drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)]">
                                 {formatSecondsLabel(entry.seconds)}

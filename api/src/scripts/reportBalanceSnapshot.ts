@@ -276,7 +276,7 @@ async function main(): Promise<void> {
         loadKeySpellUsage(minLevel, maxLevel),
     ]);
 
-    printSection(`Snapshot ${minLevel}-${maxLevel} por clase`);
+    printSection(`Snapshot ${minLevel}-${maxLevel} by class`);
     for (const row of classSummary) {
         console.log(
             [
@@ -291,28 +291,28 @@ async function main(): Promise<void> {
         );
     }
 
-    printSection(`Top combinaciones clase/raza ${minLevel}-${maxLevel}`);
+    printSection(`Top class/race combinations ${minLevel}-${maxLevel}`);
     for (const row of topCombos) {
         console.log(
             `${getClassName(row.id_clase)} / ${getRaceName(row.id_raza)} | chars=${row.chars} | avgLvl=${row.avg_level}`,
         );
     }
 
-    printSection("Meta de retos all-time por clase");
+    printSection("All-time challenge meta by class");
     for (const row of challengeAllTime) {
         console.log(
             `${row.class_name} | appearances=${row.appearances} | wins=${row.wins} | winrate=${row.winrate}% | avgLvl=${row.avg_level ?? "-"}`,
         );
     }
 
-    printSection("Meta de retos ultimos 7 dias por clase");
+    printSection("Last 7 days challenge meta by class");
     for (const row of challengeRecent) {
         console.log(
             `${row.class_name} | appearances=${row.appearances} | wins=${row.wins} | winrate=${row.winrate}%`,
         );
     }
 
-    printSection(`Adopcion de spells clave ${minLevel}-${maxLevel}`);
+    printSection(`Key spell adoption ${minLevel}-${maxLevel}`);
     for (const classId of [1, 2, 4, 6, 7, 8] as NamedClass[]) {
         const byClass = keySpellUsage.get(classId) ?? new Map<number, number>();
         const spellParts = KEY_SPELL_IDS.map((spellId) => {

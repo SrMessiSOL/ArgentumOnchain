@@ -1,4 +1,6 @@
 "use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
+import { useI18n } from "@/components/I18nProvider";
 
 import React from "react";
 import {
@@ -69,7 +71,7 @@ const MARKET_OBJECT_TYPE_OPTIONS = [
     { value: OBJECT_TYPE.cascos, label: "Cascos" },
     { value: OBJECT_TYPE.anillos, label: "Anillos" },
     { value: OBJECT_TYPE.pociones, label: "Pociones" },
-    { value: OBJECT_TYPE.lenia, label: "Leñas" },
+    { value: OBJECT_TYPE.lenia, label: "LeÃ±as" },
     { value: OBJECT_TYPE.metales, label: "Minerales" },
     { value: OBJECT_TYPE.lingotes, label: "Lingotes" },
     { value: OBJECT_TYPE.gemas, label: "Gemas" },
@@ -127,7 +129,7 @@ function formatClaimDate(isoDate: string) {
 }
 
 function formatDecimal(value: number) {
-    return new Intl.NumberFormat("es-AR", {
+    return new Intl.NumberFormat("en-US", {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
     }).format(value);
@@ -151,7 +153,7 @@ function ItemGraphic({
 
     return (
         <div className="relative h-10 w-10 overflow-hidden rounded-sm">
-            <div
+            <LocalizedLabel><div
                 aria-label={name}
                 className="absolute left-1/2 top-1/2 bg-no-repeat"
                 style={{
@@ -162,7 +164,7 @@ function ItemGraphic({
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: "center",
                 }}
-            />
+            /></LocalizedLabel>
         </div>
     );
 }
@@ -177,7 +179,7 @@ function SectionCard({
     return (
         <section className="rounded-2xl border border-white/10 bg-black/20 p-3">
             <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-amber-200/80">
-                {title}
+                <LocalizedText source={title} />
             </h3>
             {children}
         </section>
@@ -204,6 +206,8 @@ export default function MarketModal({
     onCancelListing,
     onClaim,
 }: MarketModalProps) {
+    const { t: localizeKey, text: localizeText } = useI18n();
+
     const [graphicsDB, setGraphicsDB] = React.useState<Record<
         string,
         GraphicData
@@ -373,29 +377,23 @@ export default function MarketModal({
     }, [normalizedSearchText, selectedObjType, sortPrice]);
 
     return (
-        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-sm">
-            <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[28px] border border-amber-200/20 bg-[linear-gradient(180deg,rgba(35,23,14,0.97),rgba(15,10,8,0.97))] text-stone-100 shadow-[0_24px_120px_rgba(0,0,0,0.6)]">
+        <div className="game-modal-backdrop fixed inset-0 z-[95] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-sm">
+            <div className="game-modal-panel flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[28px] border border-amber-200/20 bg-[linear-gradient(180deg,rgba(35,23,14,0.97),rgba(15,10,8,0.97))] text-stone-100 shadow-[0_24px_120px_rgba(0,0,0,0.6)]">
                 <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
                     <div>
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-amber-200/70">
-                            Mercado Global
-                        </p>
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-amber-200/70"><LocalizedText source={"Mercado Global "} /></p>
                     </div>
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
                             onClick={() => onRefresh(browsePayload)}
                             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-200 transition hover:bg-white/10"
-                        >
-                            Actualizar
-                        </button>
+                        ><LocalizedText source={"Actualizar "} /></button>
                         <button
                             type="button"
                             onClick={onClose}
                             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-200 transition hover:bg-white/10"
-                        >
-                            Cerrar
-                        </button>
+                        >{localizeKey("common.close")}</button>
                     </div>
                 </div>
 
@@ -403,12 +401,11 @@ export default function MarketModal({
                     <aside className="flex flex-col gap-3">
                         <SectionCard title="Estado">
                             <div className="space-y-2 text-sm text-stone-300">
-                                <p>Oro disponible: {formatNumber(gold)}</p>
-                                <p>
-                                    Tasa publicación:{" "}
+                                <p><LocalizedText source={"Oro disponible: "} />{formatNumber(gold)}</p>
+                                <p><LocalizedText source={"Tasa publicaciÃ³n:"} />{" "}
                                     {marketState.publicationFeeBps / 100}%
                                 </p>
-                                <p>Reclamos: {marketState.claims.length}</p>
+                                <p><LocalizedText source={"Reclamos: "} />{marketState.claims.length}</p>
                             </div>
                         </SectionCard>
                         {[
@@ -427,7 +424,7 @@ export default function MarketModal({
                                         : "border-white/10 bg-white/5 text-stone-300 hover:bg-white/10"
                                 }`}
                             >
-                                {label}
+                                <LocalizedText source={label} />
                             </button>
                         ))}
                     </aside>
@@ -436,7 +433,7 @@ export default function MarketModal({
                         {tab === "browse" ? (
                             <SectionCard title="Publicaciones Activas">
                                 <div className="mb-3 grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_180px_200px]">
-                                    <input
+                                    <LocalizedLabel><input
                                         value={searchText}
                                         onChange={(event) => {
                                             setSelectedGroupItemId(null);
@@ -444,7 +441,7 @@ export default function MarketModal({
                                         }}
                                         placeholder="Buscar item"
                                         className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-stone-100 outline-none"
-                                    />
+                                    /></LocalizedLabel>
                                     <select
                                         value={selectedObjType ?? ""}
                                         onChange={(event) => {
@@ -463,7 +460,7 @@ export default function MarketModal({
                                                     key={option.label}
                                                     value={option.value ?? ""}
                                                 >
-                                                    {option.label}
+                                                    <LocalizedText source={option.label} />
                                                 </option>
                                             ),
                                         )}
@@ -479,47 +476,34 @@ export default function MarketModal({
                                         }}
                                         className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-stone-100 outline-none"
                                     >
-                                        <option value="recent">
-                                            Ultimos publicados
-                                        </option>
-                                        <option value="asc">
-                                            Oro: menor a mayor
-                                        </option>
-                                        <option value="desc">
-                                            Oro: mayor a menor
-                                        </option>
+                                        <option value="recent"><LocalizedText source={"Ultimos publicados "} /></option>
+                                        <option value="asc"><LocalizedText source={"Oro: menor a mayor "} /></option>
+                                        <option value="desc"><LocalizedText source={"Oro: mayor a menor "} /></option>
                                     </select>
                                 </div>
                                 <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
                                     {marketState.listingGroups.length === 0 ? (
-                                        <p className="text-sm text-stone-400">
-                                            No hay publicaciones activas.
-                                        </p>
+                                        <p className="text-sm text-stone-400"><LocalizedText source={"No hay publicaciones activas. "} /></p>
                                     ) : null}
                                     {selectedListingGroup ? (
                                         <div className="space-y-3 rounded-2xl border border-white/8 bg-white/5 p-3">
                                             <div className="flex items-center justify-between gap-3">
                                                 <div>
-                                                    <p className="text-xs uppercase tracking-[0.2em] text-stone-400">
-                                                        Vendedores de{" "}
+                                                    <p className="text-xs uppercase tracking-[0.2em] text-stone-400"><LocalizedText source={"Vendedores de"} />{" "}
                                                         {
-                                                            selectedListingGroup.itemName
+                                                            localizeText(selectedListingGroup.itemName)
                                                         }
                                                     </p>
                                                     <p className="text-sm text-stone-300">
                                                         {
                                                             selectedListingGroup.totalListings
-                                                        }{" "}
-                                                        publicaciones |{" "}
+                                                        }{" "}<LocalizedText source={"publicaciones |"} />{" "}
                                                         {formatNumber(
                                                             selectedListingGroup.totalQuantity,
-                                                        )}{" "}
-                                                        unidades | desde{" "}
+                                                        )}{" "}<LocalizedText source={"unidades | desde"} />{" "}
                                                         {formatDecimal(
                                                             selectedListingGroup.minUnitPrice,
-                                                        )}{" "}
-                                                        oro c/u
-                                                    </p>
+                                                        )}{" "}<LocalizedText source={"oro c/u "} /></p>
                                                 </div>
                                                 <button
                                                     type="button"
@@ -529,9 +513,7 @@ export default function MarketModal({
                                                         )
                                                     }
                                                     className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-200 transition hover:bg-white/10"
-                                                >
-                                                    Volver
-                                                </button>
+                                                >{localizeKey("common.back")}</button>
                                             </div>
                                             {selectedListingGroup.listings.map(
                                                 (listing) => {
@@ -574,7 +556,7 @@ export default function MarketModal({
                                                                 <div>
                                                                     <p className="font-semibold text-stone-100">
                                                                         {
-                                                                            listing.itemName
+                                                                            localizeText(listing.itemName)
                                                                         }{" "}
                                                                         x
                                                                         {
@@ -584,12 +566,10 @@ export default function MarketModal({
                                                                     <p className="text-sm text-stone-400">
                                                                         {
                                                                             listing.sellerName
-                                                                        }{" "}
-                                                                        | vence
-                                                                        en{" "}
-                                                                        {formatRemainingTime(
+                                                                        }{" "}<LocalizedText source={"| vence en"} />{" "}
+                                                                        {localizeText(formatRemainingTime(
                                                                             listing.expiresAt,
-                                                                        )}
+                                                                        ))}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -598,21 +578,14 @@ export default function MarketModal({
                                                                     <p className="text-sm font-semibold text-amber-200">
                                                                         {formatNumber(
                                                                             listing.price,
-                                                                        )}{" "}
-                                                                        oro
-                                                                    </p>
+                                                                        )}{" "}<LocalizedText source={"oro "} /></p>
                                                                     <p className="text-xs text-stone-400">
                                                                         {formatDecimal(
                                                                             unitPrice,
-                                                                        )}{" "}
-                                                                        oro c/u
-                                                                    </p>
+                                                                        )}{" "}<LocalizedText source={"oro c/u "} /></p>
                                                                 </div>
                                                                 {isOwnListing ? (
-                                                                    <span className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-300">
-                                                                        Tu
-                                                                        publicación
-                                                                    </span>
+                                                                    <span className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-300"><LocalizedText source={"Tu publicaciÃ³n "} /></span>
                                                                 ) : (
                                                                     <button
                                                                         type="button"
@@ -636,9 +609,7 @@ export default function MarketModal({
                                                                             )
                                                                         }
                                                                         className="rounded-xl bg-amber-300 px-3 py-2 text-sm font-semibold text-stone-950 transition hover:bg-amber-200"
-                                                                    >
-                                                                        Comprar
-                                                                    </button>
+                                                                    >{localizeKey("hud.buy")}</button>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -679,35 +650,26 @@ export default function MarketModal({
                                                               <div>
                                                                   <p className="font-semibold text-stone-100">
                                                                       {
-                                                                          group.itemName
+                                                                          localizeText(group.itemName)
                                                                       }
                                                                   </p>
                                                                   <p className="text-sm text-stone-400">
                                                                       {
                                                                           group.totalListings
-                                                                      }{" "}
-                                                                      publicaciones
-                                                                      |{" "}
+                                                                      }{" "}<LocalizedText source={"publicaciones |"} />{" "}
                                                                       {formatNumber(
                                                                           group.totalQuantity,
-                                                                      )}{" "}
-                                                                      unidades
-                                                                  </p>
+                                                                      )}{" "}<LocalizedText source={"unidades "} /></p>
                                                               </div>
                                                           </div>
                                                           <div className="flex items-center gap-4">
                                                               <div>
-                                                                  <p className="text-sm font-semibold text-amber-200">
-                                                                      Desde{" "}
+                                                                  <p className="text-sm font-semibold text-amber-200"><LocalizedText source={"Desde"} />{" "}
                                                                       {formatDecimal(
                                                                           group.minUnitPrice,
-                                                                      )}{" "}
-                                                                      oro c/u
-                                                                  </p>
+                                                                      )}{" "}<LocalizedText source={"oro c/u "} /></p>
                                                               </div>
-                                                              <span className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-200">
-                                                                  Ver vendedores
-                                                              </span>
+                                                              <span className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-200"><LocalizedText source={"Ver vendedores "} /></span>
                                                           </div>
                                                       </button>
                                                   );
@@ -728,9 +690,7 @@ export default function MarketModal({
                                                 });
                                             }}
                                             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:bg-white/10"
-                                        >
-                                            Traer más
-                                        </button>
+                                        ><LocalizedText source={"Traer mÃ¡s "} /></button>
                                     ) : null}
                                 </div>
                             </SectionCard>
@@ -738,7 +698,7 @@ export default function MarketModal({
 
                         {tab === "sell" ? (
                             <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_320px]">
-                                <SectionCard title="Inventario">
+                                <SectionCard title={localizeKey("hud.inventory")}>
                                     <div className="max-h-[58vh] overflow-y-auto pr-1">
                                         <div className="grid grid-cols-7 gap-1">
                                             {inventory.map((item) => {
@@ -747,7 +707,7 @@ export default function MarketModal({
                                                         String(item.grhIndex)
                                                     ];
                                                 return (
-                                                    <button
+                                                    <LocalizedLabel><button
                                                         key={item.slot}
                                                         type="button"
                                                         onClick={() =>
@@ -759,7 +719,7 @@ export default function MarketModal({
                                                             selectedInventorySlot ===
                                                                 item.slot,
                                                         )}`}
-                                                        title={`${item.name} x${formatNumber(item.amount)}`}
+                                                        title={`${localizeText(item.name)} x${formatNumber(item.amount)}`}
                                                     >
                                                         <div className="flex items-center justify-center">
                                                             <ItemGraphic
@@ -779,28 +739,24 @@ export default function MarketModal({
                                                                 E
                                                             </span>
                                                         ) : null}
-                                                    </button>
+                                                    </button></LocalizedLabel>
                                                 );
                                             })}
                                         </div>
                                     </div>
                                 </SectionCard>
 
-                                <SectionCard title="Nueva Publicación">
+                                <SectionCard title="Nueva PublicaciÃ³n">
                                     <div className="space-y-3 text-sm text-stone-300">
-                                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-stone-300">
-                                            Activas: {activeListingsCount}/
+                                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-stone-300"><LocalizedText source={"Activas: "} />{activeListingsCount}/
                                             {MARKET_MAX_ACTIVE_LISTINGS}
                                         </div>
                                         <p>
                                             Item:{" "}
-                                            {selectedInventoryItem?.name ??
-                                                "Selecciona un item"}
+                                            <LocalizedText source={selectedInventoryItem?.name ?? "Selecciona un item"} />
                                         </p>
                                         <label className="block">
-                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400">
-                                                Cantidad
-                                            </span>
+                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400">{localizeKey("hud.amount")}</span>
                                             <input
                                                 value={quantityText}
                                                 onChange={(event) =>
@@ -813,9 +769,7 @@ export default function MarketModal({
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400">
-                                                Precio total
-                                            </span>
+                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400"><LocalizedText source={"Precio total "} /></span>
                                             <input
                                                 value={priceText}
                                                 onChange={(event) =>
@@ -828,9 +782,7 @@ export default function MarketModal({
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400">
-                                                Duración (horas)
-                                            </span>
+                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400"><LocalizedText source={"DuraciÃ³n (horas) "} /></span>
                                             <input
                                                 type="number"
                                                 value={durationText}
@@ -852,10 +804,8 @@ export default function MarketModal({
                                                 {marketState.maxDurationHours}h.
                                             </span>
                                         </label>
-                                        <div className="rounded-xl border border-amber-200/15 bg-amber-950/25 px-3 py-2 text-amber-100">
-                                            Tasa de publicación:{" "}
-                                            {formatNumber(publicationFee)} oro
-                                        </div>
+                                        <div className="rounded-xl border border-amber-200/15 bg-amber-950/25 px-3 py-2 text-amber-100"><LocalizedText source={"Tasa de publicaciÃ³n:"} />{" "}
+                                            {formatNumber(publicationFee)}<LocalizedText source={" oro "} /></div>
                                         <button
                                             type="button"
                                             disabled={!selectedInventoryItem}
@@ -873,9 +823,7 @@ export default function MarketModal({
                                                 );
                                             }}
                                             className="w-full rounded-xl bg-cyan-300 px-4 py-2 font-semibold text-stone-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-stone-600"
-                                        >
-                                            Publicar
-                                        </button>
+                                        ><LocalizedText source={"Publicar "} /></button>
                                     </div>
                                 </SectionCard>
                             </div>
@@ -885,9 +833,7 @@ export default function MarketModal({
                             <SectionCard title="Mis Ventas">
                                 <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
                                     {marketState.myListings.length === 0 ? (
-                                        <p className="text-sm text-stone-400">
-                                            No tienes publicaciones todavía.
-                                        </p>
+                                        <p className="text-sm text-stone-400"><LocalizedText source={"No tienes publicaciones todavÃ­a. "} /></p>
                                     ) : null}
                                     {marketState.myListings.map((listing) => {
                                         const graphicData =
@@ -908,19 +854,17 @@ export default function MarketModal({
                                                     />
                                                     <div>
                                                         <p className="font-semibold text-stone-100">
-                                                            {listing.itemName} x
+                                                            {localizeText(listing.itemName)} x
                                                             {listing.quantity}
                                                         </p>
                                                         <p className="text-sm text-stone-400">
-                                                            {formatListingStatus(
+                                                            {localizeText(formatListingStatus(
                                                                 listing.status,
-                                                            )}{" "}
+                                                            ))}{" "}
                                                             |{" "}
                                                             {formatNumber(
                                                                 listing.price,
-                                                            )}{" "}
-                                                            oro
-                                                        </p>
+                                                            )}{" "}<LocalizedText source={"oro "} /></p>
                                                         <p className="text-xs text-stone-500">
                                                             {formatClaimDate(
                                                                 listing.createdAt,
@@ -938,9 +882,7 @@ export default function MarketModal({
                                                             )
                                                         }
                                                         className="rounded-xl border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-sm font-semibold text-rose-100 transition hover:bg-rose-300/20"
-                                                    >
-                                                        Cancelar
-                                                    </button>
+                                                    >{localizeKey("common.cancel")}</button>
                                                 ) : null}
                                             </div>
                                         );
@@ -959,14 +901,10 @@ export default function MarketModal({
                                             marketState.claims.length === 0
                                         }
                                         className="rounded-xl bg-amber-300 px-4 py-2 font-semibold text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-stone-600"
-                                    >
-                                        Reclamar todo
-                                    </button>
+                                    ><LocalizedText source={"Reclamar todo "} /></button>
                                     <div className="max-h-[50vh] space-y-3 overflow-y-auto pr-1">
                                         {marketState.claims.length === 0 ? (
-                                            <p className="text-sm text-stone-400">
-                                                No tienes reclamos pendientes.
-                                            </p>
+                                            <p className="text-sm text-stone-400"><LocalizedText source={"No tienes reclamos pendientes. "} /></p>
                                         ) : null}
                                         {marketState.claims.map((claim) => {
                                             const graphicData =
@@ -1002,16 +940,15 @@ export default function MarketModal({
                                                         <p className="font-semibold text-stone-100">
                                                             {claim.claimType ===
                                                             "gold"
-                                                                ? `${formatNumber(claim.goldAmount)} oro`
-                                                                : `${claim.itemName ?? "Item"} x${claim.itemQuantity ?? 0}`}
+                                                                ? `${formatNumber(claim.goldAmount)} ${localizeText("oro")}`
+                                                                : `${localizeText(claim.itemName ?? "Item")} x${claim.itemQuantity ?? 0}`}
                                                         </p>
                                                         {claim.claimType ===
                                                             "gold" &&
                                                         claim.itemName ? (
-                                                            <p className="text-sm text-stone-300">
-                                                                Venta de{" "}
-                                                                {claim.itemName ??
-                                                                    "Item"}{" "}
+                                                            <p className="text-sm text-stone-300"><LocalizedText source={"Venta de"} />{" "}
+                                                                {localizeText(claim.itemName ??
+                                                                    "Item")}{" "}
                                                                 x
                                                                 {claim.itemQuantity ??
                                                                     0}
@@ -1019,12 +956,7 @@ export default function MarketModal({
                                                         ) : null}
                                                         {claim.claimType ===
                                                         "item" ? (
-                                                            <p className="text-sm text-stone-300">
-                                                                Retorno
-                                                                pendiente para
-                                                                guardar en
-                                                                inventario
-                                                            </p>
+                                                            <p className="text-sm text-stone-300"><LocalizedText source={"Retorno pendiente para guardar en inventario "} /></p>
                                                         ) : null}
                                                         <p className="text-xs text-stone-500">
                                                             {formatClaimDate(
@@ -1045,9 +977,7 @@ export default function MarketModal({
             {pendingPurchase ? (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-3xl border border-amber-200/25 bg-[#1d140d] p-5 text-stone-100 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
-                        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200/80">
-                            Confirmar compra
-                        </p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-amber-200/80"><LocalizedText source={"Confirmar compra "} /></p>
                         <div className="mt-4 flex items-center gap-3">
                             <ItemGraphic
                                 graphicData={
@@ -1063,30 +993,24 @@ export default function MarketModal({
                             />
                             <div>
                                 <p className="font-semibold">
-                                    {pendingPurchase.itemName} x
+                                    {localizeText(pendingPurchase.itemName)} x
                                     {pendingPurchase.quantity}
                                 </p>
-                                <p className="text-sm text-stone-400">
-                                    Vendedor: {pendingPurchase.sellerName}
+                                <p className="text-sm text-stone-400"><LocalizedText source={"Vendedor: "} />{pendingPurchase.sellerName}
                                 </p>
                             </div>
                         </div>
                         <div className="mt-4 rounded-2xl border border-amber-200/15 bg-amber-950/25 px-4 py-3">
-                            <p className="text-sm text-stone-300">
-                                Vas a gastar
-                            </p>
+                            <p className="text-sm text-stone-300"><LocalizedText source={"Vas a gastar "} /></p>
                             <p className="text-2xl font-bold text-amber-200">
-                                {formatNumber(pendingPurchase.price)} oro
-                            </p>
+                                {formatNumber(pendingPurchase.price)}<LocalizedText source={" oro "} /></p>
                         </div>
                         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                             <button
                                 type="button"
                                 onClick={() => setPendingPurchase(null)}
                                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:bg-white/10"
-                            >
-                                Cancelar
-                            </button>
+                            >{localizeKey("common.cancel")}</button>
                             <button
                                 type="button"
                                 onClick={() => {
@@ -1102,9 +1026,7 @@ export default function MarketModal({
                                     setPendingPurchase(null);
                                 }}
                                 className="rounded-xl bg-amber-300 px-4 py-2 text-sm font-bold text-stone-950 transition hover:bg-amber-200"
-                            >
-                                Confirmar compra
-                            </button>
+                            ><LocalizedText source={"Confirmar compra "} /></button>
                         </div>
                     </div>
                 </div>

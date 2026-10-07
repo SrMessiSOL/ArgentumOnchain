@@ -1,0 +1,1606 @@
+{
+  "npc.snake.name": {
+    "en": "Snake",
+    "es": "Serpiente"
+  },
+  "npc.antharesSnake.name": {
+    "en": "Anthares Snake",
+    "es": "Serpiente de Anthares"
+  },
+  "nav.home": {
+    "en": "Home",
+    "es": "Inicio"
+  },
+  "nav.characters": {
+    "en": "Characters",
+    "es": "Personajes"
+  },
+  "nav.login": {
+    "en": "Sign in",
+    "es": "Ingresar"
+  },
+  "nav.logout": {
+    "en": "Sign out",
+    "es": "Cerrar sesion"
+  },
+  "auth.login": {
+    "en": "Sign in",
+    "es": "Iniciar sesion"
+  },
+  "auth.loginAccent": {
+    "en": "Sign in",
+    "es": "Iniciar sesión"
+  },
+  "auth.create": {
+    "en": "Create account",
+    "es": "Crear cuenta"
+  },
+  "auth.username": {
+    "en": "Username",
+    "es": "Nombre de usuario"
+  },
+  "auth.identifier": {
+    "en": "Email or username",
+    "es": "Email o nombre de usuario"
+  },
+  "auth.password": {
+    "en": "Password",
+    "es": "Contraseña"
+  },
+  "auth.confirm": {
+    "en": "Repeat password",
+    "es": "Repetir contraseña"
+  },
+  "auth.confirm2": {
+    "en": "Confirm password",
+    "es": "Confirmar contraseña"
+  },
+  "auth.pending": {
+    "en": "Working…",
+    "es": "Procesando..."
+  },
+  "auth.enter": {
+    "en": "Sign in",
+    "es": "Entrar"
+  },
+  "auth.noAccount": {
+    "en": "New here?",
+    "es": "No tenes cuenta?"
+  },
+  "auth.hasAccount": {
+    "en": "Already have an account?",
+    "es": "Ya tenes una cuenta?"
+  },
+  "auth.forgot": {
+    "en": "Forgot password",
+    "es": "Olvide mi contraseña"
+  },
+  "auth.register": {
+    "en": "Create account",
+    "es": "Registrate"
+  },
+  "auth.loading": {
+    "en": "Loading registration…",
+    "es": "Cargando registro..."
+  },
+  "auth.registration": {
+    "en": "Registration",
+    "es": "Registro"
+  },
+  "auth.mismatch": {
+    "en": "Passwords do not match",
+    "es": "Las passwords no coinciden"
+  },
+  "auth.failed": {
+    "en": "Could not complete the request",
+    "es": "No se pudo completar la operacion"
+  },
+  "auth.unexpected": {
+    "en": "An unexpected error occurred",
+    "es": "Ocurrio un error inesperado"
+  },
+  "auth.exists": {
+    "en": "An account with that email or username already exists",
+    "es": "Ya existe una cuenta con ese email o nombre"
+  },
+  "auth.invalid": {
+    "en": "Invalid login details",
+    "es": "Credenciales invalidas"
+  },
+  "characters.selection": {
+    "en": "Character selection",
+    "es": "Seleccion de personaje"
+  },
+  "characters.shared": {
+    "en": "One shared world",
+    "es": "Un mundo compartido"
+  },
+  "characters.intro": {
+    "en": "Choose your character and enter the same world as every other player.",
+    "es": "Elegí tu personaje y entrá al mismo mundo que todos los jugadores."
+  },
+  "characters.create": {
+    "en": "Create character",
+    "es": "Crear personaje"
+  },
+  "characters.loading": {
+    "en": "Loading characters…",
+    "es": "Cargando personajes..."
+  },
+  "characters.entering": {
+    "en": "Entering…",
+    "es": "Entrando..."
+  },
+  "characters.level": {
+    "en": "Level",
+    "es": "Nivel"
+  },
+  "characters.map": {
+    "en": "Map",
+    "es": "Mapa"
+  },
+  "characters.empty": {
+    "en": "You do not have any characters yet.",
+    "es": "Todavia no tenes personajes."
+  },
+  "characters.delete": {
+    "en": "Delete character",
+    "es": "Borrar personaje"
+  },
+  "characters.deleteConfirm": {
+    "en": "Confirm deletion",
+    "es": "Confirmar borrado"
+  },
+  "characters.deleting": {
+    "en": "Deleting…",
+    "es": "Borrando..."
+  },
+  "characters.deleteHint": {
+    "en": "Type BORRAR to confirm",
+    "es": "Escribi BORRAR para confirmar"
+  },
+  "common.cancel": {
+    "en": "Cancel",
+    "es": "Cancelar"
+  },
+  "common.close": {
+    "en": "Close",
+    "es": "Cerrar"
+  },
+  "common.unexpected": {
+    "en": "Unexpected error",
+    "es": "Error inesperado"
+  },
+  "common.back": {
+    "en": "Back",
+    "es": "Volver"
+  },
+  "common.confirm": {
+    "en": "Confirm",
+    "es": "Confirmar"
+  },
+  "creation.title": {
+    "en": "Create your character",
+    "es": "Crea tu personaje"
+  },
+  "creation.name": {
+    "en": "Name",
+    "es": "Nombre"
+  },
+  "creation.characterName": {
+    "en": "Character name",
+    "es": "Nombre del personaje"
+  },
+  "creation.class": {
+    "en": "Class",
+    "es": "Clase"
+  },
+  "creation.race": {
+    "en": "Race",
+    "es": "Raza"
+  },
+  "creation.gender": {
+    "en": "Gender",
+    "es": "Genero"
+  },
+  "creation.genderAccent": {
+    "en": "Gender",
+    "es": "Género"
+  },
+  "creation.male": {
+    "en": "Male",
+    "es": "Masculino"
+  },
+  "creation.female": {
+    "en": "Female",
+    "es": "Femenino"
+  },
+  "creation.preview": {
+    "en": "Preview",
+    "es": "Vista previa"
+  },
+  "creation.head": {
+    "en": "Appearance",
+    "es": "Cabeza"
+  },
+  "creation.stats": {
+    "en": "Starting stats",
+    "es": "Stats iniciales"
+  },
+  "creation.pending": {
+    "en": "Creating…",
+    "es": "Creando..."
+  },
+  "creation.loading": {
+    "en": "Loading character creator…",
+    "es": "Cargando creador..."
+  },
+  "creation.invalidAppearance": {
+    "en": "No appearance is available for this combination.",
+    "es": "No hay un body o head valido para esta combinacion."
+  },
+  "class.mage": {
+    "en": "Mage",
+    "es": "Mago"
+  },
+  "class.cleric": {
+    "en": "Cleric",
+    "es": "Clerigo"
+  },
+  "class.clericAccent": {
+    "en": "Cleric",
+    "es": "Clérigo"
+  },
+  "class.warrior": {
+    "en": "Warrior",
+    "es": "Guerrero"
+  },
+  "class.assassin": {
+    "en": "Assassin",
+    "es": "Asesino"
+  },
+  "class.bard": {
+    "en": "Bard",
+    "es": "Bardo"
+  },
+  "class.druid": {
+    "en": "Druid",
+    "es": "Druida"
+  },
+  "class.paladin": {
+    "en": "Paladin",
+    "es": "Paladin"
+  },
+  "class.hunter": {
+    "en": "Hunter",
+    "es": "Cazador"
+  },
+  "race.human": {
+    "en": "Human",
+    "es": "Humano"
+  },
+  "race.elf": {
+    "en": "Elf",
+    "es": "Elfo"
+  },
+  "race.darkElf": {
+    "en": "Dark elf",
+    "es": "Elfo Drow"
+  },
+  "race.dwarf": {
+    "en": "Dwarf",
+    "es": "Enano"
+  },
+  "race.gnome": {
+    "en": "Gnome",
+    "es": "Gnomo"
+  },
+  "hud.inventory": {
+    "en": "Inventory",
+    "es": "Inventario"
+  },
+  "hud.spells": {
+    "en": "Spells",
+    "es": "Hechizos"
+  },
+  "hud.character": {
+    "en": "Character",
+    "es": "Personaje"
+  },
+  "hud.experience": {
+    "en": "Experience",
+    "es": "Experiencia"
+  },
+  "hud.health": {
+    "en": "Health",
+    "es": "Vida"
+  },
+  "hud.strength": {
+    "en": "Strength",
+    "es": "Fuerza"
+  },
+  "hud.agility": {
+    "en": "Agility",
+    "es": "Agilidad"
+  },
+  "hud.intelligence": {
+    "en": "Intelligence",
+    "es": "Inteligencia"
+  },
+  "hud.charisma": {
+    "en": "Charisma",
+    "es": "Carisma"
+  },
+  "hud.constitution": {
+    "en": "Constitution",
+    "es": "Constitucion"
+  },
+  "hud.cast": {
+    "en": "Cast",
+    "es": "Lanzar"
+  },
+  "hud.castSpell": {
+    "en": "Cast spell",
+    "es": "Lanzar hechizo"
+  },
+  "hud.equip": {
+    "en": "Equip",
+    "es": "Equipar"
+  },
+  "hud.use": {
+    "en": "Use",
+    "es": "Usar"
+  },
+  "hud.drop": {
+    "en": "Drop",
+    "es": "Tirar"
+  },
+  "hud.amount": {
+    "en": "Amount",
+    "es": "Cantidad"
+  },
+  "hud.buy": {
+    "en": "Buy",
+    "es": "Comprar"
+  },
+  "hud.sell": {
+    "en": "Sell",
+    "es": "Vender"
+  },
+  "hud.trade": {
+    "en": "Trade",
+    "es": "Comerciar"
+  },
+  "hud.gold": {
+    "en": "Gold",
+    "es": "Oro"
+  },
+  "hud.clans": {
+    "en": "Clans",
+    "es": "Clanes"
+  },
+  "hud.settings": {
+    "en": "Open settings",
+    "es": "Abrir ajustes"
+  },
+  "hud.worldMap": {
+    "en": "Open world map",
+    "es": "Abrir mapa del mundo"
+  },
+  "hud.mapTitle": {
+    "en": "World map",
+    "es": "Mapa del mundo"
+  },
+  "hud.changeCharacter": {
+    "en": "Change character",
+    "es": "Cambiar personaje"
+  },
+  "hud.logoutHint": {
+    "en": "In an unsafe area, use /logout to log out or your character will remain connected for 10 seconds.",
+    "es": "En zona insegura cerrá el personaje con /salir o quedará conectado por 10 segundos."
+  },
+  "hud.manaCost": {
+    "en": "Mana required",
+    "es": "Mana requerida"
+  },
+  "hud.info": {
+    "en": "Information",
+    "es": "Informacion"
+  },
+  "hud.description": {
+    "en": "Description",
+    "es": "Descripcion"
+  },
+  "hud.damage": {
+    "en": "Damage",
+    "es": "Daño"
+  },
+  "hud.defense": {
+    "en": "Defense",
+    "es": "Defensa"
+  },
+  "hud.weight": {
+    "en": "Weight",
+    "es": "Peso"
+  },
+  "hud.price": {
+    "en": "Price",
+    "es": "Precio"
+  },
+  "welcome.title": {
+    "en": "Default controls",
+    "es": "Teclas predeterminadas"
+  },
+  "welcome.hello": {
+    "en": "Welcome",
+    "es": "Bienvenido"
+  },
+  "welcome.body": {
+    "en": "These are the default controls. You can change them in the settings panel.",
+    "es": "Estas son las teclas base del juego. Despues podes cambiarlas desde el panel derecho."
+  },
+  "welcome.accept": {
+    "en": "Got it",
+    "es": "Entendido"
+  },
+  "fullscreen.recommend": {
+    "en": "Display tip",
+    "es": "Recomendacion"
+  },
+  "fullscreen.title": {
+    "en": "This game works best in full screen",
+    "es": "Esta pantalla se ve mejor en pantalla completa"
+  },
+  "fullscreen.body": {
+    "en": "Your window is small. Full screen gives the game, chat and inventory more space.",
+    "es": "Detectamos una ventana chica para el juego. Si queres, podemos abrirlo en pantalla completa para que entren mejor la consola, el HUD y las macros."
+  },
+  "fullscreen.stay": {
+    "en": "Keep windowed",
+    "es": "Seguir asi"
+  },
+  "fullscreen.open": {
+    "en": "Open full screen",
+    "es": "Abrir en pantalla completa"
+  },
+  "fullscreen.enter": {
+    "en": "Enter full screen",
+    "es": "Entrar en pantalla completa"
+  },
+  "fullscreen.exit": {
+    "en": "Exit full screen",
+    "es": "Salir de pantalla completa"
+  },
+  "controls.up": {
+    "en": "Move up",
+    "es": "Mover arriba"
+  },
+  "controls.left": {
+    "en": "Move left",
+    "es": "Mover izquierda"
+  },
+  "controls.down": {
+    "en": "Move down",
+    "es": "Mover abajo"
+  },
+  "controls.right": {
+    "en": "Move right",
+    "es": "Mover derecha"
+  },
+  "controls.map": {
+    "en": "Toggle map",
+    "es": "Abrir / cerrar mapa"
+  },
+  "controls.safe": {
+    "en": "Toggle safety",
+    "es": "Activar / desactivar seguro"
+  },
+  "controls.clan": {
+    "en": "Toggle clan safety",
+    "es": "Activar / desactivar seguro de clan"
+  },
+  "controls.pickup": {
+    "en": "Pick up item",
+    "es": "Agarrar item"
+  },
+  "controls.attack": {
+    "en": "Attack / aim",
+    "es": "Atacar / apuntar"
+  },
+  "controls.meditate": {
+    "en": "Meditate",
+    "es": "Meditar"
+  },
+  "controls.equip": {
+    "en": "Equip item",
+    "es": "Equipar item"
+  },
+  "controls.use": {
+    "en": "Use item",
+    "es": "Usar item"
+  },
+  "controls.drop": {
+    "en": "Drop item",
+    "es": "Tirar item"
+  },
+  "controls.cancel": {
+    "en": "Cancel / close",
+    "es": "Cancelar / cerrar"
+  },
+  "controls.space": {
+    "en": "Space",
+    "es": "Espacio"
+  },
+  "item.red": {
+    "en": "Red potion (Newbie)",
+    "es": "Poción Roja (Newbie)"
+  },
+  "item.yellow": {
+    "en": "Yellow potion (Newbie)",
+    "es": "Poción Amarilla (Newbie)"
+  },
+  "item.green": {
+    "en": "Green potion (Newbie)",
+    "es": "Poción Verde (Newbie)"
+  },
+  "item.blue": {
+    "en": "Blue potion (Newbie)",
+    "es": "Poción Azul (Newbie)"
+  },
+  "item.apple": {
+    "en": "Red apple (Newbie)",
+    "es": "Manzana Roja (Newbie)"
+  },
+  "item.water": {
+    "en": "Water bottle (Newbie)",
+    "es": "Botella de Agua (Newbie)"
+  },
+  "item.sword": {
+    "en": "Sword (Newbie)",
+    "es": "Espada (Newbie)"
+  },
+  "item.shield": {
+    "en": "Shield (Newbie)",
+    "es": "Escudo (Newbie)"
+  },
+  "item.helmet": {
+    "en": "Simple helmet (Newbie)",
+    "es": "Casco Simple (Newbie)"
+  },
+  "item.armor": {
+    "en": "Leather armor (H/E/DE) (Newbie)",
+    "es": "Armadura de Cuero (H/E/EO) (Newbie)"
+  },
+  "map.ulla": {
+    "en": "Ullathorpe",
+    "es": "Ciudad de Ullathorpe"
+  },
+  "auth.usernameHelp": {
+    "en": "Choose a username for your account. Your characters have their own names.",
+    "es": "Elegí un nombre para tu cuenta. Tus personajes tendrán sus propios nombres."
+  },
+  "cosmetic.title": {
+    "en": "Explorer badge",
+    "es": "Insignia de explorador"
+  },
+  "cosmetic.mission": {
+    "en": "First journey: reach level 2 with a character, then return here to claim your badge. Log out of the character to save your latest progress.",
+    "es": "Primer viaje: alcanzá nivel 2 con un personaje y volvé para reclamar tu insignia. Salí del personaje para guardar tu progreso."
+  },
+  "cosmetic.noBonus": {
+    "en": "Test-only collectible on Solana devnet. No monetary value or combat bonus. The server pays the test transaction fee.",
+    "es": "Coleccionable de prueba en Solana devnet. Sin valor monetario ni ventajas de combate. El servidor paga la comisión de prueba."
+  },
+  "cosmetic.eligible": {
+    "en": "Mission complete",
+    "es": "Misión completada"
+  },
+  "cosmetic.levelRequired": {
+    "en": "Reach level 2 to unlock this reward.",
+    "es": "Alcanzá nivel 2 para desbloquear esta recompensa."
+  },
+  "cosmetic.signIn": {
+    "en": "Sign in to view your reward.",
+    "es": "Ingresá para ver tu recompensa."
+  },
+  "cosmetic.linkWallet": {
+    "en": "Link your wallet above first.",
+    "es": "Primero vinculá tu wallet arriba."
+  },
+  "cosmetic.unavailable": {
+    "en": "Devnet issuance is not enabled on this server yet.",
+    "es": "La emisión en devnet todavía no está habilitada en este servidor."
+  },
+  "cosmetic.pending": {
+    "en": "Processing… You can return and retry safely.",
+    "es": "Procesando… Podés volver y reintentar sin duplicar el objeto."
+  },
+  "cosmetic.claimConflict": {
+    "en": "This reward was prepared for a different linked wallet. Restore that wallet to continue.",
+    "es": "Esta recompensa se preparó para otra wallet vinculada. Volvé a vincularla para continuar."
+  },
+  "cosmetic.notOwned": {
+    "en": "Your linked wallet does not own this badge.",
+    "es": "Tu wallet vinculada no es dueña de esta insignia."
+  },
+  "cosmetic.retry": {
+    "en": "Devnet could not confirm the result. Refresh or retry; the same asset will be checked again.",
+    "es": "Devnet no pudo confirmar el resultado. Actualizá o reintentá; se volverá a comprobar el mismo objeto."
+  },
+  "cosmetic.claim": {
+    "en": "Claim on devnet",
+    "es": "Reclamar en devnet"
+  },
+  "cosmetic.explorer": {
+    "en": "View on Solana Explorer",
+    "es": "Ver en Solana Explorer"
+  },
+  "cosmetic.unequip": {
+    "en": "Unequip",
+    "es": "Desequipar"
+  },
+  "cosmetic.refresh": {
+    "en": "Refresh",
+    "es": "Actualizar"
+  },
+  "characters.noAppearance": {
+    "en": "No appearance is available for this character.",
+    "es": "El personaje no tiene apariencia renderizable."
+  },
+  "characters.first": {
+    "en": "Create your first character to enter the world.",
+    "es": "Esta cuenta todavía no tiene personajes. Crea el primero desde /createcharacter."
+  },
+  "characters.deletingName": {
+    "en": "You are about to delete",
+    "es": "Vas a borrar a"
+  },
+  "characters.type": {
+    "en": "Type",
+    "es": "Escribe"
+  },
+  "characters.confirmSuffix": {
+    "en": "to confirm.",
+    "es": "para confirmar."
+  },
+  "characters.confirmation": {
+    "en": "Confirmation",
+    "es": "Confirmacion"
+  },
+  "controls.upperClose": {
+    "en": "CLOSE",
+    "es": "CERRAR"
+  },
+  "name.letters": {
+    "en": "Use letters A–Z and spaces only",
+    "es": "El nombre solo puede contener letras de la A a la Z y espacios"
+  },
+  "name.short": {
+    "en": "The name must have at least 3 characters",
+    "es": "El nombre debe tener al menos 3 caracteres"
+  },
+  "name.long": {
+    "en": "The name must have at most 15 characters",
+    "es": "El nombre no puede tener mas de 15 caracteres"
+  },
+  "stats.str": {
+    "en": "STR",
+    "es": "FUE"
+  },
+  "stats.cha": {
+    "en": "CHA",
+    "es": "CAR"
+  },
+  "name.emptySuffix": {
+    "en": "Use letters A-Z and spaces only.",
+    "es": "El nombre solo puede contener letras de la A a la Z y espacios."
+  },
+  "name.minSuffix": {
+    "en": "Use at least 3 characters.",
+    "es": "El nombre debe tener al menos 3 caracteres."
+  },
+  "name.maxSuffix": {
+    "en": "Use at most 15 characters.",
+    "es": "El nombre debe tener como maximo 15 caracteres."
+  },
+  "game.message.0": {
+    "en": "You are too far away to trade.",
+    "es": "Te encuentras muy lejos para comerciar."
+  },
+  "game.message.1": {
+    "en": "You are too far away to use the bank.",
+    "es": "Te encuentras muy lejos para operar con el banco."
+  },
+  "game.message.2": {
+    "en": "You cannot equip items while dead.",
+    "es": "Los muertos no pueden equipar items."
+  },
+  "game.message.3": {
+    "en": "Stop meditating before doing that.",
+    "es": "Debes dejar de meditar para realizar esta acción."
+  },
+  "game.message.4": {
+    "en": "You are already casting Resurrection.",
+    "es": "Ya estás casteando resucitar."
+  },
+  "game.message.5": {
+    "en": "Only beginner characters can equip this item.",
+    "es": "Solo los personajes newbie pueden equipar este item."
+  },
+  "game.message.6": {
+    "en": "Your class cannot equip that item.",
+    "es": "Tu clase no puede equipar ese item."
+  },
+  "game.message.7": {
+    "en": "Your faction cannot equip that item.",
+    "es": "Tu faccion no puede equipar ese item."
+  },
+  "game.message.8": {
+    "en": "Your race cannot equip that item.",
+    "es": "Tu raza no puede equipar ese item."
+  },
+  "game.message.9": {
+    "en": "You cannot attack while dead.",
+    "es": "Los muertos no pueden atacar."
+  },
+  "game.message.10": {
+    "en": "You cannot use this weapon that way.",
+    "es": "No puedes usar esta arma así."
+  },
+  "game.message.11": {
+    "en": "Archers cannot make melee attacks.",
+    "es": "Los arqueros no pueden atacar cuerpo a cuerpo."
+  },
+  "game.message.12": {
+    "en": "You cannot attack a dead player.",
+    "es": "No puedes atacar a un usuario muerto."
+  },
+  "game.message.13": {
+    "en": "You cannot attack that NPC.",
+    "es": "No puedes atacar a ese NPC."
+  },
+  "game.message.14": {
+    "en": "You cannot attack your summoned creatures.",
+    "es": "No puedes atacar a tus invocaciones."
+  },
+  "game.message.15": {
+    "en": "You have no arrows equipped.",
+    "es": "No tienes flechas equipadas."
+  },
+  "game.message.16": {
+    "en": "You cannot cast spells while dead.",
+    "es": "Los muertos no pueden tirar hechizos."
+  },
+  "game.message.17": {
+    "en": "Your class cannot cast spells.",
+    "es": "Tu clase no puede usar hechizos."
+  },
+  "game.message.18": {
+    "en": "You cannot cast spells on this map.",
+    "es": "En este mapa no se puede lanzar magia."
+  },
+  "game.message.19": {
+    "en": "You do not have enough mana to cast that spell.",
+    "es": "No tienes mana suficiente para lanzar ese hechizo."
+  },
+  "game.message.20": {
+    "en": "You can only resurrect dead players.",
+    "es": "Solo puedes resucitar usuarios muertos."
+  },
+  "game.message.21": {
+    "en": "You can only cast Resurrection on dead players.",
+    "es": "Solo puedes usar resucitar sobre usuarios muertos."
+  },
+  "game.message.22": {
+    "en": "You cannot cast spells on that NPC.",
+    "es": "No puedes lanzar hechizos sobre ese NPC."
+  },
+  "game.message.23": {
+    "en": "You cannot cast healing spells on NPCs.",
+    "es": "No puedes lanzar hechizos de curación sobre NPCs."
+  },
+  "game.message.24": {
+    "en": "Your inventory is full.",
+    "es": "No tienes espacio en el inventario."
+  },
+  "game.message.25": {
+    "en": "You do not have enough gold.",
+    "es": "No tienes oro suficiente."
+  },
+  "game.message.26": {
+    "en": "Your bank is full.",
+    "es": "No tienes mas espacio en el banco."
+  },
+  "spell.1.name": {
+    "en": "Magic Antidote",
+    "es": "Antídoto Mágico"
+  },
+  "spell.2.name": {
+    "en": "Magic Dart",
+    "es": "Dardo Mágico"
+  },
+  "spell.3.name": {
+    "en": "Heal Minor Wounds",
+    "es": "Curar Heridas Leves"
+  },
+  "spell.4.name": {
+    "en": "Toxin",
+    "es": "Toxina"
+  },
+  "spell.5.name": {
+    "en": "Heal Major Wounds",
+    "es": "Curar Heridas Graves"
+  },
+  "spell.6.name": {
+    "en": "Magic Arrow",
+    "es": "Flecha Mágica"
+  },
+  "spell.7.name": {
+    "en": "Electric Arrow",
+    "es": "Flecha Eléctrica"
+  },
+  "spell.8.name": {
+    "en": "Magic Missile",
+    "es": "Proyectil Mágico"
+  },
+  "spell.9.name": {
+    "en": "Paralyze",
+    "es": "Paralizar"
+  },
+  "spell.10.name": {
+    "en": "Remove Paralysis",
+    "es": "Remover Parálisis"
+  },
+  "spell.11.name": {
+    "en": "Resurrection",
+    "es": "Resucitar"
+  },
+  "spell.12.name": {
+    "en": "Hunger Attack",
+    "es": "Ataque de Hambre"
+  },
+  "spell.13.name": {
+    "en": "Igôr’s Terrible Hunger",
+    "es": "Terrible hambre de Igôr"
+  },
+  "spell.14.name": {
+    "en": "Invisibility",
+    "es": "Invisibilidad"
+  },
+  "spell.15.name": {
+    "en": "Firestorm",
+    "es": "Tormenta de Fuego"
+  },
+  "spell.16.name": {
+    "en": "Nature’s Call",
+    "es": "Llamado a la Naturaleza"
+  },
+  "spell.17.name": {
+    "en": "Necromancer’s Call",
+    "es": "Llamado Nigromante"
+  },
+  "spell.18.name": {
+    "en": "Haste",
+    "es": "Celeridad"
+  },
+  "spell.19.name": {
+    "en": "Clumsiness",
+    "es": "Torpeza"
+  },
+  "spell.20.name": {
+    "en": "Strength",
+    "es": "Fuerza"
+  },
+  "spell.21.name": {
+    "en": "Weakness",
+    "es": "Debilidad"
+  },
+  "spell.22.name": {
+    "en": "Call of Uhkrul",
+    "es": "Llamado a Uhkrul"
+  },
+  "spell.23.name": {
+    "en": "Lightning Bolt",
+    "es": "Descarga Eléctrica"
+  },
+  "spell.24.name": {
+    "en": "Immobilize",
+    "es": "Inmovilizar"
+  },
+  "spell.25.name": {
+    "en": "Apocalypse",
+    "es": "Apocalipsis"
+  },
+  "spell.26.name": {
+    "en": "Summon Fire Elemental",
+    "es": "Invocar Elemental de Fuego"
+  },
+  "spell.27.name": {
+    "en": "Summon Water Elemental",
+    "es": "Invocar Elemental de Agua"
+  },
+  "spell.28.name": {
+    "en": "Summon Earth Elemental",
+    "es": "Invocar Elemental de Tierra"
+  },
+  "spell.29.name": {
+    "en": "Plea for Help",
+    "es": "Implorar Ayuda"
+  },
+  "spell.30.name": {
+    "en": "Blindness",
+    "es": "Ceguera"
+  },
+  "spell.31.name": {
+    "en": "Stun",
+    "es": "Aturdir"
+  },
+  "spell.32.name": {
+    "en": "God’s Wrath",
+    "es": "Ira de Dios"
+  },
+  "spell.33.name": {
+    "en": "Summon from Beyond",
+    "es": "Invocación de Ultratumba"
+  },
+  "spell.1.description": {
+    "en": "This spell transforms the toxic fluids in your body, counteracting the harmful effects of poisons and venoms. Simple but essential: both mages and creatures in these lands can inflict poisoning.",
+    "es": "Con este conjuro podrás mutar los fluidos tóxicos de tu cuerpo para detener su vil accionar, contrarrestando los efectos nocivos de todo tipo de ponzoñas y venenos. Se trata de un conjuro tan simple como necesario, puesto que, además de los magos que provocan envenenamiento, son varias las criaturas que lanzan veneno en estas tierras."
+  },
+  "spell.2.description": {
+    "en": "One of the simplest attack spells you can learn. It deals little damage, but its low resource cost makes it useful for training young spellcasters.",
+    "es": "Éste es uno de los más elementales y sencillos hechizos de ataque que podrás aprender. No causa un gran daño a la víctima, pero al consumir muy pocos recursos, resulta una herramienta muy útil para el entrenamiento de los jóvenes hechiceros."
+  },
+  "spell.3.description": {
+    "en": "This simple spell immediately heals minor wounds and slowly restores the target’s health. It helps apprentice spellcasters train while protecting themselves from wild beasts.",
+    "es": "Con este sencillo conjuro podrás efectuar la sanación inmediata de pequeñas heridas y devolver lentamente la salud a quien se lo lances. Suele ser de gran utilidad para los jóvenes aprendices de magia, para poder entrenar al resguardo del ataque de las fieras salvajes."
+  },
+  "spell.5.description": {
+    "en": "This miraculous spell heals deep, painful wounds and quickly restores health to those near death. Moderately complex, it is essential for young adventurers facing the dangers of the world.",
+    "es": "Con esta milagrosa sanación para las heridas más profundas y dolorosas, podrás rápidamente devolver la salud a quienes agonizan. Se trata de un conjuro de una complejidad intermedia, pero que suele resultar fundamental para los jóvenes aventureros que desean recorrer el mundo y enfrentarse con sus peligros."
+  },
+  "npc.1.dialog": {
+    "en": "Hello, stranger! Welcome to our humble village.",
+    "es": "¡Hola forastero! Bienvenido a nuestra humilde aldea."
+  },
+  "npc.5.dialog": {
+    "en": "Hello, my child! I am the Priest of these lands. Double-click me to be resurrected.",
+    "es": "¡Hola, hijo mío! Soy el Sacerdote de estas tierras. Si quieres que te resucite escribe /RESUCITAR, o haz doble click sobre mí."
+  },
+  "npc.6.dialog": {
+    "en": "I will imprison every criminal!",
+    "es": "¡Daré cárcel a todos los criminales!"
+  },
+  "npc.7.dialog": {
+    "en": "Welcome, sewer rat. I am the Blacksmith of Ullathorpe... I have weapons that may help you on your travels.",
+    "es": "Bienvenido, rata de alcantarilla, soy el Herrero de Ullathorpe...tengo algunas armas que pueden ayudarte en tus viajes."
+  },
+  "npc.8.dialog": {
+    "en": "Heeello, young one! I have the best supplies in Ullathorpe!",
+    "es": "Hooooola jovencito, tengo las mejores provisiones de Ullathorpe!!"
+  },
+  "npc.9.dialog": {
+    "en": "Hello, little adventurer! I have supplies to satisfy your hunger and thirst.",
+    "es": "¡Hola, pequeño aventurero, tengo aquí unas mercaderías para saciar tu hambre y sed!."
+  },
+  "npc.10.dialog": {
+    "en": "Hello! Would you like to hear a beautiful melody?",
+    "es": "¡¿Hola, os gustaria oír una hermosa melodía?!."
+  },
+  "npc.12.dialog": {
+    "en": "Hello, stranger! I am the Tailor of Ullathorpe. Welcome!",
+    "es": "¡Hola forastero! Soy el Sastre de Ullathorpe, Bienvenido!"
+  },
+  "npc.13.dialog": {
+    "en": "Hello, I am the governor of Ullathorpe. Welcome to our little village! Type /sethome to become a citizen.",
+    "es": "Hola, soy el gobernador de Ullathorpe ¡Bienvenido a nuestra pequeña aldea! Escribe /asignarhogar para obtener la ciudadanía."
+  },
+  "npc.14.dialog": {
+    "en": "Hello, I have the finest alchemical potions.",
+    "es": "Hola, tengo las mejores Pociones de la Alquimia."
+  },
+  "npc.24.dialog": {
+    "en": "Hello, welcome to Goliath Finance. We are the largest banking chain in Argentum, with branches in the major cities.",
+    "es": "Hola, bienvenido a la cadena de finanzas Goliath. Somos la cadena más grande en Argentum, contamos con bancos en las ciudades más importantes."
+  },
+  "npc.9008.dialog": {
+    "en": "I have robes, clothes and outfits organized by tier.",
+    "es": "Tengo tunicas, ropas y vestimentas organizadas por tier."
+  },
+  "npc.9009.dialog": {
+    "en": "I have armor organized by tier for warriors and adventurers.",
+    "es": "Tengo armaduras organizadas por tier para guerreros y aventureros."
+  },
+  "npc.9010.dialog": {
+    "en": "I have melee and ranged weapons organized by tier.",
+    "es": "Tengo armas cuerpo a cuerpo y a distancia organizadas por tier."
+  },
+  "npc.9012.dialog": {
+    "en": "I have helmets, hats and shields organized by tier.",
+    "es": "Tengo cascos, sombreros y escudos organizados por tier."
+  },
+  "npc.9014.dialog": {
+    "en": "I have tickets for travel between the ports of the continent.",
+    "es": "Tengo pasajes para viajar entre los puertos del continente."
+  },
+  "game.ui.0": {
+    "en": "Bank",
+    "es": "Banco"
+  },
+  "game.ui.1": {
+    "en": "Merchant",
+    "es": "Comerciante"
+  },
+  "game.ui.2": {
+    "en": "Select an item",
+    "es": "Selecciona un item"
+  },
+  "game.ui.3": {
+    "en": "Personal",
+    "es": "Personal"
+  },
+  "game.ui.4": {
+    "en": "Account",
+    "es": "Cuenta"
+  },
+  "game.ui.5": {
+    "en": "Console",
+    "es": "Consola"
+  },
+  "game.ui.6": {
+    "en": "Your character cannot use this item.",
+    "es": "No lo puede usar tu personaje."
+  },
+  "game.ui.7": {
+    "en": "Deposit or withdraw items from your bank.",
+    "es": "Guarda o retira items desde tu banco."
+  },
+  "game.ui.8": {
+    "en": "Deposit or withdraw items here.",
+    "es": "Guarda o retira items desde este panel."
+  },
+  "game.ui.9": {
+    "en": "Buy or sell items here.",
+    "es": "Compra o vende items desde este panel."
+  },
+  "shop.extra.0": {
+    "en": "Gold:",
+    "es": "Oro:"
+  },
+  "shop.extra.1": {
+    "en": "Your gold:",
+    "es": "Tu oro:"
+  },
+  "shop.extra.2": {
+    "en": "Clan vault gold",
+    "es": "Oro bóveda clan"
+  },
+  "shop.extra.3": {
+    "en": "Account vault gold",
+    "es": "Oro bóveda cuenta"
+  },
+  "shop.extra.4": {
+    "en": "Withdraw",
+    "es": "Retirar"
+  },
+  "shop.extra.5": {
+    "en": "Deposit",
+    "es": "Guardar"
+  },
+  "shop.extra.6": {
+    "en": "Deposit all",
+    "es": "Guardar todo"
+  },
+  "shop.extra.7": {
+    "en": "Sell all",
+    "es": "Vender todo"
+  },
+  "shop.extra.8": {
+    "en": "Select an item from the bank or your inventory.",
+    "es": "Selecciona un item del banco o de tu inventario."
+  },
+  "shop.extra.9": {
+    "en": "Select an item from the merchant or your inventory.",
+    "es": "Selecciona un item del comerciante o de tu inventario."
+  },
+  "shop.extra.10": {
+    "en": "Stored",
+    "es": "Guardados"
+  },
+  "shop.extra.11": {
+    "en": "gold each",
+    "es": "oro por unidad"
+  },
+  "game.followup.0": {
+    "en": "Show channels",
+    "es": "Mostrar canales"
+  },
+  "game.followup.1": {
+    "en": "Hide channels",
+    "es": "Ocultar canales"
+  },
+  "game.followup.2": {
+    "en": "Show chat",
+    "es": "Mostrar chat"
+  },
+  "game.followup.3": {
+    "en": "Hide chat",
+    "es": "Ocultar chat"
+  },
+  "game.followup.4": {
+    "en": "This character has no spells available.",
+    "es": "Este personaje no tiene hechizos disponibles."
+  },
+  "game.followup.5": {
+    "en": "In an unsafe area, use /logout to log out or your character will remain connected for 10 seconds.",
+    "es": "En zona insegura cerrá el personaje con /salir o quedará conectado por 10 segundos."
+  },
+  "walkthrough.mage.0": {
+    "en": "Mage staff (Newbie)",
+    "es": "Bastón de Mago (Newbie)"
+  },
+  "walkthrough.mage.1": {
+    "en": "Robe (H/E/DE) (Newbie)",
+    "es": "Túnica (H/E/EO) (Newbie)"
+  },
+  "walkthrough.mage.2": {
+    "en": "Spell list",
+    "es": "Lista de hechizos"
+  },
+  "walkthrough.mage.3": {
+    "en": "Move selected spell up",
+    "es": "Subir hechizo seleccionado"
+  },
+  "walkthrough.mage.4": {
+    "en": "Move selected spell down",
+    "es": "Bajar hechizo seleccionado"
+  },
+  "walkthrough.mage.5": {
+    "en": "Selected spell information",
+    "es": "Informacion del hechizo seleccionado"
+  },
+  "walkthrough.mage.6": {
+    "en": "Spell information",
+    "es": "Informacion del hechizo"
+  },
+  "walkthrough.mage.7": {
+    "en": "Close spell information",
+    "es": "Cerrar informacion del hechizo"
+  },
+  "walkthrough.mage.8": {
+    "en": "Spell",
+    "es": "Hechizo"
+  },
+  "walkthrough.mage.9": {
+    "en": "Navigation",
+    "es": "Navegacion"
+  },
+  "walkthrough.mage.10": {
+    "en": "Close world map",
+    "es": "Cerrar mapa del mundo"
+  },
+  "walkthrough.mage.11": {
+    "en": "Full world map",
+    "es": "Mapa del mundo completo"
+  },
+  "walkthrough.mage.12": {
+    "en": "Woodcutter’s axe",
+    "es": "Hacha de Leñador"
+  },
+  "walkthrough.mage.13": {
+    "en": "Elven woodcutting axe",
+    "es": "Hacha de leña Elfica"
+  },
+  "walkthrough.mage.14": {
+    "en": "Saw",
+    "es": "Serrucho"
+  },
+  "walkthrough.mage.15": {
+    "en": "ATK",
+    "es": "ATQ"
+  },
+  "walkthrough.mage.16": {
+    "en": "MR",
+    "es": "RM"
+  },
+  "walkthrough.mage.17": {
+    "en": "for",
+    "es": "por"
+  },
+  "walkthrough.mage.18": {
+    "en": "gold.",
+    "es": "oro."
+  },
+  "walkthrough.mage.19": {
+    "en": " Your character cannot use this item.",
+    "es": " No lo puede usar tu personaje."
+  },
+  "walkthrough.mage.20": {
+    "en": " Unequip it before depositing it.",
+    "es": " Primero debes desequiparlo para guardarlo."
+  },
+  "walkthrough.mage.21": {
+    "en": " Unequip it first.",
+    "es": " Primero debes desequiparlo."
+  },
+  "walkthrough.mage.22": {
+    "en": "You are too far away to use the marketplace.",
+    "es": "Te encuentras muy lejos para operar con el mercado."
+  },
+  "walkthrough.mage.23": {
+    "en": "Welcome to AOCHAIN. For the latest game updates, join our ",
+    "es": "Bienvenido a AOCHAIN. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro "
+  },
+  "walkthrough.mage.24": {
+    "en": "- Report bugs or suggest changes here: ",
+    "es": "- Si quieres reportar erorres o sugerir cambios, puedes hacerlo en: "
+  },
+  "walkthrough.mage.25": {
+    "en": "- Scout accounts, cheats and external programs that alter gameplay, including automatic potion use or paralysis removal, are prohibited. Using them will result in a permanent ban without warning.",
+    "es": "- Está completamente prohibido el uso de personajes cámara, cheats o cualquier programa externo que modifique el juego, como auto tomar pociones o auto removerse. El uso de los mismos terminará en un ban permanente, sin previo aviso."
+  },
+  "walkthrough.mage.26": {
+    "en": "STR",
+    "es": "Fue"
+  },
+  "walkthrough.mage.27": {
+    "en": "CHA",
+    "es": "Car"
+  },
+  "npc.143.dialog": {
+    "es": "En las batallas más escalofriantes, más sangrientas... Un bardo siempre está presente.",
+    "en": "In the most chilling, bloodiest battles... a bard is always present."
+  },
+  "npc.9013.dialog": {
+    "es": "Bienvenido al Mercado Global. Aquí podrás publicar, comprar y reclamar subastas.",
+    "en": "Welcome to the Global Market. Here you can list, buy and claim auctions."
+  },
+  "walkthrough.death.0": {
+    "en": "You have died",
+    "es": "Personaje muerto"
+  },
+  "walkthrough.death.1": {
+    "en": "Return to the priest",
+    "es": "Volver al sacerdote"
+  },
+  "walkthrough.death.2": {
+    "en": "Return to town",
+    "es": "Volver a la ciudad"
+  },
+  "walkthrough.death.3": {
+    "en": "You can also return to the priest with /home",
+    "es": "También puedes volver al sacerdote con el comando /hogar"
+  },
+  "walkthrough.death.4": {
+    "en": "You can also return with /home",
+    "es": "También puedes volver con el comando /hogar"
+  },
+  "walkthrough.death.5": {
+    "en": "Confirm",
+    "es": "Aceptar"
+  },
+  "walkthrough.death.6": {
+    "en": "Woodcutter",
+    "es": "Leñador"
+  },
+  "walkthrough.death.7": {
+    "en": "Priest",
+    "es": "Sacerdote"
+  },
+  "walkthrough.death.8": {
+    "en": "City of Ullathorpe",
+    "es": "Ciudad de Ullathorpe"
+  },
+  "walkthrough.death.9": {
+    "en": "South Ullathorpe Forest",
+    "es": "Bosque sur de Ullathorpe"
+  },
+  "npc.wildRat.name": {
+    "es": "Rata Salvaje",
+    "en": "Wild Rat"
+  },
+  "death.realm": {
+    "es": "En 15 segundos entraras al mundo de los muertos.",
+    "en": "You will enter the realm of the dead in 15 seconds."
+  },
+  "gameplay.dead.hide": {
+    "en": "You cannot hide while dead.",
+    "es": "Los muertos no pueden ocultarse."
+  },
+  "gameplay.dead.use": {
+    "en": "You cannot use items while dead.",
+    "es": "Los muertos no pueden usar items."
+  },
+  "gameplay.dead.pickup": {
+    "en": "You cannot pick up items while dead.",
+    "es": "Los muertos no pueden agarrar items."
+  },
+  "gameplay.dead.drop": {
+    "en": "You cannot drop items while dead.",
+    "es": "Los muertos no pueden tirar items."
+  },
+  "gameplay.dead.bankWithdraw": {
+    "en": "You cannot withdraw items from the bank while dead.",
+    "es": "Los muertos no pueden retirar items del banco."
+  },
+  "gameplay.dead.bankDeposit": {
+    "en": "You cannot deposit items in the bank while dead.",
+    "es": "Los muertos no pueden guardar items en el banco."
+  },
+  "gameplay.dead.buy": {
+    "en": "You cannot buy items while dead.",
+    "es": "Los muertos no pueden comprar items."
+  },
+  "gameplay.dead.sell": {
+    "en": "You cannot sell items while dead.",
+    "es": "Los muertos no pueden vender items."
+  },
+  "gameplay.dead.meditate": {
+    "en": "You cannot meditate while dead.",
+    "es": "Los muertos no pueden meditar."
+  },
+  "gameplay.target.aliveCancel": {
+    "en": "Resurrection was canceled because the target is no longer dead.",
+    "es": "La resurrección se canceló porque el objetivo ya no está muerto."
+  },
+  "gameplay.target.paralyzed": {
+    "en": "The target is already paralyzed.",
+    "es": "El objetivo ya está paralizado"
+  },
+  "gameplay.target.notParalyzed": {
+    "en": "The target is not paralyzed.",
+    "es": "El objetivo no está paralizado"
+  },
+  "command.meditate.description": {
+    "en": "Sends the /meditate command.",
+    "es": "Envía el comando /meditar."
+  },
+  "command.logout.unsafe": {
+    "en": "In an unsafe area, use /logout and wait 10 seconds without moving.",
+    "es": "Para salir en zona insegura usa /salir y espera 10 segundos sin moverte."
+  },
+  "command.usage.0": {
+    "en": "Usage: /global message",
+    "es": "Uso: /global mensaje"
+  },
+  "command.usage.1": {
+    "en": "Usage: /p message",
+    "es": "Uso: /p mensaje"
+  },
+  "command.usage.2": {
+    "en": "Usage: /c message",
+    "es": "Uso: /c mensaje"
+  },
+  "command.usage.3": {
+    "en": "Usage: /w ",
+    "es": "Uso: /w "
+  },
+  "command.usage.4": {
+    "en": "[INFO] Usage: /inspect name.",
+    "es": "[INFO] Uso: /inspect nombre."
+  },
+  "command.usage.5": {
+    "en": "Usage: /party {player}",
+    "es": "Uso: /party {usuario}"
+  },
+  "command.usage.6": {
+    "en": "Usage: /kickparty {player}",
+    "es": "Uso: /expulsarparty {usuario}"
+  },
+  "command.usage.7": {
+    "en": "Usage: /createclan name|minLevel, /applyclan clanId|message, /acceptclan requestId, /rejectclan requestId, /leaveclan, /kickclan characterId, /clancoleader characterId|co_leader|member, /clanleader characterId, /deleteclan confirm",
+    "es": "Uso: /clancrear nombre|nivelMin, /clanpostular clanId|mensaje, /clanaceptar requestId, /clanrechazar requestId, /clansalir, /clanexpulsar characterId, /clancolider characterId|co_leader|member, /clanlider characterId, /claneliminar confirmar"
+  },
+  "command.usage.8": {
+    "en": "Usage: /createclan name|minLevel",
+    "es": "Uso: /clancrear nombre|nivelMin"
+  },
+  "command.usage.9": {
+    "en": "Usage: /applyclan clanId|message",
+    "es": "Uso: /clanpostular clanId|mensaje"
+  },
+  "command.usage.10": {
+    "en": "Usage: /acceptclan requestId",
+    "es": "Uso: /clanaceptar requestId"
+  },
+  "command.usage.11": {
+    "en": "Usage: /rejectclan requestId",
+    "es": "Uso: /clanrechazar requestId"
+  },
+  "command.usage.12": {
+    "en": "Usage: /kickclan characterId",
+    "es": "Uso: /clanexpulsar characterId"
+  },
+  "command.usage.13": {
+    "en": "Usage: /clancoleader characterId|co_leader|member",
+    "es": "Uso: /clancolider characterId|co_leader|member"
+  },
+  "command.usage.14": {
+    "en": "Usage: /deleteclan confirm",
+    "es": "Uso: /claneliminar confirmar"
+  },
+  "command.usage.15": {
+    "en": "Usage: /clanleader characterId",
+    "es": "Uso: /clanlider characterId"
+  },
+  "command.usage.16": {
+    "en": "[INFO] Usage: /devresetmap 500",
+    "es": "[INFO] Uso: /devresetmap 500"
+  },
+  "command.usage.17": {
+    "en": "[INFO] Usage: /limpiarpiso {map}",
+    "es": "[INFO] Uso: /limpiarpiso {mapa}"
+  },
+  "command.usage.18": {
+    "en": "[INFO] Usage: /spawnnpc NPC_ID [save|fixed|persistent] [move|mobile]",
+    "es": "[INFO] Uso: /invocarnpc ID_NPC [guardar|fijo|persistente] [mover|movil]"
+  },
+  "command.usage.19": {
+    "en": "[INFO] Usage: /createitem ID_ITEM CANTIDAD",
+    "es": "[INFO] Uso: /crearitem ID_ITEM CANTIDAD"
+  },
+  "command.usage.20": {
+    "en": "[INFO] Usage: /removenpc ID_ENTIDAD_NPC",
+    "es": "[INFO] Uso: /quitarnpc ID_ENTIDAD_NPC"
+  },
+  "command.usage.21": {
+    "en": "[INFO] Usage: /removenpcpermanent ID_ENTIDAD_NPC",
+    "es": "[INFO] Uso: /quitarnpcpermanente ID_ENTIDAD_NPC"
+  },
+  "journey.0": {
+    "es": "Manzana Roja",
+    "en": "Red apple"
+  },
+  "journey.1": {
+    "es": "Frutas del Bosque",
+    "en": "Forest berries"
+  },
+  "journey.2": {
+    "es": "Botella de Agua",
+    "en": "Water bottle"
+  },
+  "journey.3": {
+    "es": "Cerveza",
+    "en": "Beer"
+  },
+  "journey.5": {
+    "es": "Sin mapa cargado",
+    "en": "No map loaded"
+  },
+  "journey.6": {
+    "es": "Preparando cliente",
+    "en": "Preparing client"
+  },
+  "journey.7": {
+    "es": "Cargando escena inicial",
+    "en": "Loading the world"
+  },
+  "journey.8": {
+    "es": "Cargando personaje",
+    "en": "Loading character"
+  },
+  "journey.9": {
+    "es": "Cargando hechizos",
+    "en": "Loading spells"
+  },
+  "journey.10": {
+    "es": "Renderizando mundo",
+    "en": "Rendering world"
+  },
+  "journey.11": {
+    "es": "Precargando alrededores",
+    "en": "Loading nearby areas"
+  },
+  "journey.12": {
+    "es": "Cargando assets",
+    "en": "Loading assets"
+  },
+  "journey.13": {
+    "es": "Preparando escena",
+    "en": "Preparing scene"
+  },
+  "journey.14": {
+    "es": "Inicializando recursos...",
+    "en": "Initializing resources..."
+  },
+  "journey.15": {
+    "es": "Precargando ventana del mapa...",
+    "en": "Loading the map view..."
+  },
+  "journey.17": {
+    "es": "[Servidor] Cerrando sesión...",
+    "en": "[Server] Logging out..."
+  },
+  "cosmetic.huntTitle": {
+    "en": "First Hunt crest",
+    "es": "Emblema de la primera cacería"
+  },
+  "cosmetic.huntRequired": {
+    "en": "Reach level 2 and defeat four NPCs with the same character. Log out to save your progress.",
+    "es": "Alcanza nivel 2 y derrota cuatro NPCs con el mismo personaje. Cierra el personaje para guardar tu progreso."
+  },
+  "cosmetic.huntLimit": {
+    "en": "Server-limited devnet edition. Claims remaining:",
+    "es": "Edición de devnet limitada por el servidor. Reclamos disponibles:"
+  },
+  "cosmetic.kills": {
+    "en": "NPC kills",
+    "es": "NPCs derrotados"
+  },
+  "cosmetic.soldOut": {
+    "en": "All claims for this edition are reserved.",
+    "es": "Todos los reclamos de esta edición están reservados."
+  },
+  "cosmetic.received": {
+    "en": "Received a cosmetic from another wallet?",
+    "es": "¿Recibiste un cosmético de otra billetera?"
+  },
+  "cosmetic.assetAddress": {
+    "en": "Cosmetic asset address",
+    "es": "Dirección del cosmético"
+  },
+  "macro.save": {
+    "en": "Save",
+    "es": "Guardar macro"
+  },
+  "cosmetic.collection": {
+    "en": "Game cosmetics",
+    "es": "Cosméticos del juego"
+  },
+  "cosmetic.current": {
+    "en": "Equipped cosmetic",
+    "es": "Cosmético equipado"
+  },
+  "cosmetic.none": {
+    "en": "No cosmetic equipped",
+    "es": "Ningún cosmético equipado"
+  },
+  "cosmetic.checking": {
+    "en": "Checking ownership…",
+    "es": "Verificando propiedad…"
+  },
+  "cosmetic.verified": {
+    "en": "Ownership verified",
+    "es": "Propiedad verificada"
+  },
+  "cosmetic.verificationUnavailable": {
+    "en": "Ownership verification unavailable",
+    "es": "Verificación de propiedad no disponible"
+  },
+  "cosmetic.lostOwnership": {
+    "en": "The selected cosmetic is no longer verified for your linked wallet. It will not appear in-game.",
+    "es": "El cosmético seleccionado ya no está verificado para tu wallet vinculada. No aparecerá en el juego."
+  },
+  "cosmetic.receivedHelp": {
+    "en": "Paste the asset address of an AOCHAIN cosmetic received by your linked wallet. We verify ownership before equipping it.",
+    "es": "Pegá la dirección del cosmético de AOCHAIN recibido por tu wallet vinculada. Verificamos la propiedad antes de equiparlo."
+  },
+  "cosmetic.verifyEquip": {
+    "en": "Verify and equip",
+    "es": "Verificar y equipar"
+  },
+  "cosmetic.assetInvalid": {
+    "en": "Enter a valid Solana asset address.",
+    "es": "Ingresá una dirección de asset de Solana válida."
+  },
+  "cosmetic.equipSuccess": {
+    "en": "Cosmetic equipped.",
+    "es": "Cosmético equipado."
+  },
+  "cosmetic.unequipSuccess": {
+    "en": "Cosmetic unequipped.",
+    "es": "Cosmético desequipado."
+  },
+  "cosmetic.claimSuccess": {
+    "en": "Cosmetic claimed. Equip it when you are ready.",
+    "es": "Cosmético reclamado. Equipalo cuando quieras."
+  },
+  "cosmetic.syncHint": {
+    "en": "Changes may take a few seconds to appear in-game.",
+    "es": "Los cambios pueden tardar unos segundos en aparecer en el juego."
+  },
+  "cosmetic.clearedSelection": {
+    "en": "Clear selected cosmetic",
+    "es": "Quitar cosmético seleccionado"
+  }
+}

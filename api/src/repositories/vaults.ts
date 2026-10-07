@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import type { PoolClient } from "pg";
 import pool from "../db";
 
@@ -25,6 +26,7 @@ function ensureUniqueSlots<T extends { idPos: number }>(
 
 const syncVaultSchema = z
     .object({
+        operationId: z.string().uuid().optional(),
         characterId: z.string().uuid().optional(),
         characterGold: z.coerce
             .number()
@@ -334,6 +336,25 @@ async function syncVault(
 
     try {
         await client.query("BEGIN");
+        if (parsed.operationId) {
+            const hash = createHash('sha256').update(JSON.stringify(parsed)).digest('hex');
+            const inserted = await client.query(
+                `INSERT INTO vault_operation_receipts(operation_id, scope, owner_id, payload_hash)
+                 VALUES ($1,$2,$3,$4) ON CONFLICT (operation_id) DO NOTHING RETURNING operation_id`,
+                [parsed.operationId, scope, parsedOwnerId, hash],
+            );
+            if (!inserted.rowCount) {
+                const receipt = (await client.query<{
+                    scope: string; owner_id: string; payload_hash: string;
+                    response: { ok: true; updatedAt: string } | null;
+                }>('SELECT scope, owner_id, payload_hash, response FROM vault_operation_receipts WHERE operation_id=$1 FOR UPDATE', [parsed.operationId])).rows[0];
+                if (!receipt || receipt.scope !== scope || receipt.owner_id !== parsedOwnerId || receipt.payload_hash !== hash || !receipt.response) {
+                    throw new Error('Vault operation ID does not match its original transfer');
+                }
+                await client.query('COMMIT');
+                return receipt.response;
+            }
+        }
         await ensureOwnerExists(client, scope, parsedOwnerId);
         await ensureVaultRow(client, scope, parsedOwnerId);
 
@@ -428,14 +449,17 @@ async function syncVault(
             [parsedOwnerId],
         );
 
-        await client.query("COMMIT");
-
-        return {
-            ok: true,
+        const result = {
+            ok: true as const,
             updatedAt:
                 updatedResult.rows[0]?.updated_at.toISOString() ??
                 new Date().toISOString(),
         };
+        if (parsed.operationId) {
+            await client.query('UPDATE vault_operation_receipts SET response=$2::jsonb WHERE operation_id=$1', [parsed.operationId, JSON.stringify(result)]);
+        }
+        await client.query("COMMIT");
+        return result;
     } catch (error) {
         await client.query("ROLLBACK");
         throw error;

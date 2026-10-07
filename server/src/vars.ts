@@ -48,7 +48,7 @@ function Vars(this: any) {
         idleCharacterSweepMs: 10000,
         cleanupClosedCharactersMs: 60000,
         onlineStatsSnapshotMs: 60000,
-        worldSaveMs: 1800000,
+        worldSaveMs: Math.max(10000, Number(process.env.AOWEB_AUTOSAVE_MS) || 60000),
         statusDurations: {
             crowdControlUserMs: 8000,
             crowdControlNpcMs: 50000,

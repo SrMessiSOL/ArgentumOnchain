@@ -1,4 +1,5 @@
 import { AnimatedSprite, Sprite } from "pixi.js";
+import {translateSource, parseLocale} from '@/lib/i18n';
 import type { ObjectData } from "../../../types/game";
 import { OBJECT_TYPE, type PlayerHudState } from "../../../lib/aowProtocol";
 import type { RuntimeTimingConfig } from "../../../lib/runtime-config";
@@ -98,7 +99,9 @@ export function canRenderInvisibleAsTransparent(
 export function getCharacterNameLabel(
     character: Character | null | undefined,
 ): string {
-    return character?.nameCharacter || "Jugador";
+    const locale=typeof document==='undefined'?'en':parseLocale(document.documentElement.lang);
+    const name=character?.nameCharacter;
+    return name ? (character?.isNpc ? translateSource(name,locale):name) : translateSource('Jugador',locale);
 }
 
 export function getCharacterClanLabel(

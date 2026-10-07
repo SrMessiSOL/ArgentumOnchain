@@ -76,7 +76,7 @@ function requireValue(label: string, value: string | undefined): string {
   const trimmed = value?.trim();
 
   if (!trimmed) {
-    throw new Error(`Falta ${label}`);
+    throw new Error(`Missing ${label}`);
   }
 
   return trimmed;
@@ -107,7 +107,7 @@ async function requestJson<T>(
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`${response.status} ${response.statusText} en ${pathname}: ${text}`);
+    throw new Error(`${response.status} ${response.statusText} at ${pathname}: ${text}`);
   }
 
   return (await response.json()) as T;
@@ -118,7 +118,7 @@ function pickCharacter(characters: AuthCharacter[], requestedId?: string, reques
     const match = characters.find((character) => character._id === requestedId);
 
     if (!match) {
-      throw new Error(`No existe un personaje con id ${requestedId}`);
+      throw new Error(`No character exists with ID ${requestedId}`);
     }
 
     return match;
@@ -129,14 +129,14 @@ function pickCharacter(characters: AuthCharacter[], requestedId?: string, reques
     const match = characters.find((character) => character.name.trim().toLocaleLowerCase("es-AR") === normalizedName);
 
     if (!match) {
-      throw new Error(`No existe un personaje con nombre ${requestedName}`);
+      throw new Error(`No character exists with name ${requestedName}`);
     }
 
     return match;
   }
 
   if (characters.length === 0) {
-    throw new Error("La cuenta no tiene personajes");
+    throw new Error("The account has no characters");
   }
 
   return characters[0];
@@ -146,20 +146,20 @@ async function main(): Promise<void> {
   readEnvFile();
 
   const baseUrl = (getArg("base-url") ?? process.env.API_BASE_URL ?? "http://localhost:3001").replace(/\/+$/, "");
-  const email = requireValue("EMAIL o --email", getArg("email") ?? process.env.DIAG_EMAIL ?? process.env.EMAIL);
+  const email = requireValue("EMAIL or --email", getArg("email") ?? process.env.DIAG_EMAIL ?? process.env.EMAIL);
   const password = requireValue(
-    "PASSWORD o --password",
+    "PASSWORD or --password",
     getArg("password") ?? process.env.DIAG_PASSWORD ?? process.env.PASSWORD,
   );
   const internalToken = requireValue(
-    "TOKEN_AUTH o --token-auth",
+    "TOKEN_AUTH or --token-auth",
     getArg("token-auth") ?? process.env.TOKEN_AUTH,
   );
   const requestedCharacterId = getArg("character-id") ?? process.env.DIAG_CHARACTER_ID;
   const requestedCharacterName = getArg("character-name") ?? process.env.DIAG_CHARACTER_NAME;
 
   console.log(`[diag] API: ${baseUrl}`);
-  console.log(`[diag] Login con cuenta: ${email}`);
+  console.log(`[diag] Logging in with account: ${email}`);
 
   const login = await requestJson<AuthLoginResponse>(baseUrl, "/auth/login", {
     method: "POST",
@@ -171,7 +171,7 @@ async function main(): Promise<void> {
 
   const selectedCharacter = pickCharacter(login.characters, requestedCharacterId, requestedCharacterName);
 
-  console.log(`[diag] Personaje seleccionado: ${selectedCharacter.name} (${selectedCharacter._id})`);
+  console.log(`[diag] Selected character: ${selectedCharacter.name} (${selectedCharacter._id})`);
 
   await requestJson(baseUrl, "/auth/select-character", {
     method: "POST",
@@ -217,20 +217,20 @@ async function main(): Promise<void> {
   const resultA = consumeA.status === "fulfilled" ? consumeA.value : null;
   const resultB = consumeB.status === "fulfilled" ? consumeB.value : null;
 
-  console.log("[diag] Resultado consume A:", consumeA.status === "fulfilled" ? "OK" : consumeA.reason);
-  console.log("[diag] Resultado consume B:", consumeB.status === "fulfilled" ? "OK" : consumeB.reason);
+  console.log("[diag] Consume result A:", consumeA.status === "fulfilled" ? "OK" : consumeA.reason);
+  console.log("[diag] Consume result B:", consumeB.status === "fulfilled" ? "OK" : consumeB.reason);
 
   const bothSucceeded = Boolean(resultA?.character?._id && resultB?.character?._id);
   const sameCharacter = resultA?.character?._id === selectedCharacter._id && resultB?.character?._id === selectedCharacter._id;
 
   if (bothSucceeded && sameCharacter) {
-    console.log("\n[diag][vulnerable] Ambos tickets se consumieron para el mismo personaje.");
-    console.log("[diag][vulnerable] Esto confirma el vector base de doble sesion/snapshot duplicado.");
+    console.log("\n[diag][vulnerable] Both tickets were consumed for the same character.");
+    console.log("[diag][vulnerable] This confirms the base duplicate-session/snapshot vulnerability.");
     process.exitCode = 2;
     return;
   }
 
-  console.log("\n[diag][ok] No se pudo consumir dos veces el mismo personaje con este flujo.");
+  console.log("\n[diag][ok] This flow could not consume the same character twice.");
 }
 
 void main().catch((error) => {

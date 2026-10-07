@@ -1,4 +1,6 @@
 import type { GameApi } from "./game";
+import { bankOperations } from './bankOperationGuard';
+import { resolveCommandAlias, playerCommandHelp, normalizeClassInput, parseNpcSpawnOptions, formatAdminBotName } from "./commandAliases";
 import type { HandleProtocolApi } from "./handleProtocol";
 import type { SocketApi } from "./socket";
 import {
@@ -413,19 +415,7 @@ async function persistBailState(user: CommandCharacter) {
         return;
     }
 
-    await funct.fetchUrl(`/character_save/${user._id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-            gold: user.gold,
-            criminal: Boolean(user.criminal),
-            fianza: user.fianza ?? 0,
-            updatedAt: new Date(),
-        }),
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: vars.tokenAuth,
-        },
-    });
+    await game.persistCharacterPatch(user, { gold: user.gold, criminal: Boolean(user.criminal), fianza: user.fianza ?? 0 });
 }
 
 function makeCitizen(user: CommandCharacter, ws: RuntimeClient) {
@@ -633,7 +623,7 @@ function startServerRestartWarningSequence() {
 function runWorldSave(targetClient?: CommandClient) {
     handleProtocol.consoleToAll("[Servidor] Guardando personajes.", "#E69500", 0, 0);
     game.worldSave((result) => {
-        console.log("[COMANDO] WorldSave");
+        console.log("[COMMAND] WorldSave");
 
         if (!targetClient) {
             return;
@@ -1075,11 +1065,7 @@ type AdminSummonedBotCharacter = CommandCharacter & {
 };
 
 function normalizeBotClassInput(value: string) {
-    return value
-        .trim()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLocaleLowerCase("es-AR");
+    return normalizeClassInput(value);
 }
 
 function listAvailableAdminBotClasses() {
@@ -1229,7 +1215,7 @@ async function spawnAdminSummonedBot(idUser: EntityId, classInput: string, level
     const template = vars.charactersPvP[templateIndex];
     const currentBotCount = getAdminSummonedBots(idUser).length;
     const botClient = createInternalBotClient(ws);
-    const botName = `Bot ${template.name} ${targetLevel} #${currentBotCount + 1}`;
+    const botName = formatAdminBotName(template.name, targetLevel, currentBotCount + 1);
 
     try {
         await login.connectCharacterPvP(
@@ -2107,7 +2093,7 @@ const command: CommandApi = {
                 nextText = "";
             }
 
-            commandText = commandText.toLowerCase();
+            commandText = resolveCommandAlias(commandText);
 
             if (!game.existPjOrClose(ws)) {
                 return;
@@ -2118,6 +2104,11 @@ const command: CommandApi = {
             const userInSafeZone = isInSafeZone(user);
 
             switch (commandText) {
+                case "/help":
+                    for (const line of playerCommandHelp) {
+                        handleProtocol.console(line, "white", 0, 0, ws as CommandClient);
+                    }
+                    break;
                 case "/online":
                     handleProtocol.console(
                         `Usuarios online en PvE: ${vars.usuariosOnline}`,
@@ -2616,7 +2607,7 @@ const command: CommandApi = {
                 case "/claneliminar": {
                     const confirmation = nextText.trim().toLowerCase();
 
-                    if (confirmation !== "confirmar") {
+                    if (confirmation !== "confirmar" && confirmation !== "confirm") {
                         handleProtocol.console("Uso: /claneliminar confirmar", "white", 0, 0, ws as CommandClient);
                         break;
                     }
@@ -2748,44 +2739,46 @@ const command: CommandApi = {
                         break;
                     }
 
-                    const bailCost = getBailCost(user);
+                    await bankOperations.run(user.id, async () => {
+                        const bailCost = getBailCost(user);
 
-                    if (user.gold < bailCost) {
-                        handleProtocol.openBail(getBailOffer(user), ws as CommandClient);
+                        if (user.gold < bailCost) {
+                            handleProtocol.openBail(getBailOffer(user), ws as CommandClient);
+                            handleProtocol.console(
+                                `Necesitas ${bailCost} monedas de oro para pagar tu fianza y volver a ser ciudadano.`,
+                                "white",
+                                1,
+                                0,
+                                ws as CommandClient,
+                            );
+                            return;
+                        }
+
+                        user.gold = balance.clampGold(user.gold - bailCost);
+                        user.fianza = Number(user.ciudadanosMatados ?? 0);
+                        handleProtocol.actGold(user.gold, getClient(clientId));
+                        makeCitizen(user, ws);
+                        handleProtocol.closeBail(ws as CommandClient);
+                        game.logCharacterActivity(user, {
+                            category: "economy",
+                            action: "bail_paid",
+                            goldDelta: -bailCost,
+                            details: {
+                                map: user.map,
+                                posX: user.pos.x,
+                                posY: user.pos.y,
+                                bailCost,
+                            },
+                        });
+                        await persistBailState(user);
                         handleProtocol.console(
-                            `Necesitas ${bailCost} monedas de oro para pagar tu fianza y volver a ser ciudadano.`,
-                            "white",
+                            `Has pagado ${bailCost} monedas de oro y vuelves a ser ciudadano.`,
+                            "#E69500",
                             1,
                             0,
                             ws as CommandClient,
                         );
-                        break;
-                    }
-
-                    user.gold = balance.clampGold(user.gold - bailCost);
-                    user.fianza = Number(user.ciudadanosMatados ?? 0);
-                    handleProtocol.actGold(user.gold, getClient(clientId));
-                    makeCitizen(user, ws);
-                    handleProtocol.closeBail(ws as CommandClient);
-                    game.logCharacterActivity(user, {
-                        category: "economy",
-                        action: "bail_paid",
-                        goldDelta: -bailCost,
-                        details: {
-                            map: user.map,
-                            posX: user.pos.x,
-                            posY: user.pos.y,
-                            bailCost,
-                        },
-                    });
-                    await persistBailState(user);
-                    handleProtocol.console(
-                        `Has pagado ${bailCost} monedas de oro y vuelves a ser ciudadano.`,
-                        "#E69500",
-                        1,
-                        0,
-                        ws as CommandClient,
-                    );
+                    }, undefined);
                     break;
                 }
 
@@ -3529,12 +3522,7 @@ const command: CommandApi = {
                             break;
                         }
 
-                        const persist = ["guardar", "guardado", "fijo", "persistente"].includes(
-                            String(spawnArgs[1] ?? "").toLocaleLowerCase("es-AR"),
-                        );
-                        const persistMovement = ["mover", "movil", "móvil"].includes(
-                            String(spawnArgs[2] ?? "").toLocaleLowerCase("es-AR"),
-                        );
+                        const { persist, persistMovement } = parseNpcSpawnOptions(spawnArgs[1], spawnArgs[2]);
 
                         spawnNpcNextToAdmin(clientId, idNpc, ws, persist, persistMovement);
                     }
@@ -3664,17 +3652,17 @@ const command: CommandApi = {
                             break;
                         }
 
-                        game.putItemToInv(user.id, idItem, cant);
-                        void game.persistCharacterItemsById(user.id).catch((error: unknown) => {
-                            funct.dumpError(error);
-                        });
-                        handleProtocol.console(
+                        void bankOperations.run(user.id, async () => {
+                            game.putItemToInv(user.id, idItem, cant);
+                            await game.persistCharacterEconomyById(user.id);
+                            handleProtocol.console(
                             `[INFO] Recibiste ${cant} ${itemData.name ?? "item"}.`,
                             "#86efac",
                             0,
                             0,
                             ws as CommandClient,
                         );
+                        }, undefined).catch((error: unknown) => funct.dumpError(error));
                     }
                     break;
 

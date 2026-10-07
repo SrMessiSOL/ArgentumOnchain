@@ -7,9 +7,13 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "generate:headswithfile": "node ./scripts/generate-headswithfile.mjs"
+        "generate:headswithfile": "node ./scripts/generate-headswithfile.mjs",
+        "test:english": "node scripts/test-english.mjs",
+        "audit:english-data": "node --import ../server/node_modules/tsx/dist/loader.mjs scripts/audit-english-data.ts"
     },
     "dependencies": {
+        "@solana/connector": "^0.3.0",
+        "@solana/web3.js": "1.98.4",
         "dotenv": "^17.4.2",
         "howler": "^2.2.4",
         "lucide-react": "^1.16.0",

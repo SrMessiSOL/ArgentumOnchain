@@ -326,7 +326,7 @@ function exportMap(mapId: number, sourceDir: string, outputDir: string): void {
     const specialsPath = path.join(mapDir, "specials.json");
 
     if (!fs.existsSync(terrainPath)) {
-        throw new Error(`Mapa ${mapId}: no existe ${terrainPath}`);
+        throw new Error(`Map ${mapId}: ${terrainPath} does not exist`);
     }
 
     const terrain = readJsonFile<TerrainMap>(terrainPath);
@@ -339,7 +339,7 @@ function exportMap(mapId: number, sourceDir: string, outputDir: string): void {
     writeJsonFile(path.join(outputDir, fileName), optimizedMap);
 
     console.log(
-        `Exportado optimized mapa ${mapId} -> ${path.relative(process.cwd(), path.join(outputDir, fileName))} ` +
+        `Exported optimized map ${mapId} -> ${path.relative(process.cwd(), path.join(outputDir, fileName))} ` +
             `(cells=${optimizedMap.d.length}, complex=${optimizedMap.cx?.length ?? 0})`,
     );
 }
@@ -349,14 +349,14 @@ function main(): void {
     const resolvedMapIds = mapIds.length > 0 ? mapIds : getAvailableMapIds(sourceDir);
 
     if (resolvedMapIds.length === 0) {
-        throw new Error("No se encontraron mapas para exportar.");
+        throw new Error("No maps found to export.");
     }
 
     for (const mapId of resolvedMapIds) {
         exportMap(mapId, sourceDir, outputDir);
     }
 
-    console.log(`Listo. Mapas optimizados exportados: ${resolvedMapIds.length}`);
+    console.log(`Done. Optimized maps exported: ${resolvedMapIds.length}`);
 }
 
 main();

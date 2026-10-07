@@ -15,6 +15,9 @@
 
 # next.js
 /.next/
+/.next-public/
+/.next-public-en/
+/.next-public-next/
 /out/
 
 # production
@@ -42,6 +45,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.tsconfig-public-*.json
 test-results
 playwright-report
 

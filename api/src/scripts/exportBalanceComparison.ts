@@ -197,11 +197,11 @@ async function main() {
   fs.writeFileSync(outputPath, `${lines.join("\n")}\n`, "utf8");
   await pool.end();
 
-  console.log(`CSV generado: ${outputPath}`);
+  console.log(`CSV generated: ${outputPath}`);
   console.log(
-    `Personajes analizados: ${result.rowCount ?? result.rows.length}`,
+    `Characters analyzed: ${result.rowCount ?? result.rows.length}`,
   );
-  console.log(`Nivel maximo nuevo aplicado para comparacion: ${MAX_LEVEL}`);
+  console.log(`New maximum level used for comparison: ${MAX_LEVEL}`);
 }
 
 main().catch(async (error) => {

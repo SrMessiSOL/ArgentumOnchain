@@ -1,5 +1,6 @@
 import type { EntityId, RuntimeCallback, RuntimeCharacter, RuntimeClient, RuntimeNpc } from "./types/runtime";
 import type { GameApi } from "./game";
+import { bankOperations } from './bankOperationGuard';
 import type { PackageApi, PacketPayload } from "./package";
 
 export {};
@@ -447,6 +448,7 @@ const socket: SocketApi = {
 
     async closePjById(idUser) {
         try {
+            await bankOperations.wait(idUser);
             const ws = vars.clients[idUser] as RuntimeClient | undefined;
             const personajeWS = vars.personajes[idUser] as RuntimeCharacter | undefined;
             const npcApi = require("./npcs") as {
@@ -505,11 +507,11 @@ const socket: SocketApi = {
                         },
                     });
 
-                    funct.sendTelegramMessage(`[Servidor] Usuario ${personajeWS.nameCharacter} desconectado.`);
+                    funct.sendTelegramMessage(`[Server] User ${personajeWS.nameCharacter} disconnected.`);
 
                     vars.usuariosOnline--;
 
-                    funct.sendTelegramMessage(`[Servidor] Usuarios online: ${vars.usuariosOnline}`);
+                    funct.sendTelegramMessage(`[Server] Users online: ${vars.usuariosOnline}`);
 
                     this.actOnline(vars.usuariosOnline);
                     mapInstanceManager.onPlayerDisconnected(personajeWS);
@@ -519,9 +521,9 @@ const socket: SocketApi = {
                     if (!personajeWS.botLoad) {
                         vars.usuariosOnlinePvP--;
 
-                        funct.sendTelegramMessage(`[Servidor-PVP] Usuario ${personajeWS.nameCharacter} desconectado.`);
+                        funct.sendTelegramMessage(`[Server-PVP] User ${personajeWS.nameCharacter} disconnected.`);
 
-                        funct.sendTelegramMessage(`[Servidor-PVP] Usuarios online: ${vars.usuariosOnlinePvP}`);
+                        funct.sendTelegramMessage(`[Server-PVP] Users online: ${vars.usuariosOnlinePvP}`);
                     }
 
                     await arenaManager.onPlayerDisconnected(personajeWS);

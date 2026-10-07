@@ -1,6 +1,11 @@
 "use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
+import { translateSource, type Locale } from "@/lib/i18n";
+import { localizeConsoleEntry } from "@/lib/game-i18n";
+import { useI18n } from "@/components/I18nProvider";
 
 import Link from "next/link";
+import {logoutFeedback} from "@/lib/logout-state";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Maximize2, Minimize2 } from "lucide-react";
@@ -91,10 +96,10 @@ const FULLSCREEN_PROMPT_MAX_HEIGHT = 900;
 const PLAY_HOTKEYS_HINT_STORAGE_KEY = "ao-play-hotkeys-hint-dismissed";
 const PLAY_SOUND_VOLUME_STORAGE_KEY = "ao-play-sound-volume";
 const LOGOUT_STARTED_MESSAGE =
-    "[Servidor] Debes permanecer quieto durante 10 segundos para salir. Si te mueves, la salida se cancelará.";
-const LOGOUT_CANCELLED_PATTERN = /^\[Servidor\] La salida se canceló porque /;
+    "[Servidor] Debes permanecer quieto durante 10 segundos para salir. Si te mueves, la salida se cancelarÃƒÂ¡.";
+const LOGOUT_CANCELLED_PATTERN = /^\[Servidor\] La salida se cancelÃƒÂ³ porque /;
 const LOGOUT_DENIED_PATTERN = /^\[Servidor\] No puedes salir /;
-const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesión...";
+const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesiÃƒÂ³n...";
 const LOGOUT_DELAY_MS = 10000;
 const CHALLENGE_INSTANCE_MAP_START = 2000;
 const RETOS_INFO_MESSAGES = new Set([
@@ -104,28 +109,28 @@ const RETOS_INFO_MESSAGES = new Set([
 ]);
 const RETOS_ERROR_MESSAGES = new Set([
     "Solo puedes usar retos en Mundo Abierto.",
-    "No puedes usar retos mientras estás muerto.",
+    "No puedes usar retos mientras estÃƒÂ¡s muerto.",
     "Solo puedes usar retos estando en zona segura.",
-    "Ese personaje ya está participando en otro reto.",
+    "Ese personaje ya estÃƒÂ¡ participando en otro reto.",
     "Para crear o unirte a un reto 2vs2 debes estar en una party de 2.",
-    "Solo el líder de la party puede crear o aceptar retos 2vs2.",
+    "Solo el lÃƒÂ­der de la party puede crear o aceptar retos 2vs2.",
     "El reto 2vs2 requiere una party exacta de 2 personajes.",
     "Todos los miembros de la party deben estar conectados para el reto 2vs2.",
     "Debes estar conectado para usar retos.",
-    "El modo de reto es inválido.",
-    "El reto ya no está disponible.",
+    "El modo de reto es invÃƒÂ¡lido.",
+    "El reto ya no estÃƒÂ¡ disponible.",
     "Solo puedes cancelar tu propio reto.",
-    "El retador ya no está disponible.",
+    "El retador ya no estÃƒÂ¡ disponible.",
     "No puedes aceptar tu propio reto.",
 ]);
 const CONSOLE_DISCORD_URL = "https://discord.gg/sf8rWAvgxs";
 const CONSOLE_FEEDBACK_FORM_URL = "https://forms.gle/Df2cmGExTBjjJhAR8";
 const WELCOME_CONSOLE_MESSAGES = {
     discord:
-        "Bienvenido a AOWeb. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.",
+        "Bienvenido a AOCHAIN. Si quieres enterarte de las ÃƒÂºltimas actualizaciones del juego, puedes ingresar a nuestro Discord.",
     feedback:
         "- Si quieres reportar erorres o sugerir cambios, puedes hacerlo en: https://forms.gle/Df2cmGExTBjjJhAR8",
-    rules: "- Está completamente prohibido el uso de personajes cámara, cheats o cualquier programa externo que modifique el juego, como auto tomar pociones o auto removerse. El uso de los mismos terminará en un ban permanente, sin previo aviso.",
+    rules: "- EstÃƒÂ¡ completamente prohibido el uso de personajes cÃƒÂ¡mara, cheats o cualquier programa externo que modifique el juego, como auto tomar pociones o auto removerse. El uso de los mismos terminarÃƒÂ¡ en un ban permanente, sin previo aviso.",
 } as const;
 const CHALLENGE_OVERLAY_PATTERN = /^\[Reto\]\s+(10|[0-9]|YA)$/;
 
@@ -146,6 +151,9 @@ function resolveWebSocketUrl(configuredUrl: string): string {
     }
 
     const pageProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    if (configuredUrl.startsWith("/") && !configuredUrl.startsWith("//")) {
+        return `${pageProtocol}//${window.location.host}${configuredUrl}`;
+    }
 
     try {
         const configured = new URL(configuredUrl);
@@ -160,14 +168,12 @@ function resolveWebSocketUrl(configuredUrl: string): string {
             isPrivateHostname(configured.hostname) &&
             !isPrivateHostname(currentHost)
         ) {
-            configured.protocol = pageProtocol;
-            configured.hostname = currentHost;
-            return configured.toString();
+            return `${pageProtocol}//${window.location.host}/game-socket`;
         }
 
         return configuredUrl;
     } catch {
-        return `${pageProtocol}//${window.location.hostname}:7666`;
+        return `${pageProtocol}//${window.location.host}/game-socket`;
     }
 }
 
@@ -312,6 +318,7 @@ type ConsoleEntry = {
     speakerType?: "npc" | "user";
     channel?: ChatChannel;
     senderName?: string;
+    npcName?: string;
 };
 
 type GlobalCanvasNotice = {
@@ -491,14 +498,16 @@ function buildChatMessageForTab(
     }
 }
 
-function renderConsoleEntryText(text: string) {
-    if (text === WELCOME_CONSOLE_MESSAGES.discord) {
+function renderConsoleEntryText(text: string, locale: Locale) {
+    if (text === WELCOME_CONSOLE_MESSAGES.discord || text === translateSource(WELCOME_CONSOLE_MESSAGES.discord,'en')) {
         const suffix = "Discord";
-        const prefix = text.slice(0, -`${suffix}.`.length);
+        const linkStart = text.indexOf(suffix);
+        const prefix = text.slice(0, linkStart);
+        const ending = text.slice(linkStart + suffix.length);
 
         return (
             <>
-                {prefix}
+                {translateSource(prefix, locale)}
                 <a
                     href={CONSOLE_DISCORD_URL}
                     target="_blank"
@@ -507,18 +516,18 @@ function renderConsoleEntryText(text: string) {
                 >
                     {suffix}
                 </a>
-                .
+                {ending}
             </>
         );
     }
 
-    if (text === WELCOME_CONSOLE_MESSAGES.feedback) {
+    if (text === WELCOME_CONSOLE_MESSAGES.feedback || text === translateSource(WELCOME_CONSOLE_MESSAGES.feedback,'en')) {
         const url = CONSOLE_FEEDBACK_FORM_URL;
         const prefix = text.slice(0, -url.length);
 
         return (
             <>
-                {prefix}
+                {translateSource(prefix, locale)}
                 <a
                     href={url}
                     target="_blank"
@@ -662,6 +671,8 @@ function ScaledHudFrame({
 }
 
 function HomeContent() {
+    const { locale, t: localizeKey, text: localizeText } = useI18n();
+
     const router = useRouter();
     const searchParams = useSearchParams();
     const arenaRoomId = searchParams.get("room")?.trim() || "";
@@ -733,7 +744,7 @@ function HomeContent() {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [chatMessage, setChatMessage] = useState("");
     const [isChatMenuOpen, setIsChatMenuOpen] = useState(false);
-    const [isConsoleOpen, setIsConsoleOpen] = useState(false);
+    const isConsoleOpen = true;
     const [lastWhisperTarget, setLastWhisperTarget] = useState<string | null>(
         null,
     );
@@ -914,13 +925,13 @@ function HomeContent() {
         : "/characters";
     const switchCharacterLabel = arenaMode
         ? "Cambiar clase"
-        : "Cambiar personaje";
+        : localizeKey("hud.changeCharacter");
     const deathHomeTitle = arenaMode
         ? "Volver al sacerdote"
         : "Volver a la ciudad";
     const deathHomeDescription = arenaMode
-        ? "También puedes volver al sacerdote con el comando /hogar"
-        : "También puedes volver con el comando /hogar";
+        ? "TambiÃƒÂ©n puedes volver al sacerdote con el comando /hogar"
+        : "TambiÃƒÂ©n puedes volver con el comando /hogar";
 
     useEffect(() => {
         activeChatTabRef.current = activeChatTab;
@@ -998,10 +1009,8 @@ function HomeContent() {
             }
 
             if (
-                commandText === "/retos" &&
-                trimmedMessage.localeCompare("/retos", "es", {
-                    sensitivity: "base",
-                }) === 0
+                ["/retos", "/challenges"].includes(commandText) &&
+                ["/retos", "/challenges"].includes(trimmedMessage.toLowerCase())
             ) {
                 setRetosOpen(true);
                 return true;
@@ -1474,9 +1483,11 @@ function HomeContent() {
         HUD_GAP +
         COLUMN_SECTION_GAP;
 
-    const isDesktopConsoleLayout = isFullscreen
+    const leftConsoleWidth = Math.min(320, viewport.width - CANVAS_BASE_WIDTH - RIGHT_PANEL_WIDTH - HUD_GAP * 2 - (isFullscreen ? SHELL_HORIZONTAL_PADDING_FULLSCREEN : SHELL_HORIZONTAL_PADDING) * 2);
+    const isLeftConsoleLayout = leftConsoleWidth >= 200;
+    const isDesktopConsoleLayout = isLeftConsoleLayout || (isFullscreen
         ? viewport.width > 768
-        : viewport.width > 768 && viewport.height >= minimumPinnedConsoleHeight;
+        : viewport.width > 768 && viewport.height >= minimumPinnedConsoleHeight);
 
     const shellTopPadding = isFullscreen
         ? SHELL_TOP_PADDING_FULLSCREEN
@@ -1528,7 +1539,7 @@ function HomeContent() {
     }, []);
 
     const hudScale = useMemo(() => {
-        if (!isFullscreen || !viewport.width || !viewport.height) {
+        if ((!isFullscreen && !isLeftConsoleLayout) || !viewport.width || !viewport.height) {
             return 1;
         }
 
@@ -1539,11 +1550,11 @@ function HomeContent() {
             rightColumnSize.height,
         );
         const totalBaseHeight =
-            (isDesktopConsoleLayout ? topHudSectionSize.height + HUD_GAP : 0) +
+            (isDesktopConsoleLayout && !isLeftConsoleLayout ? topHudSectionSize.height + HUD_GAP : 0) +
             mainRowBaseHeight;
         const mainRowBaseWidth =
-            CANVAS_BASE_WIDTH + HUD_GAP + rightColumnSize.width;
-        const totalBaseWidth = isDesktopConsoleLayout
+            CANVAS_BASE_WIDTH + HUD_GAP + rightColumnSize.width + (isLeftConsoleLayout ? leftConsoleWidth + HUD_GAP : 0);
+        const totalBaseWidth = isDesktopConsoleLayout && !isLeftConsoleLayout
             ? Math.max(mainRowBaseWidth, topHudSectionSize.width)
             : mainRowBaseWidth;
         const availableWidth = viewport.width - shellHorizontalPadding * 2;
@@ -1557,9 +1568,11 @@ function HomeContent() {
             return 1;
         }
 
-        return Math.min(MAX_FULLSCREEN_HUD_SCALE, nextScale);
+        return Math.min(isFullscreen ? MAX_FULLSCREEN_HUD_SCALE : 1, nextScale);
     }, [
         isDesktopConsoleLayout,
+        isLeftConsoleLayout,
+        leftConsoleWidth,
         isFullscreen,
         macroBarSize.height,
         rightColumnSize.height,
@@ -1581,7 +1594,7 @@ function HomeContent() {
             };
         }
 
-        if (!isFullscreen) {
+        if (!isFullscreen && !isLeftConsoleLayout) {
             return {
                 canvasWidth: CANVAS_BASE_WIDTH,
                 canvasHeight: CANVAS_BASE_HEIGHT,
@@ -1597,7 +1610,7 @@ function HomeContent() {
             canvasWidth: scaledCanvasSize,
             canvasHeight: scaledCanvasSize,
         };
-    }, [hudScale, isFullscreen, viewport.height, viewport.width]);
+    }, [hudScale, isFullscreen, isLeftConsoleLayout, viewport.height, viewport.width]);
 
     const toggleFullscreen = useCallback(async () => {
         const shellElement = gameShellRef.current;
@@ -1637,7 +1650,6 @@ function HomeContent() {
         setIsChatOpen(false);
         setChatMessage("");
         setIsChatMenuOpen(false);
-        setIsConsoleOpen(false);
         setLastWhisperTarget(null);
         setUnreadChatCounts(createEmptyUnreadChatCounts());
         setDeathHomePromptOpen(false);
@@ -1731,20 +1743,20 @@ function HomeContent() {
                     return;
                 }
 
-                if (entry.text === LOGOUT_STARTED_MESSAGE) {
+                if (logoutFeedback(entry.text) === 'started') {
                     setLogoutPending(true);
                     setLogoutDeadline(Date.now() + LOGOUT_DELAY_MS);
-                } else if (LOGOUT_CANCELLED_PATTERN.test(entry.text)) {
+                } else if (logoutFeedback(entry.text) === 'cancelled') {
                     setLogoutPending(false);
                     setLogoutDeadline(null);
                     setLogoutSecondsRemaining(0);
                     setPendingExitHref(null);
-                } else if (LOGOUT_DENIED_PATTERN.test(entry.text)) {
+                } else if (logoutFeedback(entry.text) === 'denied') {
                     setLogoutPending(false);
                     setLogoutDeadline(null);
                     setLogoutSecondsRemaining(0);
                     setPendingExitHref(null);
-                } else if (entry.text === LOGOUT_CLOSING_MESSAGE) {
+                } else if (logoutFeedback(entry.text) === 'closing') {
                     setLogoutPending(true);
                     setLogoutDeadline(null);
                     setLogoutSecondsRemaining(0);
@@ -1803,24 +1815,6 @@ function HomeContent() {
             }
 
             const nextChannel = entry.channel ?? "console";
-
-            if (
-                (nextChannel === "party" ||
-                    nextChannel === "clan" ||
-                    nextChannel === "whisper") &&
-                nextChannel !== activeChatTabRef.current &&
-                !isOwnChatEntry(
-                    entry.text,
-                    nextChannel,
-                    playerNameRef.current,
-                    entry.senderName,
-                )
-            ) {
-                setUnreadChatCounts((current) => ({
-                    ...current,
-                    [nextChannel]: current[nextChannel] + 1,
-                }));
-            }
 
             setChatEntriesByTab((current) => {
                 const nextId = Math.max(
@@ -2293,11 +2287,10 @@ function HomeContent() {
     }, [hud?.inventory, tradeState]);
 
     const visibleConsoleEntries = useMemo(
-        () => chatEntriesByTab[activeChatTab] ?? [],
-        [activeChatTab, chatEntriesByTab],
+        () => Object.values(chatEntriesByTab).flat().sort((a, b) => a.id - b.id),
+        [chatEntriesByTab],
     );
-    const activeChatTabLabel =
-        CHAT_TABS.find((tab) => tab.id === activeChatTab)?.label ?? "Consola";
+    const activeChatTabLabel = "Consola";
     const totalUnreadChatCount =
         unreadChatCounts.party +
         unreadChatCounts.clan +
@@ -2331,7 +2324,7 @@ function HomeContent() {
         }
 
         container.scrollTop = container.scrollHeight;
-    }, [isDesktopConsoleLayout, isConsoleOpen, visibleConsoleEntries]);
+    }, [isDesktopConsoleLayout, isLeftConsoleLayout, isConsoleOpen, visibleConsoleEntries]);
 
     useEffect(() => {
         if (arenaMode || !authSession?.selectedCharacterId) {
@@ -2551,8 +2544,56 @@ function HomeContent() {
         [],
     );
 
+    const chatInputForm = (
+                                        <form
+                                            ref={chatFormRef}
+                                            className="pointer-events-auto flex w-full items-center gap-3 rounded-2xl border border-amber-300/35 bg-stone-950/88 px-4 py-3 shadow-2xl backdrop-blur-md"
+                                            onSubmit={(event) => {
+                                                event.preventDefault();
+                                                submitChatMessage();
+                                            }}
+                                        >
+                                            <LocalizedLabel><input
+                                                ref={chatInputRef}
+                                                type="text"
+                                                autoComplete="off"
+                                                value={chatMessage}
+                                                maxLength={120}
+                                                onChange={(event) =>
+                                                    setChatMessage(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                onKeyDown={(event) => {
+                                                    if (
+                                                        event.key === "Escape"
+                                                    ) {
+                                                        event.preventDefault();
+                                                        setIsChatOpen(false);
+                                                        setChatMessage("");
+                                                    }
+                                                }}
+                                                placeholder={
+                                                    activeChatTab === "global"
+                                                        ? "/global para mandar un mensaje global"
+                                                        : activeChatTab ===
+                                                            "party"
+                                                          ? "Mensaje para la party"
+                                                          : activeChatTab ===
+                                                              "clan"
+                                                            ? "Mensaje para el clan"
+                                                            : activeChatTab ===
+                                                                "whisper"
+                                                              ? whisperPlaceholder
+                                                              : "Escribi tu mensaje y presiona Enter"
+                                                }
+                                                className="min-w-0 flex-1 bg-transparent text-sm text-stone-100 outline-none placeholder:text-stone-500"
+                                            /></LocalizedLabel>
+                                        </form>
+    );
+
     const chatTabsMenu = (
-        <div className="flex h-full flex-col gap-1 rounded-2xl border border-cyan-200/20 bg-stone-950/72 p-2 shadow-2xl backdrop-blur-[2px]">
+        <div className={`${isLeftConsoleLayout ? "grid grid-cols-2" : "flex h-full flex-col"} gap-1 rounded-2xl border border-cyan-200/20 bg-stone-950/72 p-2 shadow-2xl backdrop-blur-[2px]`}>
             {CHAT_TABS.map((tab) => {
                 const isActive = tab.id === activeChatTab;
                 const unreadCount =
@@ -2568,16 +2609,17 @@ function HomeContent() {
                         type="button"
                         onClick={(event) => {
                             setActiveChatTab(tab.id);
+                            setIsChatOpen(true);
                             setIsChatMenuOpen(false);
                             event.currentTarget.blur();
                         }}
-                        className={`relative flex min-h-0 flex-1 items-center justify-center rounded-full px-3 py-1 text-center text-[10px] font-medium uppercase tracking-[0.2em] transition focus:outline-none focus-visible:outline-none ${
+                        className={`relative flex ${isLeftConsoleLayout ? "min-h-8" : "min-h-0 flex-1"} items-center justify-center rounded-full px-3 py-1 text-center text-[10px] font-medium uppercase tracking-[0.2em] transition focus:outline-none focus-visible:outline-none ${
                             isActive
                                 ? "bg-cyan-300/18 text-cyan-100"
                                 : "bg-stone-900/70 text-stone-400 hover:text-stone-200"
                         }`}
                     >
-                        {tab.label}
+                        {localizeText(tab.label)}
                         {unreadCount > 0 ? (
                             <span className="absolute right-1.5 top-1/2 flex min-w-3.5 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 px-1 text-[8px] font-semibold leading-3 text-white">
                                 {unreadCount > 9 ? "9+" : unreadCount}
@@ -2590,7 +2632,7 @@ function HomeContent() {
     );
 
     const fullscreenToggleButton = (
-        <button
+        <LocalizedLabel><button
             type="button"
             onClick={(event) => {
                 void toggleFullscreen();
@@ -2599,13 +2641,13 @@ function HomeContent() {
             className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-cyan-200/25 bg-stone-950/78 text-cyan-100/85 shadow-xl backdrop-blur-md transition hover:border-cyan-200/45 hover:bg-stone-900/85 hover:text-white focus:outline-none focus-visible:outline-none"
             aria-label={
                 isFullscreen
-                    ? "Salir de pantalla completa"
-                    : "Entrar en pantalla completa"
+                    ? localizeKey("fullscreen.exit")
+                    : localizeKey("fullscreen.enter")
             }
             title={
                 isFullscreen
-                    ? "Salir de pantalla completa"
-                    : "Entrar en pantalla completa"
+                    ? localizeKey("fullscreen.exit")
+                    : localizeKey("fullscreen.enter")
             }
         >
             {isFullscreen ? (
@@ -2613,15 +2655,13 @@ function HomeContent() {
             ) : (
                 <Maximize2 className="h-5 w-5" />
             )}
-        </button>
+        </button></LocalizedLabel>
     );
 
     const fullscreenToggleControl = (
         <div className="pointer-events-none flex flex-col items-end gap-2">
             {showFullscreenHint ? (
-                <div className="rounded-full border border-white/10 bg-stone-950/70 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-stone-300/85 shadow-xl backdrop-blur-md">
-                    Esc para salir
-                </div>
+                <div className="rounded-full border border-white/10 bg-stone-950/70 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-stone-300/85 shadow-xl backdrop-blur-md"><LocalizedText source={"Esc para salir "} /></div>
             ) : null}
             {fullscreenToggleButton}
         </div>
@@ -2650,7 +2690,7 @@ function HomeContent() {
                     className="pointer-events-auto flex flex-col"
                     style={{ gap: `${HUD_GAP}px` }}
                 >
-                    {isDesktopConsoleLayout ? (
+                    {isDesktopConsoleLayout && !isLeftConsoleLayout ? (
                         <ScaledHudFrame
                             scale={hudScale}
                             baseWidth={CANVAS_BASE_WIDTH + 156 + HUD_GAP}
@@ -2683,17 +2723,14 @@ function HomeContent() {
                                                         }}
                                                     >
                                                         {renderConsoleEntryText(
-                                                            entry.text,
+                                                            localizeConsoleEntry(entry, locale), locale,
                                                         )}
                                                     </div>
                                                 ),
                                             )
                                         ) : (
-                                            <div className="text-stone-300/55">
-                                                No hay mensajes en{" "}
-                                                {activeChatTabLabel.toLowerCase()}{" "}
-                                                todavía.
-                                            </div>
+                                            <div className="text-stone-300/55"><LocalizedText source={"No hay mensajes en"} />{" "}
+                                                {localizeText(activeChatTabLabel).toLowerCase()}{" "}<LocalizedText source={"todavÃƒÂ­a. "} /></div>
                                         )}
                                     </div>
                                 </div>
@@ -2709,6 +2746,22 @@ function HomeContent() {
                         className="flex items-start"
                         style={{ gap: `${HUD_GAP}px` }}
                     >
+                        {isLeftConsoleLayout ? (
+                            <ScaledHudFrame scale={hudScale} baseWidth={leftConsoleWidth}>
+                                <aside aria-label={localizeText('Consola')} className="flex flex-col overflow-hidden rounded-2xl border border-cyan-200/20 bg-stone-950/90 shadow-2xl" style={{width:leftConsoleWidth,height:CANVAS_BASE_HEIGHT}}>
+                                    <div className="border-b border-white/10 px-3 py-3 text-xs font-semibold uppercase tracking-widest text-cyan-100">{localizeText(activeChatTabLabel)}</div>
+                                    <div className="p-2">{chatTabsMenu}</div>
+                                    <div ref={consoleScrollRef} role="log" aria-label={localizeText(activeChatTabLabel)} aria-live="polite" className="min-h-0 flex-1 overflow-y-auto px-3 py-3 text-xs leading-5 text-stone-200/90">
+                                        {visibleConsoleEntries.length ? visibleConsoleEntries.map(entry => (
+                                            <div key={entry.id} className="break-words" style={{color:entry.color || 'rgba(231, 229, 228, 0.92)'}}>{renderConsoleEntryText(localizeConsoleEntry(entry,locale),locale)}</div>
+                                        )) : <p className="text-stone-400"><LocalizedText source="No hay mensajes en" />{' '}{localizeText(activeChatTabLabel).toLowerCase()}{' '}<LocalizedText source="todavÃƒÂ­a. " /></p>}
+                                    </div>
+                                    <div className="shrink-0 border-t border-white/10 p-2">
+                                        {isChatOpen ? chatInputForm : <button type="button" onClick={event=>{setIsChatOpen(true);event.currentTarget.blur();}} className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-stone-300"><span>{localizeText('Chat')}</span><kbd className="rounded border border-white/20 px-1.5 text-xs">Enter</kbd></button>}
+                                    </div>
+                                </aside>
+                            </ScaledHudFrame>
+                        ) : null}
                         <div
                             className="flex flex-col"
                             style={{
@@ -2792,27 +2845,20 @@ function HomeContent() {
                                 logoutSecondsRemaining > 0 &&
                                 !hud?.dead ? (
                                     <div className="pointer-events-none absolute left-4 top-4 z-30 rounded-2xl border border-amber-300/45 bg-stone-950/88 px-4 py-3 text-stone-100 shadow-2xl backdrop-blur-md">
-                                        <div className="text-[11px] uppercase tracking-[0.28em] text-amber-300/85">
-                                            Salida en progreso
-                                        </div>
+                                        <div className="text-[11px] uppercase tracking-[0.28em] text-amber-300/85"><LocalizedText source={"Salida en progreso "} /></div>
                                         <div className="mt-1 text-2xl font-semibold text-amber-100">
                                             {logoutSecondsRemaining}s
                                         </div>
-                                        <div className="mt-1 text-xs text-stone-300/85">
-                                            No te muevas, no ataques y no
-                                            castees.
-                                        </div>
+                                        <div className="mt-1 text-xs text-stone-300/85"><LocalizedText source={"No te muevas, no ataques y no castees. "} /></div>
                                     </div>
                                 ) : null}
 
                                 {challengeOverlayText ? (
                                     <div className="pointer-events-none absolute right-3 top-3 z-30">
                                         <div className="rounded-2xl border border-cyan-200/30 bg-stone-950/84 px-4 py-2 text-center shadow-xl backdrop-blur-md">
-                                            <div className="text-[10px] uppercase tracking-[0.24em] text-cyan-200/70">
-                                                Reto
-                                            </div>
+                                            <div className="text-[10px] uppercase tracking-[0.24em] text-cyan-200/70"><LocalizedText source={"Reto "} /></div>
                                             <div className="mt-0.5 text-2xl font-semibold leading-none text-cyan-100">
-                                                {challengeOverlayText}
+                                                {localizeText(challengeOverlayText)}
                                             </div>
                                         </div>
                                     </div>
@@ -2827,7 +2873,7 @@ function HomeContent() {
                                                 : "16px",
                                         }}
                                     >
-                                        <div
+                                        <LocalizedLabel><div
                                             role="button"
                                             tabIndex={0}
                                             onClick={() =>
@@ -2847,16 +2893,14 @@ function HomeContent() {
                                         >
                                             <div className="flex items-start gap-3">
                                                 <div className="min-w-0 flex-1">
-                                                    <div className="text-[10px] uppercase tracking-[0.24em] text-stone-300/65">
-                                                        Servidor
-                                                    </div>
+                                                    <div className="text-[10px] uppercase tracking-[0.24em] text-stone-300/65"><LocalizedText source={"Servidor "} /></div>
                                                     <div className="mt-1 break-words text-sm leading-5 text-stone-100/90">
                                                         {
                                                             globalCanvasNotice.text
                                                         }
                                                     </div>
                                                 </div>
-                                                <button
+                                                <LocalizedLabel><button
                                                     type="button"
                                                     onClick={(event) => {
                                                         event.stopPropagation();
@@ -2868,9 +2912,9 @@ function HomeContent() {
                                                     aria-label="Cerrar aviso global"
                                                 >
                                                     x
-                                                </button>
+                                                </button></LocalizedLabel>
                                             </div>
-                                        </div>
+                                        </div></LocalizedLabel>
                                     </div>
                                 ) : null}
 
@@ -2886,58 +2930,14 @@ function HomeContent() {
                                               : "16px",
                                     }}
                                 >
-                                    {!isDesktopConsoleLayout
+                                    {!isDesktopConsoleLayout || isLeftConsoleLayout
                                         ? fullscreenToggleControl
                                         : null}
                                 </div>
 
                                 <div className="pointer-events-none absolute bottom-3 right-16 z-30 flex w-[594px] max-w-[calc(100vw-9rem)] flex-col items-center gap-3">
-                                    {isChatOpen ? (
-                                        <form
-                                            ref={chatFormRef}
-                                            className="pointer-events-auto flex w-full items-center gap-3 rounded-2xl border border-amber-300/35 bg-stone-950/88 px-4 py-3 shadow-2xl backdrop-blur-md"
-                                            onSubmit={(event) => {
-                                                event.preventDefault();
-                                                submitChatMessage();
-                                            }}
-                                        >
-                                            <input
-                                                ref={chatInputRef}
-                                                type="text"
-                                                autoComplete="off"
-                                                value={chatMessage}
-                                                maxLength={120}
-                                                onChange={(event) =>
-                                                    setChatMessage(
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                onKeyDown={(event) => {
-                                                    if (
-                                                        event.key === "Escape"
-                                                    ) {
-                                                        event.preventDefault();
-                                                        setIsChatOpen(false);
-                                                        setChatMessage("");
-                                                    }
-                                                }}
-                                                placeholder={
-                                                    activeChatTab === "global"
-                                                        ? "/global para mandar un mensaje global"
-                                                        : activeChatTab ===
-                                                            "party"
-                                                          ? "Mensaje para la party"
-                                                          : activeChatTab ===
-                                                              "clan"
-                                                            ? "Mensaje para el clan"
-                                                            : activeChatTab ===
-                                                                "whisper"
-                                                              ? whisperPlaceholder
-                                                              : "Escribi tu mensaje y presiona Enter"
-                                                }
-                                                className="min-w-0 flex-1 bg-transparent text-sm text-stone-100 outline-none placeholder:text-stone-500"
-                                            />
-                                        </form>
+                                    {isChatOpen && !isLeftConsoleLayout ? (
+                                        chatInputForm
                                     ) : null}
 
                                     {!isDesktopConsoleLayout &&
@@ -2960,17 +2960,14 @@ function HomeContent() {
                                                                 }}
                                                             >
                                                                 {renderConsoleEntryText(
-                                                                    entry.text,
+                                                            localizeConsoleEntry(entry, locale), locale,
                                                                 )}
                                                             </div>
                                                         ),
                                                     )
                                                 ) : (
-                                                    <div className="text-stone-300/55">
-                                                        No hay mensajes en{" "}
-                                                        {activeChatTabLabel.toLowerCase()}{" "}
-                                                        todavía.
-                                                    </div>
+                                                    <div className="text-stone-300/55"><LocalizedText source={"No hay mensajes en"} />{" "}
+                                                        {localizeText(activeChatTabLabel).toLowerCase()}{" "}<LocalizedText source={"todavÃƒÂ­a. "} /></div>
                                                 )}
                                             </div>
                                         </div>
@@ -2986,7 +2983,7 @@ function HomeContent() {
                                         ) : null}
 
                                         <div className="flex flex-col items-end gap-3">
-                                            <button
+                                            <LocalizedLabel><button
                                                 type="button"
                                                 onClick={(event) => {
                                                     setIsChatMenuOpen(
@@ -2997,13 +2994,13 @@ function HomeContent() {
                                                 className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-cyan-200/25 bg-stone-950/38 text-cyan-100/82 shadow-xl backdrop-blur-[2px] transition hover:border-cyan-200/45 hover:bg-stone-900/50 hover:text-white focus:outline-none focus-visible:outline-none"
                                                 aria-label={
                                                     isChatMenuOpen
-                                                        ? "Ocultar canales"
-                                                        : "Mostrar canales"
+                                                        ? localizeText("Ocultar canales")
+                                                        : localizeText("Mostrar canales")
                                                 }
                                                 title={
                                                     isChatMenuOpen
-                                                        ? "Ocultar canales"
-                                                        : "Mostrar canales"
+                                                        ? localizeText("Ocultar canales")
+                                                        : localizeText("Mostrar canales")
                                                 }
                                                 style={{
                                                     WebkitTapHighlightColor:
@@ -3049,47 +3046,9 @@ function HomeContent() {
                                                         r="1"
                                                     />
                                                 </svg>
-                                            </button>
+                                            </button></LocalizedLabel>
 
-                                            <button
-                                                type="button"
-                                                onClick={(event) => {
-                                                    setIsConsoleOpen(
-                                                        (current) => !current,
-                                                    );
-                                                    event.currentTarget.blur();
-                                                }}
-                                                className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full border border-cyan-200/25 bg-stone-950/38 text-cyan-100/82 shadow-xl backdrop-blur-[2px] transition hover:border-cyan-200/45 hover:bg-stone-900/50 hover:text-white focus:outline-none focus-visible:outline-none"
-                                                aria-label={
-                                                    isConsoleOpen
-                                                        ? "Ocultar chat"
-                                                        : "Mostrar chat"
-                                                }
-                                                title={
-                                                    isConsoleOpen
-                                                        ? "Ocultar chat"
-                                                        : "Mostrar chat"
-                                                }
-                                                style={{
-                                                    WebkitTapHighlightColor:
-                                                        "transparent",
-                                                }}
-                                            >
-                                                <svg
-                                                    aria-hidden="true"
-                                                    viewBox="0 0 24 24"
-                                                    className="h-5 w-5"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="1.8"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <path d="M4 6h16" />
-                                                    <path d="M4 12h10" />
-                                                    <path d="M4 18h16" />
-                                                </svg>
-                                            </button>
+
                                         </div>
                                     </div>
                                 ) : null}
@@ -3101,9 +3060,7 @@ function HomeContent() {
                                     baseWidth={CANVAS_BASE_WIDTH}
                                     onMeasure={handleMacroBarMeasure}
                                 >
-                                    <div className="flex min-h-20 items-center justify-center rounded-[24px] border border-white/8 bg-stone-950/55 px-4 py-5 text-sm text-stone-400 shadow-xl backdrop-blur-md">
-                                        Cargando macros...
-                                    </div>
+                                    <div className="flex min-h-20 items-center justify-center rounded-[24px] border border-white/8 bg-stone-950/55 px-4 py-5 text-sm text-stone-400 shadow-xl backdrop-blur-md"><LocalizedText source={"Cargando macros... "} /></div>
                                 </ScaledHudFrame>
                             ) : (
                                 <ScaledHudFrame
@@ -3162,7 +3119,7 @@ function HomeContent() {
                                 className="flex w-[320px] flex-col"
                                 style={{ gap: "12px" }}
                             >
-                                {isDesktopConsoleLayout ? (
+                                {isDesktopConsoleLayout && !isLeftConsoleLayout ? (
                                     <div className="pointer-events-none absolute right-0 top-0 z-30 -translate-y-[calc(100%+12px)]">
                                         {fullscreenToggleControl}
                                     </div>
@@ -3399,24 +3356,6 @@ function HomeContent() {
                                         {authSession ? (
                                             <>
                                                 <Link
-                                                    href="/arenas"
-                                                    prefetch={false}
-                                                    onClick={(event) => {
-                                                        if (!arenaMode) {
-                                                            return;
-                                                        }
-
-                                                        event.preventDefault();
-                                                        void leaveArenaRoom();
-                                                    }}
-                                                    className="text-amber-300 transition hover:text-amber-200"
-                                                >
-                                                    {arenaMode &&
-                                                    arenaLeavePending
-                                                        ? "Saliendo..."
-                                                        : "Arenas"}
-                                                </Link>
-                                                <Link
                                                     href={switchCharacterHref}
                                                     prefetch={false}
                                                     onClick={
@@ -3424,7 +3363,7 @@ function HomeContent() {
                                                     }
                                                     className="text-cyan-300 transition hover:text-cyan-200"
                                                 >
-                                                    {switchCharacterLabel}
+                                                    {localizeText(switchCharacterLabel)}
                                                 </Link>
                                             </>
                                         ) : (
@@ -3440,21 +3379,14 @@ function HomeContent() {
                                                     href="/register"
                                                     prefetch={false}
                                                     className="text-stone-400 transition hover:text-stone-200"
-                                                >
-                                                    Registro
-                                                </Link>
+                                                >{localizeKey("auth.registration")}</Link>
                                             </>
                                         )}
                                     </div>
 
                                     {authSession && !arenaMode ? (
                                         <div className="text-center text-[11px] leading-5 tracking-[0.04em] text-stone-300/85">
-                                            En zona insegura cerrá el personaje
-                                            con{" "}
-                                            <span className="text-amber-300">
-                                                /salir
-                                            </span>{" "}
-                                            o quedará conectado por 10 segundos.
+                                            {localizeText("En zona insegura cerrÃƒÂ¡ el personaje con /salir o quedarÃƒÂ¡ conectado por 10 segundos.")}
                                         </div>
                                     ) : null}
                                 </div>
@@ -3684,14 +3616,12 @@ function HomeContent() {
             {deathHomePromptOpen ? (
                 <div className="fixed inset-0 z-[90] flex items-center justify-center px-4 py-6">
                     <div className="w-full max-w-sm rounded-2xl border border-amber-200/20 bg-[linear-gradient(180deg,rgba(28,18,12,0.96),rgba(14,10,8,0.96))] p-4 text-stone-100 shadow-[0_20px_80px_rgba(0,0,0,0.55)] backdrop-blur-md">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">
-                            Personaje muerto
-                        </p>
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">{localizeText("Personaje muerto")}</p>
                         <h2 className="mt-2 text-lg font-semibold text-[#f3e7c8]">
-                            {deathHomeTitle}
+                            {localizeText(deathHomeTitle)}
                         </h2>
                         <p className="mt-2 text-sm text-stone-300">
-                            {deathHomeDescription}
+                            {localizeText(deathHomeDescription)}
                         </p>
 
                         <div className="mt-4 flex justify-end gap-2">
@@ -3699,9 +3629,7 @@ function HomeContent() {
                                 type="button"
                                 onClick={() => setDeathHomePromptOpen(false)}
                                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-stone-200 transition hover:bg-white/10"
-                            >
-                                Cancelar
-                            </button>
+                            >{localizeKey("common.cancel")}</button>
                             <button
                                 type="button"
                                 onClick={handleDeathHomeConfirm}
@@ -3710,9 +3638,7 @@ function HomeContent() {
                                     background:
                                         "linear-gradient(135deg, #f8d47b 0%, #d6a546 100%)",
                                 }}
-                            >
-                                Aceptar
-                            </button>
+                            >{localizeText("Aceptar")}</button>
                         </div>
                     </div>
                 </div>
@@ -3721,17 +3647,9 @@ function HomeContent() {
             {showFullscreenPrompt ? (
                 <div className="fixed inset-0 z-[88] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-[28px] border border-cyan-200/20 bg-[linear-gradient(180deg,rgba(16,19,28,0.96),rgba(8,10,18,0.98))] p-6 text-stone-100 shadow-[0_30px_120px_rgba(0,0,0,0.6)]">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-cyan-200/75">
-                            Recomendacion
-                        </p>
-                        <h2 className="mt-2 text-xl font-semibold text-cyan-50">
-                            Esta pantalla se ve mejor en pantalla completa
-                        </h2>
-                        <p className="mt-3 text-sm leading-6 text-stone-300">
-                            Detectamos una ventana chica para el juego. Si
-                            queres, podemos abrirlo en pantalla completa para
-                            que entren mejor la consola, el HUD y las macros.
-                        </p>
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-cyan-200/75">{localizeKey("fullscreen.recommend")}</p>
+                        <h2 className="mt-2 text-xl font-semibold text-cyan-50">{localizeKey("fullscreen.title")}</h2>
+                        <p className="mt-3 text-sm leading-6 text-stone-300">{localizeKey("fullscreen.body")}</p>
 
                         <div className="mt-6 flex justify-end gap-3">
                             <button
@@ -3740,9 +3658,7 @@ function HomeContent() {
                                     dismissFullscreenPrompt();
                                 }}
                                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-stone-200 transition hover:bg-white/10"
-                            >
-                                Seguir asi
-                            </button>
+                            >{localizeKey("fullscreen.stay")}</button>
                             <button
                                 type="button"
                                 onClick={(event) => {
@@ -3755,9 +3671,7 @@ function HomeContent() {
                                     background:
                                         "linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%)",
                                 }}
-                            >
-                                Abrir en pantalla completa
-                            </button>
+                            >{localizeKey("fullscreen.open")}</button>
                         </div>
                     </div>
                 </div>
@@ -3792,59 +3706,50 @@ function HomeContent() {
 
             {status.error || fullscreenError ? (
                 <div className="fixed left-4 top-24 z-50 max-w-sm rounded-2xl bg-stone-950/88 px-4 py-3 text-sm text-rose-300 shadow-2xl backdrop-blur-md">
-                    {status.error || fullscreenError}
+                    <LocalizedText source={status.error || fullscreenError} />
                 </div>
             ) : null}
 
             {isHotkeyIntroOpen ? (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-[28px] border border-amber-200/20 bg-[linear-gradient(180deg,rgba(28,18,12,0.98),rgba(14,10,8,0.98))] p-6 text-stone-100 shadow-[0_30px_120px_rgba(0,0,0,0.6)]">
-                        <div className="flex items-start justify-between gap-4">
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-3 sm:p-6 backdrop-blur-sm">
+                    <div role="dialog" aria-modal="true" aria-labelledby="hotkey-intro-title" className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[28px] border border-amber-200/20 bg-[linear-gradient(180deg,rgba(28,18,12,0.98),rgba(14,10,8,0.98))] p-4 sm:max-h-[calc(100dvh-3rem)] sm:p-6 text-stone-100 shadow-[0_30px_120px_rgba(0,0,0,0.6)]">
+                        <div className="flex shrink-0 items-start justify-between gap-4">
                             <div>
-                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">
-                                    Bienvenido
-                                </p>
-                                <h2 className="mt-2 text-2xl font-semibold text-[#f3e7c8]">
-                                    Teclas predeterminadas
-                                </h2>
-                                <p className="mt-2 max-w-xl text-sm leading-6 text-stone-300">
-                                    Estas son las teclas base del juego. Despues
-                                    podes cambiarlas desde el panel derecho.
-                                </p>
+                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">{localizeKey("welcome.hello")}</p>
+                                <h2 id="hotkey-intro-title" className="mt-2 text-xl sm:text-2xl font-semibold text-[#f3e7c8]">{localizeKey("welcome.title")}</h2>
+                                <p className="mt-2 max-w-xl text-sm leading-6 text-stone-300">{localizeKey("welcome.body")}</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={dismissHotkeyIntro}
-                                className="rounded-full border border-white/10 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-stone-300 transition hover:border-amber-300/35 hover:text-white"
-                            >
-                                Cerrar
-                            </button>
+                                className="shrink-0 rounded-full border border-white/10 px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-stone-300 transition hover:border-amber-300/35 hover:text-white"
+                            >{localizeKey("common.close")}</button>
                         </div>
 
-                        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                        <div tabIndex={0} className="mt-4 min-h-0 overflow-y-auto overscroll-contain pr-2 sm:mt-6">
+                        <div className="grid gap-2 sm:gap-3 sm:grid-cols-2">
                             {defaultHotkeyIntroItems.map((item) => (
                                 <div
                                     key={item.label}
                                     className="flex items-center justify-between gap-3 rounded-2xl border border-white/6 bg-black/20 px-4 py-3"
                                 >
                                     <span className="text-sm text-stone-300">
-                                        {item.label}
+                                        <LocalizedText source={item.label} />
                                     </span>
                                     <span className="rounded-xl border border-amber-300/20 bg-amber-200/10 px-3 py-1 text-sm font-semibold text-amber-100">
-                                        {item.value}
+                                        {localizeText(item.value)}
                                     </span>
                                 </div>
                             ))}
                         </div>
+                        </div>
 
-                        <div className="mt-6 flex justify-end">
+                        <div className="mt-4 flex shrink-0 justify-end sm:mt-6">
                             <button
                                 type="button"
                                 onClick={dismissHotkeyIntro}
                                 className="rounded-2xl border border-amber-300/35 bg-amber-200/10 px-5 py-2.5 text-sm font-semibold text-amber-100 transition hover:border-amber-300/60 hover:bg-amber-200/15"
-                            >
-                                Entendido
-                            </button>
+                            >{localizeKey("welcome.accept")}</button>
                         </div>
                     </div>
                 </div>

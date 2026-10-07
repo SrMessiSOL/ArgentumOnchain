@@ -278,6 +278,7 @@ export type HandleProtocolApi = {
         client: RuntimeClient,
         channel?: ConsoleChannel,
         senderName?: string,
+        npcName?: string,
     ) => void;
     consoleToAll: (msg: string, color: string | null, bold: number | boolean, italica: number | boolean) => void;
     globalNotice: (msg: string, durationMs: number, client: RuntimeClient) => void;
@@ -569,6 +570,7 @@ function writeConsolePayload(
     italica: number | boolean,
     channel: ConsoleChannel = "console",
     senderName?: string,
+    npcName?: string,
 ) {
     pkg.setPackageID(pkg.clientPacketID.console);
     pkg.writeString(msg);
@@ -591,6 +593,9 @@ function writeConsolePayload(
     } else {
         pkg.writeByte(0);
     }
+    // Optional trailing metadata: only this authored entity name may be translated.
+    // Older console packets remain valid without the trailing string.
+    if (npcName) pkg.writeString(npcName);
 }
 
 function writeGlobalNoticePayload(msg: string, durationMs: number) {
@@ -723,8 +728,8 @@ const handleServer: HandleProtocolApi = {
         socket.send(client);
     },
 
-    console(msg, color, bold, italica, client, channel = "console", senderName) {
-        writeConsolePayload(msg, color, bold, italica, channel, senderName);
+    console(msg, color, bold, italica, client, channel = "console", senderName, npcName) {
+        writeConsolePayload(msg, color, bold, italica, channel, senderName, npcName);
         socket.send(client);
     },
 

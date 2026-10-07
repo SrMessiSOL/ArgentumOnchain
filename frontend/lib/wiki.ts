@@ -8,6 +8,8 @@ export type PublicWikiResponse = {
         trainingMapCount: number;
     };
     npcs: Array<{
+        bodyId: number;
+        headId: number;
         id: number;
         name: string;
         npcType: number;

@@ -1,6 +1,15 @@
+import {spawnFloorItem} from "./repositories/floorSpawns";
+import fs from "node:fs";
+import path from "node:path";
+import {installGameAssetRoutes,startAssetRecovery} from "./game-asset-routes";
 import express from "express";
+import {installEconomyRoutes,startEconomyRecovery} from "./economy-routes";
+import {installAchievementRoutes} from "./achievement-routes";
 import config from "./config";
 import pool from "./db";
+import { installWalletRoutes } from "./wallet-routes";
+import { installPreferencesRoutes } from "./preferences-routes";
+import { installCosmeticRoutes } from "./cosmetic-routes";
 import { requireAuth } from "./middleware/auth";
 import {
     confirmPasswordReset,
@@ -227,7 +236,7 @@ async function ensurePgStatStatements(): Promise<void> {
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.warn(
-            `[API] pg_stat_statements no pudo habilitarse automaticamente: ${message}`,
+            `[API] Could not enable pg_stat_statements automatically: ${message}`,
         );
     }
 }
@@ -236,9 +245,25 @@ async function start(): Promise<void> {
     try {
         await pool.query("SELECT 1");
         console.log("PostgreSQL connected successfully");
-        await ensurePgStatStatements();
+        if (process.env.AOWEB_RUN_MIGRATIONS !== "0") await ensurePgStatStatements();
 
-        app.listen(config.port, () => {
+        if (process.env.AOWEB_RUN_MIGRATIONS !== "0") {
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","game-assets-schema.sql"),"utf8"));
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","vault-receipts-schema.sql"),"utf8"));
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","character-receipts-schema.sql"),"utf8"));
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","floor-items-schema.sql"),"utf8"));
+            await pool.query(fs.readFileSync(path.resolve(__dirname,"..","floor-spawns-schema.sql"),"utf8"));
+        } else {
+            // Runtime credentials must not own or alter schema objects.
+            await pool.query("SELECT 1 FROM game_asset_operations LIMIT 0");
+            await pool.query("SELECT 1 FROM vault_operation_receipts LIMIT 0");
+            await pool.query("SELECT 1 FROM character_save_receipts LIMIT 0");
+            await pool.query("SELECT 1 FROM dropped_floor_items LIMIT 0");
+            await pool.query("SELECT 1 FROM floor_spawn_receipts LIMIT 0");
+        }
+        startAssetRecovery();
+        startEconomyRecovery();
+        app.listen(config.port, process.env.HOST ?? "127.0.0.1", () => {
             console.log(`API listening on port ${config.port}`);
         });
     } catch (error) {
@@ -283,10 +308,14 @@ app.use((request, response, next) => {
 app.use((request, response, next) => {
     const origin = request.headers.origin;
 
-    if (config.corsOrigin === "*" && origin) {
-        response.header("Access-Control-Allow-Origin", origin);
-    } else if (config.corsOrigin !== "*") {
-        response.header("Access-Control-Allow-Origin", config.corsOrigin);
+    const allowedOrigin = config.corsOrigin === "*" ? new URL(config.siteUrl).origin : config.corsOrigin;
+    if (origin && origin !== allowedOrigin) {
+        response.status(403).json({ error: "Origin not allowed" });
+        return;
+    }
+    if (origin) {
+        response.header("Access-Control-Allow-Origin", allowedOrigin);
+        response.vary("Origin");
     }
 
     response.header(
@@ -1554,6 +1583,11 @@ app.get("/auth/clans/:clanId", async (request, response) => {
     }
 });
 
+// This fork runs one shared world; keep upstream arena code dormant.
+app.use(["/arenas", "/internal/arenas"], (_request, response) => {
+    response.status(404).json({ error: "Las salas no estÃƒÂ¡n habilitadas en este servidor." });
+});
+
 app.get("/arenas/rooms", async (request, response) => {
     try {
         const authorization = request.header("Authorization") || "";
@@ -1980,6 +2014,20 @@ app.get("/character", requireAuth, async (request, response) => {
     }
 });
 
+app.put('/internal/floor-spawns', requireAuth, async (request,response)=>{
+ try {response.json(await spawnFloorItem(request.body));}
+ catch {response.status(409).json({error:'World drop could not be committed'});}
+});
+app.get('/internal/floor-items', requireAuth, async (_request,response) => {
+    try { response.json({items:(await pool.query('SELECT drop_id AS "dropId",map_id AS map,x,y,item_id AS "itemId",amount FROM dropped_floor_items ORDER BY map_id,y,x')).rows}); }
+    catch { response.status(503).json({error:'Ground storage unavailable'}); }
+});
+app.delete('/internal/floor-items/:dropId', requireAuth, async (request,response) => {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(request.params.dropId))) {response.status(400).json({error:'Invalid ground item ID'});return;}
+    try {await pool.query('DELETE FROM dropped_floor_items WHERE drop_id=$1',[request.params.dropId]);response.json({ok:true});}
+    catch {response.status(503).json({error:'Ground storage unavailable'});}
+});
+
 app.put("/character_save/:id", requireAuth, async (request, response) => {
     try {
         const characterId = Array.isArray(request.params.id)
@@ -2111,7 +2159,8 @@ app.post(
             const characterId = Array.isArray(request.params.characterId)
                 ? request.params.characterId[0]
                 : request.params.characterId;
-            const result = await claimCharacterConnection(characterId ?? "");
+            if(process.env.AOWEB_CHARACTER_ACHIEVEMENTS==='1'&&!/^[0-9a-f-]{36}$/i.test(request.body?.accountId??'')){response.status(400).json({error:"Character account is required"});return;}
+            const result = await claimCharacterConnection(characterId ?? "",request.body?.accountId);
 
             if (!result.ok) {
                 const status =
@@ -2578,4 +2627,11 @@ app.get("/user-online-stats", async (request, response) => {
     }
 });
 
+installWalletRoutes(app);
+installPreferencesRoutes(app);
+installAchievementRoutes(app);
+installGameAssetRoutes(app);
+installEconomyRoutes(app);
+installCosmeticRoutes(app);
 void start();
+

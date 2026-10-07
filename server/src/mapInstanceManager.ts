@@ -157,7 +157,7 @@ const mapInstanceManager = {
 
         this.cloneMap(baseMapId, mapId);
         this.spawnMapNpcs(baseMapId, mapId);
-        funct.sendTelegramMessage(`[Servidor] Instancia creada para mapa base ${baseMapId} en mapa ${mapId}.`);
+        funct.sendTelegramMessage(`[Server] Instance created for base map ${baseMapId} on map ${mapId}.`);
         return true;
     },
 
@@ -216,7 +216,7 @@ const mapInstanceManager = {
 
         delete vars.mapData[mapId];
         delete vars.mapa[mapId];
-        funct.sendTelegramMessage(`[Servidor] Instancia destruida del mapa ${mapId}.`);
+        funct.sendTelegramMessage(`[Server] Instance destroyed on map ${mapId}.`);
     },
 
     onPlayerDisconnected(character: RuntimeCharacter | undefined) {

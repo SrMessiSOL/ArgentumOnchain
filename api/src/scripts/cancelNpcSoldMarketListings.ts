@@ -6,16 +6,16 @@ async function main() {
     const itemIds = await listNpcSoldItemIds();
 
     if (!itemIds.length) {
-        throw new Error("No se encontraron items vendidos por NPCs en game_npcs");
+        throw new Error("No NPC-sold items found in game_npcs");
     }
 
     const result = await cancelForbiddenMarketListings(itemIds);
 
     console.log(
         [
-            `Publicaciones canceladas: ${result.cancelledListings}`,
-            `Comisiones reintegradas: ${result.refundedPublicationFees}`,
-            `Items NPC analizados: ${itemIds.length}`,
+            `Listings cancelled: ${result.cancelledListings}`,
+            `Fees refunded: ${result.refundedPublicationFees}`,
+            `NPC items analyzed: ${itemIds.length}`,
         ].join(" | "),
     );
 }

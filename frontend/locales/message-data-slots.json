@@ -1,0 +1,194 @@
+{
+  "{0} lista. Haz click sobre una casilla de agua cercana para pescar.": [
+    0
+  ],
+  "{0} lista. Haz click sobre un árbol cercano para talar.": [
+    0
+  ],
+  "{0} listo. Haz click sobre un yacimiento cercano para minar.": [
+    0
+  ],
+  "{0} listo. Haz click sobre una fragua cercana para fundirlo.": [
+    0
+  ],
+  "{0} listo. Haz click sobre un yunque cercano para trabajar herrería.": [
+    0
+  ],
+  "Necesitas nivel {0} y {1} puntos de faccion para enlistarte en {2}.": [
+    2
+  ],
+  "Te enlistaste en {0}.": [
+    0
+  ],
+  "Solo puedes reclamar recompensas de {0} con su NPC correspondiente.": [
+    0
+  ],
+  "[Retos] {0} nivel {1} {2} publicó un reto {3}vs{4}. Si quieres aceptarlo, usa /retos.": [
+    2
+  ],
+  "[INFO] Tu clase fue cambiada a {0}.": [
+    0
+  ],
+  "[INFO] {0} ahora es {1}.": [
+    1
+  ],
+  "[INFO] Invocaste a {0} (ID {1}) en {2}@{3},{4}.": [
+    0
+  ],
+  "[INFO] Invocaste a {0} (ID {1}) en {2}@{3}@{4}.": [
+    0
+  ],
+  "[INFO] Invocaste y guardaste a {0} (ID {1}) {2} en {3}@{4}@{5}.": [
+    0,
+    2
+  ],
+  "No tienes suficiente {0}.": [
+    0
+  ],
+  "Has fabricado {0} {1}.": [
+    1
+  ],
+  "Has pescado {0} {1}.": [
+    1
+  ],
+  "Has talado {0} {1}.": [
+    1
+  ],
+  "Has extraído {0} {1}.": [
+    1
+  ],
+  "Has fundido {0} {1}.": [
+    1
+  ],
+  "[INFO] Recibiste {0} {1}.": [
+    1
+  ],
+  "Solo los personajes desde nivel {0} hasta nivel {1} pueden entrar a {2}": [
+    2
+  ],
+  "Solo los personajes desde nivel {0} pueden entrar a {1}": [
+    1
+  ],
+  "Solo los personajes hasta nivel {0} pueden entrar a {1}": [
+    1
+  ],
+  "Ya perteneces a {0}.": [
+    0
+  ],
+  "Ascendiste a {0}.": [
+    0
+  ],
+  "Para ascender a {0} te falta {1}.": [
+    0,
+    1
+  ],
+  "La {0} se canceló.": [
+    0
+  ],
+  "Tu {0} ha muerto.": [
+    0
+  ],
+  "{0} te ha lanzado {1} por {2}": [
+    0,
+    1
+  ],
+  "Has lanzado {0} sobre ti.": [
+    0
+  ],
+  "{0} ha lanzado {1} sobre ti": [
+    1
+  ],
+  "{0} es demasiado corto.": [
+    0
+  ],
+  "{0} es demasiado largo.": [
+    0
+  ],
+  "{0} no es valido.": [
+    0
+  ],
+  "{0} es obligatorio.": [
+    0
+  ],
+  "{0} debe tener al menos {1} caracteres.": [
+    0
+  ],
+  "{0} debe tener como maximo {1} caracteres.": [
+    0
+  ],
+  "[INFO] Uso: /bot CLASE NIVEL o /bot limpiar. Clases: {0}.": [
+    0
+  ],
+  "[INFO] Uso: /bot CLASE NIVEL. Clases: {0}.": [
+    0
+  ],
+  "[INFO] Uso: /cambiarclase NOMBRE CLASE. Clases: {0}.": [
+    0
+  ],
+  "[INFO] Clase invalida. Disponibles: {0}.": [
+    0
+  ],
+  "Info sobre {0}": [
+    0
+  ],
+  "Ultimo update: {0}. Proximo foco: {1}.": [
+    0,
+    1
+  ],
+  "{0} golpeó a {1} por {2}.": [
+    0,
+    1
+  ],
+  "{0} golpeó a tu {1} por {2}.": [
+    0,
+    1
+  ],
+  "[INFO] Has baneado a {0} {1}.": [
+    1
+  ],
+  "[INFO] Has baneado la IP {0} asociada a {1} {2}. Personajes afectados: {3}.": [
+    2
+  ],
+  "Sigues en la carcel por {0} minuto{1}.{2}": [
+    2
+  ],
+  "[INFO] Quitaste a {0} (ID {1}) del mapa y de su archivo del mapa.": [
+    0
+  ],
+  "[INFO] Quitaste a {0} (ID {1}) del mapa.": [
+    0
+  ],
+  "[INFO] {0} no tiene template valido para quitarlo permanentemente.": [
+    0
+  ],
+  "[INFO] No se pudo invocar el bot: {0}.": [
+    0
+  ],
+  "[INFO] La clase se cambio pero no se pudo persistir: {0}.": [
+    0
+  ],
+  "[INFO] No se pudo actualizar los NPCs persistidos del mapa: {0}.": [
+    0
+  ],
+  "[INFO] No se pudo guardar el NPC persistente: {0}.": [
+    0
+  ],
+  "{0} te ha paralizado.": [
+    0
+  ],
+  "{0} te ha inmovilizado.": [
+    0
+  ],
+  "Le has pegado a {0} por {1}": [
+    0
+  ],
+  "La Espada Mata Dragones atraviesa a {0} de un golpe y se consume.": [
+    0
+  ],
+  "[INFO] No se encontro a {0} en los NPCs persistidos del mapa usando su spawn original ({1}, {2}, {3}).": [
+    0
+  ],
+  "{0} — Título: {1}": [
+    1
+  ]
+}

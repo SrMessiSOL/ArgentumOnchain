@@ -1,11 +1,15 @@
 "use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
+import {economyEnglish,economySpanish} from '@/lib/economy-locales';
+import { useI18n } from "@/components/I18nProvider";
 
-import { Trash2 } from "lucide-react";
+import {portalEnglish,portalSpanish} from '@/lib/portal-copy';
+import { ArrowRight,Plus,BookOpen,Shield,Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import PortalModal from '@/components/PortalModal';
 import { useEffect, useState } from "react";
 import CharacterSpritePreview from "@/components/CharacterSpritePreview";
-import UpdatesPanel from "@/components/UpdatesPanel";
 import type { AuthErrorResponse, AuthSession } from "../../lib/auth";
 import { useAuthRedirect } from "../../hooks/useAuthRedirect";
 
@@ -47,6 +51,13 @@ function getCharacterNamePresentation(
 }
 
 export default function CharactersPage() {
+    const {locale, t: localizeKey, text: localizeText } = useI18n();
+
+    const copy=locale==='es'?portalSpanish:portalEnglish;
+    const [focusedId,setFocusedId]=useState('');
+    const [stakesLoading,setStakesLoading]=useState(true);
+    const [stakes,setStakes]=useState<Record<string,string>>({});
+    useEffect(()=>{fetch('/api/game-assets',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d)setStakes(Object.fromEntries(d.characters.map((c:any)=>[c.id,c.chain_state])));}).catch(()=>{}).finally(()=>setStakesLoading(false));},[]);
     const router = useRouter();
     const { session } = useAuthRedirect({
         redirectTo: "/login",
@@ -101,7 +112,7 @@ export default function CharactersPage() {
             setError(
                 selectionError instanceof Error
                     ? selectionError.message
-                    : "Error inesperado",
+                    : localizeKey("common.unexpected"),
             );
         } finally {
             setPendingCharacterId(null);
@@ -139,7 +150,7 @@ export default function CharactersPage() {
             setError(
                 deletionError instanceof Error
                     ? deletionError.message
-                    : "Error inesperado",
+                    : localizeKey("common.unexpected"),
             );
         } finally {
             setDeletingCharacterId(null);
@@ -152,199 +163,16 @@ export default function CharactersPage() {
     };
 
     const activeSession = localSession;
+    const chosen=activeSession?.characters.find(c=>c._id===(focusedId||activeSession.selectedCharacterId))??activeSession?.characters[0];
+    const playerName=(name:string)=>name;
 
     return (
-        <main className="min-h-screen overflow-y-auto bg-[radial-gradient(circle_at_top,#0f766e33,transparent_35%),radial-gradient(circle_at_bottom,#f59e0b22,transparent_30%),linear-gradient(180deg,#0f172a,#0c0a09)] px-4 py-12 text-stone-100">
-            <div className="mx-auto max-w-5xl">
-                <div className="mb-8 flex items-center justify-between gap-4">
-                    <div>
-                        <p className="text-[11px] uppercase tracking-[0.34em] text-cyan-200/75">
-                            Seleccion de personaje
-                        </p>
-                    </div>
-                </div>
-
-                {activeSession ? (
-                    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-                        <div className="space-y-4">
-                            <div className="flex justify-end">
-                                <Link
-                                    href="/createcharacter"
-                                    prefetch={false}
-                                    className="rounded-full border border-amber-300/30 bg-amber-300/10 px-4 py-2 text-sm font-medium text-amber-100 transition hover:border-amber-300/55 hover:bg-amber-300/16"
-                                >
-                                    Crear personaje
-                                </Link>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
-                                {activeSession.characters.map((character) => {
-                                    const appearance =
-                                        getCharacterAppearance(character);
-                                    const presentation =
-                                        getCharacterNamePresentation(character);
-                                    const isSelected =
-                                        activeSession.selectedCharacterId ===
-                                        character._id;
-                                    const isPending =
-                                        pendingCharacterId === character._id;
-                                    const isBusy = Boolean(
-                                        pendingCharacterId ||
-                                        deletingCharacterId,
-                                    );
-
-                                    return (
-                                        <div
-                                            key={character._id}
-                                            onClick={() => {
-                                                if (isBusy) {
-                                                    return;
-                                                }
-
-                                                void selectCharacter(
-                                                    character._id,
-                                                );
-                                            }}
-                                            onKeyDown={(event) => {
-                                                if (
-                                                    event.key === "Enter" ||
-                                                    event.key === " "
-                                                ) {
-                                                    event.preventDefault();
-                                                    if (isBusy) {
-                                                        return;
-                                                    }
-
-                                                    void selectCharacter(
-                                                        character._id,
-                                                    );
-                                                }
-                                            }}
-                                            role="button"
-                                            tabIndex={isBusy ? -1 : 0}
-                                            aria-disabled={isBusy}
-                                            className={`group flex h-full flex-col rounded-[26px] border px-3 py-3 text-left shadow-xl transition ${
-                                                isSelected
-                                                    ? "border-cyan-300/70 bg-cyan-300/10 shadow-cyan-950/40"
-                                                    : "border-white/8 bg-stone-950/80 hover:border-white/20 hover:bg-white/6"
-                                            } ${
-                                                isBusy
-                                                    ? "cursor-not-allowed opacity-70"
-                                                    : "cursor-pointer"
-                                            }`}
-                                        >
-                                            <div className="flex justify-center">
-                                                {appearance.bodyId > 0 &&
-                                                appearance.headId > 0 ? (
-                                                    <CharacterSpritePreview
-                                                        bodyId={
-                                                            appearance.bodyId
-                                                        }
-                                                        headId={
-                                                            appearance.headId
-                                                        }
-                                                        weaponId={
-                                                            appearance.weaponId
-                                                        }
-                                                        shieldId={
-                                                            appearance.shieldId
-                                                        }
-                                                        helmetId={
-                                                            appearance.helmetId
-                                                        }
-                                                        scale={1}
-                                                        className="border-white/8"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-[186px] w-[152px] items-center justify-center rounded-[22px] border border-white/10 bg-black/20 px-4 text-center text-xs text-stone-400">
-                                                        El personaje no tiene
-                                                        apariencia renderizable.
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="mt-3 min-h-9 text-center">
-                                                <p
-                                                    className="text-sm font-semibold leading-none"
-                                                    style={{
-                                                        color: presentation.color,
-                                                    }}
-                                                >
-                                                    {isPending
-                                                        ? "Entrando..."
-                                                        : character.name}
-                                                </p>
-                                                {character.clanName ? (
-                                                    <p className="mt-1 min-h-4 text-[11px] tracking-[0.04em] text-stone-300">
-                                                        {`<${character.clanName}>`}
-                                                    </p>
-                                                ) : null}
-                                            </div>
-
-                                            <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-                                                <div className="min-w-0">
-                                                    <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-stone-400">
-                                                        {character.className}{" "}
-                                                        {character.raceName}
-                                                    </p>
-                                                    <p className="text-[10px] uppercase tracking-[0.22em] text-stone-500">
-                                                        Nivel {character.level}
-                                                    </p>
-                                                    <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-stone-500">
-                                                        Mapa {character.map}
-                                                    </p>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={(event) => {
-                                                            event.stopPropagation();
-                                                            setDeleteCandidate({
-                                                                id: character._id,
-                                                                name: character.name,
-                                                            });
-                                                            setDeleteConfirmationText("");
-                                                            setError(null);
-                                                        }}
-                                                        disabled={isBusy}
-                                                        aria-label={`Borrar ${character.name}`}
-                                                        className="rounded-full border border-rose-400/30 bg-rose-400/10 p-2 text-rose-100 opacity-0 transition hover:border-rose-400/55 hover:bg-rose-400/16 group-hover:opacity-100 group-focus-within:opacity-100 disabled:cursor-not-allowed disabled:opacity-0"
-                                                    >
-                                                        <Trash2 className="h-3.5 w-3.5" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            {activeSession.characters.length === 0 ? (
-                                <div className="rounded-[28px] border border-dashed border-white/10 bg-stone-950/70 p-6 text-stone-400">
-                                    Esta cuenta todavía no tiene personajes.
-                                    Crea el primero desde /createcharacter.
-                                </div>
-                            ) : null}
-
-                            {error ? (
-                                <div className="rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
-                                    {error}
-                                </div>
-                            ) : null}
-                        </div>
-
-                        <aside className="xl:sticky xl:top-8 xl:self-start">
-                            <UpdatesPanel mode="preview" />
-                        </aside>
-                    </div>
-                ) : (
-                    <div className="rounded-[28px] border border-white/8 bg-stone-950/80 p-6 text-stone-300 shadow-2xl backdrop-blur-md">
-                        Cargando personajes...
-                    </div>
-                )}
-            </div>
-
+        <main className="player-portal portal-play">
+            <header className="portal-page-heading"><div><p className="portal-eyebrow">AOCHAIN / {copy.play}</p><h1>{copy.choose}</h1><p>{copy.playIntro}</p></div><span className="portal-test-badge"><i/>{copy.test}</span></header>
+            
+            {activeSession?<div className="portal-play-layout"><section className="portal-roster"><div className="portal-section-heading"><h2>{copy.roster}</h2><span>{activeSession.characters.length}</span></div><div className="portal-roster-list">{activeSession.characters.map(character=><button type="button" className={'portal-roster-choice '+(chosen?._id===character._id?'is-selected':'')} aria-pressed={chosen?._id===character._id} key={character._id} onClick={()=>setFocusedId(character._id)} disabled={Boolean(pendingCharacterId||deletingCharacterId)}><span className="portal-roster-portrait"><CharacterSpritePreview {...getCharacterAppearance(character)} scale={0.65} className="portal-sprite"/></span><span><strong>{playerName(character.name)}</strong><small>{localizeText(character.className)} · {copy.level} {character.level}</small></span></button>)}</div><Link href="/createcharacter" className="portal-create"><Plus size={17}/>{copy.newCharacter}</Link><p className="portal-smallprint">{copy.createHelp}</p></section>
+            {chosen?<section className="portal-selected"><div className="portal-selected-top"><span className="portal-test-badge"><Shield size={13}/>{copy.shared}</span><span className="portal-level">{copy.level} {chosen.level}</span></div><div className="portal-hero-art"><CharacterSpritePreview {...getCharacterAppearance(chosen)} scale={2.5} className="portal-sprite"/><span className="portal-hero-platform"/></div><div className="portal-selected-info"><p className="portal-eyebrow">{localizeText(chosen.className)} · {localizeText(chosen.raceName)}</p><h2>{playerName(chosen.name)}</h2>{chosen.clanName&&<span className="portal-clan">{playerName(chosen.clanName)}</span>}{stakesLoading?<button className="portal-primary" disabled>{locale==='es'?'Verificando personaje…':'Checking character…'}</button>:stakes[chosen._id]==='staked'?<button className="portal-primary" disabled={Boolean(pendingCharacterId||deletingCharacterId)} onClick={()=>void selectCharacter(chosen._id)}>{pendingCharacterId?copy.entering:copy.enter}<ArrowRight size={18}/></button>:<><p className="play-stake-guidance">{locale==='es'?'Este personaje necesita estar minteado y stakeado para entrar al reino.':'This character must be minted and staked before entering the realm.'}</p><Link className="portal-primary" href={'/profile?view=characters&character='+chosen._id}>{locale==='es'?'Preparar personaje para jugar':'Get this character ready'}<ArrowRight size={18}/></Link></>}{error&&<PortalModal title={locale==='es'?'No se pudo entrar':'Could not enter the realm'} onClose={()=>setError(null)}><p>{localizeText(error)}</p><Link href="/profile">{copy.manage}</Link></PortalModal>}<details className="portal-character-settings"><summary>{copy.settings}</summary><Link href="/wallet">{copy.manage}</Link><button type="button" onClick={()=>{setDeleteCandidate({id:chosen._id,name:chosen.name});setDeleteConfirmationText('');setError(null);}} disabled={Boolean(pendingCharacterId||deletingCharacterId)}><Trash2 size={14}/>{localizeKey('characters.delete')}</button></details></div></section>:<section className="portal-first"><Shield size={38}/><h2>{copy.first}</h2><p>{copy.firstHelp}</p><Link className="portal-primary" href="/createcharacter">{copy.newCharacter}<ArrowRight size={18}/></Link></section>}
+            <aside className="portal-learn"><BookOpen size={23}/><div><h3>{copy.learn}</h3><p>{copy.learnHelp}</p></div><Link href="/wiki">{copy.openGuide}<ArrowRight size={15}/></Link></aside></div>:<div className="portal-loading" role="status">{localizeKey('characters.loading')}</div>}
             {deleteCandidate ? (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/70 px-4 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(28,25,23,0.96),rgba(12,10,9,0.98))] p-6 shadow-2xl">
@@ -353,27 +181,20 @@ export default function CharactersPage() {
                                 <Trash2 className="h-5 w-5" />
                             </div>
                             <div>
-                                <p className="text-lg font-semibold text-white">
-                                    Borrar personaje
-                                </p>
-                                <p className="mt-2 text-sm leading-6 text-stone-300">
-                                    Vas a borrar a{" "}
+                                <p className="text-lg font-semibold text-white">{localizeKey("characters.delete")}</p>
+                                <p className="mt-2 text-sm leading-6 text-stone-300">{localizeKey("characters.deletingName")}{" "}
                                     <span className="font-semibold text-white">
                                         {deleteCandidate.name}
                                     </span>
                                     .
                                 </p>
-                                <p className="mt-3 text-sm leading-6 text-stone-400">
-                                    Escribe <span className="font-semibold text-white">BORRAR</span> para confirmar.
-                                </p>
+                                <p className="mt-3 text-sm leading-6 text-stone-400">{localizeKey("characters.type")}{" "}<span className="font-semibold text-white"><LocalizedText source={"BORRAR"} /></span>{" "}{localizeKey("characters.confirmSuffix")}</p>
                             </div>
                         </div>
 
                         <label className="mt-6 block">
-                            <span className="text-xs font-medium uppercase tracking-[0.22em] text-stone-400">
-                                Confirmacion
-                            </span>
-                            <input
+                            <span className="text-xs font-medium uppercase tracking-[0.22em] text-stone-400">{localizeKey("characters.confirmation")}</span>
+                            <LocalizedLabel><input
                                 type="text"
                                 value={deleteConfirmationText}
                                 onChange={(event) =>
@@ -384,7 +205,7 @@ export default function CharactersPage() {
                                 spellCheck={false}
                                 className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-stone-500 focus:border-rose-400/50 focus:bg-white/7 disabled:cursor-not-allowed disabled:opacity-60"
                                 placeholder="BORRAR"
-                            />
+                            /></LocalizedLabel>
                         </label>
 
                         <div className="mt-6 flex justify-end gap-3">
@@ -393,9 +214,7 @@ export default function CharactersPage() {
                                 onClick={closeDeleteModal}
                                 disabled={Boolean(deletingCharacterId)}
                                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-stone-200 transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                Cancelar
-                            </button>
+                            >{localizeKey("common.cancel")}</button>
                             <button
                                 type="button"
                                 onClick={() =>
@@ -403,14 +222,13 @@ export default function CharactersPage() {
                                 }
                                 disabled={
                                     Boolean(deletingCharacterId) ||
-                                    deleteConfirmationText.trim() !==
-                                        "BORRAR"
+                                    !["BORRAR", "DELETE"].includes(deleteConfirmationText.trim())
                                 }
                                 className="rounded-full border border-rose-400/35 bg-rose-500/15 px-4 py-2 text-sm font-medium text-rose-100 transition hover:border-rose-400/55 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {deletingCharacterId === deleteCandidate.id
-                                    ? "Borrando..."
-                                    : "Confirmar borrado"}
+                                    ? localizeKey("characters.deleting")
+                                    : localizeKey("characters.deleteConfirm")}
                             </button>
                         </div>
                     </div>

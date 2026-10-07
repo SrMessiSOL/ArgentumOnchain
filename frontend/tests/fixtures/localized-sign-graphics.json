@@ -1,0 +1,434 @@
+[
+  {
+    "graphicId": 529,
+    "imageFile": 7010,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 530,
+    "imageFile": 7011,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 531,
+    "imageFile": 7009,
+    "width": 160,
+    "height": 128
+  },
+  {
+    "graphicId": 545,
+    "imageFile": 7013,
+    "width": 160,
+    "height": 128
+  },
+  {
+    "graphicId": 546,
+    "imageFile": 7002,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 547,
+    "imageFile": 7003,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 548,
+    "imageFile": 7004,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 549,
+    "imageFile": 7005,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 551,
+    "imageFile": 7014,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 552,
+    "imageFile": 7015,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 553,
+    "imageFile": 7016,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 555,
+    "imageFile": 7017,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 556,
+    "imageFile": 7018,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 567,
+    "imageFile": 7019,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 568,
+    "imageFile": 7020,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 569,
+    "imageFile": 7021,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 570,
+    "imageFile": 7022,
+    "width": 63,
+    "height": 32
+  },
+  {
+    "graphicId": 610,
+    "imageFile": 7023,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 611,
+    "imageFile": 7024,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 612,
+    "imageFile": 7025,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 613,
+    "imageFile": 7026,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 614,
+    "imageFile": 7027,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 615,
+    "imageFile": 7028,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 616,
+    "imageFile": 7029,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 617,
+    "imageFile": 7030,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 618,
+    "imageFile": 7031,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 619,
+    "imageFile": 7032,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 620,
+    "imageFile": 7033,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 621,
+    "imageFile": 7034,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 622,
+    "imageFile": 7035,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 623,
+    "imageFile": 7036,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 624,
+    "imageFile": 7037,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 625,
+    "imageFile": 7038,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 626,
+    "imageFile": 7039,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 627,
+    "imageFile": 7040,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 628,
+    "imageFile": 7041,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 660,
+    "imageFile": 7042,
+    "width": 160,
+    "height": 128
+  },
+  {
+    "graphicId": 670,
+    "imageFile": 7043,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 671,
+    "imageFile": 7044,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 672,
+    "imageFile": 7045,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 673,
+    "imageFile": 7046,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 675,
+    "imageFile": 7047,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 676,
+    "imageFile": 7048,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 677,
+    "imageFile": 7049,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 718,
+    "imageFile": 7050,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 719,
+    "imageFile": 7051,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 720,
+    "imageFile": 7052,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 721,
+    "imageFile": 7053,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 863,
+    "imageFile": 7054,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 864,
+    "imageFile": 7055,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 875,
+    "imageFile": 7056,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 876,
+    "imageFile": 7057,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 877,
+    "imageFile": 7058,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 878,
+    "imageFile": 7059,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 3716,
+    "imageFile": 7073,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 4909,
+    "imageFile": 7074,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 4986,
+    "imageFile": 7076,
+    "width": 128,
+    "height": 64
+  },
+  {
+    "graphicId": 18996,
+    "imageFile": 7000,
+    "width": 403,
+    "height": 209
+  },
+  {
+    "graphicId": 19715,
+    "imageFile": 7001,
+    "width": 320,
+    "height": 182
+  },
+  {
+    "graphicId": 21969,
+    "imageFile": 7060,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21970,
+    "imageFile": 7061,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21971,
+    "imageFile": 7062,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21972,
+    "imageFile": 7063,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21973,
+    "imageFile": 7064,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21974,
+    "imageFile": 7065,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21975,
+    "imageFile": 7066,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21976,
+    "imageFile": 7067,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21977,
+    "imageFile": 7068,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21978,
+    "imageFile": 7069,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21979,
+    "imageFile": 7070,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 21980,
+    "imageFile": 7071,
+    "width": 64,
+    "height": 32
+  },
+  {
+    "graphicId": 22474,
+    "imageFile": 7072,
+    "width": 160,
+    "height": 128
+  }
+]

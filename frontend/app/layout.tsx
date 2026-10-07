@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AppChrome from "@/components/AppChrome";
+import { cookies } from "next/headers";
+import { I18nProvider } from "@/components/I18nProvider";
+import GameWalletProvider from '@/components/GameWalletProvider';
+import { parseLocale } from "@/lib/i18n";
 import {
     buildPageMetadata,
     siteDescription,
@@ -8,6 +12,9 @@ import {
     siteUrl,
 } from "@/lib/seo";
 import "./globals.css";
+import "./realm-brand.css";
+import "./player-portal.css";
+import "./portal-polish.css";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -28,15 +35,15 @@ export const metadata: Metadata = {
         twitterImagePath: "/twitter-image",
     }),
     metadataBase: new URL(siteUrl),
-    applicationName: "AOWeb",
+    applicationName: "AOCHAIN",
     title: {
         default: siteTitle,
-        template: "%s | AOWeb",
+        template: "%s | AOCHAIN",
     },
     description: siteDescription,
     authors: [{ name: "Damian Catanzaro" }],
     creator: "Damian Catanzaro",
-    publisher: "AOWeb",
+    publisher: "AOCHAIN",
     category: "games",
     formatDetection: {
         email: false,
@@ -44,9 +51,9 @@ export const metadata: Metadata = {
         telephone: false,
     },
     icons: {
-        icon: "/favicon.ico",
-        shortcut: "/favicon.ico",
-        apple: "/static/imgs/logo-aoweb.png",
+        icon: "/brand/mark.svg",
+        shortcut: "/brand/mark.svg",
+        apple: "/brand/mark.svg",
     },
     manifest: "/manifest.webmanifest",
     robots: {
@@ -62,17 +69,18 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const locale = parseLocale((await cookies()).get('aoweb-locale')?.value);
     return (
-        <html lang="es-AR">
+        <html lang={locale}>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <AppChrome>{children}</AppChrome>
+                <I18nProvider initialLocale={locale}><GameWalletProvider><AppChrome>{children}</AppChrome></GameWalletProvider></I18nProvider>
             </body>
         </html>
     );

@@ -29,11 +29,18 @@
         "test:watch": "vitest",
         "test:vaults": "vitest run src/tests/vaults.integration.test.ts",
         "migrate": "node dist/migrate.js",
-        "start": "pnpm run migrate && node dist/server.js"
+        "start": "pnpm run migrate && node dist/server.js",
+        "test:cosmetic-ownership": "vitest run src/tests/cosmetic-ownership-lifecycle.test.ts src/tests/cosmetic-inspection.test.ts"
     },
     "dependencies": {
         "@aws-sdk/client-sesv2": "^3.1048.0",
+        "@metaplex-foundation/mpl-core": "^1.10.0",
+        "@metaplex-foundation/umi": "^1.6.0",
+        "@metaplex-foundation/umi-bundle-defaults": "^1.6.0",
+        "@solana/spl-token": "0.4.14",
+        "@solana/web3.js": "1.99.0",
         "bcryptjs": "^3.0.2",
+        "bs58": "6.0.0",
         "express": "^5.1.0",
         "pg": "^8.16.3",
         "zod": "^4.1.11"

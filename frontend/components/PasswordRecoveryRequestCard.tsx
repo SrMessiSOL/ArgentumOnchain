@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import Link from "next/link";
 import { useState } from "react";
 import type { AuthErrorResponse, PasswordResetResponse } from "../lib/auth";
@@ -58,19 +59,17 @@ export default function PasswordRecoveryRequestCard() {
     };
 
     return (
-        <div className="mx-auto w-full max-w-md overflow-hidden rounded-[32px] border border-stone-700/70 bg-stone-950/88 text-stone-100 shadow-2xl backdrop-blur-md">
+        <div className="realm-auth-card mx-auto w-full max-w-md overflow-hidden rounded-[32px] border border-stone-700/70 bg-stone-950/88 text-stone-100 shadow-2xl backdrop-blur-md">
             <div className="border-b border-white/8 bg-[radial-gradient(circle_at_top,#22d3ee22,transparent_55%),linear-gradient(135deg,#111827,#0f172a)] px-6 py-6">
                 <p className="text-[11px] uppercase tracking-[0.34em] text-cyan-200/80">
                     AOWeb
                 </p>
-                <h1 className="mt-2 text-3xl font-semibold text-stone-50">
-                    Recuperar contraseña
-                </h1>
+                <h1 className="mt-2 text-3xl font-semibold text-stone-50"><LocalizedText source={"Recuperar contraseña "} /></h1>
             </div>
 
             <div className="p-6">
                 <form className="space-y-3" onSubmit={submit}>
-                    <input
+                    <LocalizedLabel><input
                         value={email}
                         onChange={(event) => setEmail(event.target.value)}
                         className="w-full rounded-2xl border border-stone-700 bg-stone-900/90 px-4 py-3 text-sm outline-none transition focus:border-cyan-400"
@@ -78,28 +77,28 @@ export default function PasswordRecoveryRequestCard() {
                         type="email"
                         autoComplete="email"
                         required
-                    />
+                    /></LocalizedLabel>
 
                     <button
                         type="submit"
                         disabled={pending}
                         className="w-full rounded-2xl bg-cyan-300 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
                     >
-                        {pending
+                        <LocalizedText source={pending
                             ? "Enviando..."
-                            : "Enviar email de recuperación"}
+                            : "Enviar email de recuperación"} />
                     </button>
                 </form>
 
                 {message ? (
-                    <div className="mt-4 rounded-2xl bg-emerald-500/12 px-4 py-3 text-sm text-emerald-200">
-                        {message}
+                    <div role="status" className="mt-4 rounded-2xl bg-emerald-500/12 px-4 py-3 text-sm text-emerald-200">
+                        <LocalizedText source={message} />
                     </div>
                 ) : null}
 
                 {error ? (
-                    <div className="mt-4 rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
-                        {error}
+                    <div role="alert" className="mt-4 rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
+                        <LocalizedText source={error} />
                     </div>
                 ) : null}
 
@@ -108,9 +107,7 @@ export default function PasswordRecoveryRequestCard() {
                         href="/login"
                         prefetch={false}
                         className="font-medium text-cyan-300 transition hover:text-cyan-200"
-                    >
-                        Volver a iniciar sesión
-                    </Link>
+                    ><LocalizedText source={"Volver a iniciar sesión "} /></Link>
                 </div>
             </div>
         </div>

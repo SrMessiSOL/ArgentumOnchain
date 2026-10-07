@@ -34,7 +34,7 @@ function resolveDefaultHeadId(idRaza: number, idGenero: number): number {
 
     if (!raceKey || !genderKey) {
         throw new Error(
-            `No se pudo resolver cabeza default para raza ${idRaza} y genero ${idGenero}`,
+            `Could not resolve default head for race ${idRaza} and gender ${idGenero}`,
         );
     }
 
@@ -67,7 +67,7 @@ async function main() {
         if (affectedResult.rows.length === 0) {
             await client.query("COMMIT");
             console.log(
-                "No se encontraron personajes con id_head = 0 e id_last_head = 0.",
+                "No characters found with id_head = 0 and id_last_head = 0.",
             );
             return;
         }
@@ -93,12 +93,12 @@ async function main() {
 
             updatedCount += 1;
             console.log(
-                `Personaje reparado: ${character.name} (${character.id}) ${character.id_head}/${character.id_last_head} -> cabeza ${defaultHeadId}`,
+                `Character repaired: ${character.name} (${character.id}) ${character.id_head}/${character.id_last_head} -> head ${defaultHeadId}`,
             );
         }
 
         await client.query("COMMIT");
-        console.log(`Personajes reparados: ${updatedCount}`);
+        console.log(`Characters repaired: ${updatedCount}`);
     } catch (error) {
         await client.query("ROLLBACK");
         throw error;

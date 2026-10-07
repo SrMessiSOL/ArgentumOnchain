@@ -15,7 +15,7 @@ class LoadNpcs {
     async initialize() {
         await this.load();
 
-        console.log("NPCS Cargados.");
+        console.log("NPCs loaded.");
     }
 
     load() {
@@ -25,10 +25,10 @@ class LoadNpcs {
             try {
                 const result = await initializeNpcTemplatesFromApi();
                 console.log(
-                    `[GAME DATA] NPC templates hidratados desde DB: ${result.loadedTemplates}. Version aplicada: ${result.currentVersion}.`,
+                    `[GAME DATA] NPC templates loaded from DB: ${result.loadedTemplates}. Applied version: ${result.currentVersion}.`,
                 );
                 if (result.loadedTemplates <= 0) {
-                    reject(new Error("No se pudieron cargar NPCs desde la API."));
+                    reject(new Error("Could not load NPCs from the API."));
                     return;
                 }
             } catch (error) {

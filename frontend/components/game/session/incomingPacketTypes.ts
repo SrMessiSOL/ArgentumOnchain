@@ -10,6 +10,7 @@ import type {
 type MutableRef<T> = { current: T };
 
 export type IncomingPacketHandlerContext = {
+    localizeNpcDialog?: (text: string) => string;
     pendingUserSnapshotRef: MutableRef<any>;
     lastServerConfirmedSelfPositionRef: MutableRef<any>;
     latestServerStateVersionRef: MutableRef<number>;

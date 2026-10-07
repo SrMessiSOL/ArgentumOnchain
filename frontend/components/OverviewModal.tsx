@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import React from "react";
 import type { PanelRow, PanelSnapshot } from "../lib/aowProtocol";
 
@@ -195,7 +196,7 @@ export default function OverviewModal({
     }, [isOpen, onClose]);
 
     const sampledAtLabel = snapshot
-        ? new Date(snapshot.sampledAt).toLocaleTimeString("es-AR", {
+        ? new Date(snapshot.sampledAt).toLocaleTimeString("en-US", {
               hour: "2-digit",
               minute: "2-digit",
               second: "2-digit",
@@ -260,22 +261,16 @@ export default function OverviewModal({
     }
 
     return (
-        <div className="fixed inset-0 z-[97] flex items-center justify-center bg-black/75 px-4 py-6 backdrop-blur-sm">
-            <div className="flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[30px] border border-[#6f5c39] bg-[radial-gradient(circle_at_top,#312418_0%,#17100c_42%,#080706_100%)] text-stone-100 shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
+        <div className="game-modal-backdrop fixed inset-0 z-[97] flex items-center justify-center bg-black/75 px-4 py-6 backdrop-blur-sm">
+            <div className="game-modal-panel flex max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[30px] border border-[#6f5c39] bg-[radial-gradient(circle_at_top,#312418_0%,#17100c_42%,#080706_100%)] text-stone-100 shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
                 <div className="border-b border-amber-200/10 bg-black/20 px-6 py-5">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                             <p className="text-[11px] uppercase tracking-[0.34em] text-amber-300/75">
                                 Panel
                             </p>
-                            <h2 className="mt-2 text-2xl font-semibold text-[#f5ead2]">
-                                Panel de actividad
-                            </h2>
-                            <p className="mt-2 max-w-4xl text-sm text-stone-300/85">
-                                Vista resumida de actividad reciente para
-                                revisar patrones fuera de lo comun sin depender
-                                de la consola.
-                            </p>
+                            <h2 className="mt-2 text-2xl font-semibold text-[#f5ead2]"><LocalizedText source={"Panel de actividad "} /></h2>
+                            <p className="mt-2 max-w-4xl text-sm text-stone-300/85"><LocalizedText source={"Vista resumida de actividad reciente para revisar patrones fuera de lo comun sin depender de la consola. "} /></p>
                         </div>
 
                         <div className="flex gap-2">
@@ -284,15 +279,13 @@ export default function OverviewModal({
                                 onClick={onRefresh}
                                 className="rounded-full border border-cyan-200/15 bg-cyan-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 transition hover:border-cyan-200/30 hover:bg-cyan-300/15"
                             >
-                                {isRefreshing ? "Actualizando" : "Actualizar"}
+                                <LocalizedText source={isRefreshing ? "Actualizando" : "Actualizar"} />
                             </button>
                             <button
                                 type="button"
                                 onClick={onClose}
                                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-200 transition hover:border-white/20 hover:bg-white/10"
-                            >
-                                Cerrar
-                            </button>
+                            ><LocalizedText source={"Cerrar "} /></button>
                         </div>
                     </div>
 
@@ -304,55 +297,41 @@ export default function OverviewModal({
                             <div className="mt-1 text-2xl font-semibold text-cyan-100">
                                 {snapshot?.baselinePps60.toFixed(1) ?? "0.0"}
                             </div>
-                            <div className="mt-1 text-xs text-stone-400">
-                                Promedio actual entre conectados.
-                            </div>
+                            <div className="mt-1 text-xs text-stone-400"><LocalizedText source={"Promedio actual entre conectados. "} /></div>
                         </div>
 
                         <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-400">
-                                Muestra
-                            </div>
+                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Muestra "} /></div>
                             <div className="mt-1 text-2xl font-semibold text-amber-100">
                                 {snapshot?.entries.length ?? 0}
                             </div>
-                            <div className="mt-1 text-xs text-stone-400">
-                                Jugadores analizados ahora.
-                            </div>
+                            <div className="mt-1 text-xs text-stone-400"><LocalizedText source={"Jugadores analizados ahora. "} /></div>
                         </div>
 
                         <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-400">
-                                Ultima lectura
-                            </div>
+                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-400"><LocalizedText source={"Ultima lectura "} /></div>
                             <div className="mt-1 text-2xl font-semibold text-fuchsia-100">
                                 {sampledAtLabel}
                             </div>
-                            <div className="mt-1 text-xs text-stone-400">
-                                Snapshot recibido desde el servidor.
-                            </div>
+                            <div className="mt-1 text-xs text-stone-400"><LocalizedText source={"Snapshot recibido desde el servidor. "} /></div>
                         </div>
                     </div>
 
                     <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(220px,0.7fr)_180px]">
                         <label className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-stone-300">
-                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-500">
-                                Filtrar por nombre
-                            </div>
-                            <input
+                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-500"><LocalizedText source={"Filtrar por nombre "} /></div>
+                            <LocalizedLabel><input
                                 value={nameFilter}
                                 onChange={(event) =>
                                     setNameFilter(event.target.value)
                                 }
                                 placeholder="Buscar jugador..."
                                 className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-stone-100 outline-none placeholder:text-stone-500 focus:border-cyan-200/30"
-                            />
+                            /></LocalizedLabel>
                         </label>
 
                         <label className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-stone-300">
-                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-500">
-                                Ordenar por dato
-                            </div>
+                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-500"><LocalizedText source={"Ordenar por dato "} /></div>
                             <select
                                 value={sortKey}
                                 onChange={(event) =>
@@ -365,16 +344,14 @@ export default function OverviewModal({
                                         key={option.value}
                                         value={option.value}
                                     >
-                                        {option.label}
+                                        <LocalizedText source={option.label} />
                                     </option>
                                 ))}
                             </select>
                         </label>
 
                         <label className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-stone-300">
-                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-500">
-                                Orden
-                            </div>
+                            <div className="text-[11px] uppercase tracking-[0.24em] text-stone-500"><LocalizedText source={"Orden "} /></div>
                             <select
                                 value={sortDirection}
                                 onChange={(event) =>
@@ -384,34 +361,26 @@ export default function OverviewModal({
                                 }
                                 className="mt-2 w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-stone-100 outline-none focus:border-cyan-200/30"
                             >
-                                <option value="desc">Mayor a menor</option>
-                                <option value="asc">Menor a mayor</option>
+                                <option value="desc"><LocalizedText source={"Mayor a menor"} /></option>
+                                <option value="asc"><LocalizedText source={"Menor a mayor"} /></option>
                             </select>
                         </label>
                     </div>
 
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-sm text-stone-300">
                         <div>
-                            {visibleEntries.length} resultados
-                            {snapshot ? ` de ${snapshot.entries.length}` : ""}
+                            {visibleEntries.length}<LocalizedText source={" resultados "} />{snapshot ? ` de ${snapshot.entries.length}` : ""}
                         </div>
-                        <div>
-                            Pagina {currentPage} de {totalPages}
+                        <div><LocalizedText source={"Pagina "} />{currentPage}<LocalizedText source={" de "} />{totalPages}
                         </div>
                     </div>
                 </div>
 
                 <div className="overflow-y-auto px-6 py-6">
                     {!snapshot || snapshot.entries.length === 0 ? (
-                        <div className="rounded-[26px] border border-white/8 bg-black/18 p-6 text-sm text-stone-300">
-                            No hay datos suficientes todavía. Proba de nuevo
-                            cuando haya jugadores activos enviando paquetes
-                            no-ping.
-                        </div>
+                        <div className="rounded-[26px] border border-white/8 bg-black/18 p-6 text-sm text-stone-300"><LocalizedText source={"No hay datos suficientes todavÃ­a. Proba de nuevo cuando haya jugadores activos enviando paquetes no-ping. "} /></div>
                     ) : visibleEntries.length === 0 ? (
-                        <div className="rounded-[26px] border border-white/8 bg-black/18 p-6 text-sm text-stone-300">
-                            No hay jugadores que coincidan con ese filtro.
-                        </div>
+                        <div className="rounded-[26px] border border-white/8 bg-black/18 p-6 text-sm text-stone-300"><LocalizedText source={"No hay jugadores que coincidan con ese filtro. "} /></div>
                     ) : (
                         <div className="grid gap-4 xl:grid-cols-2">
                             {pagedEntries.map((entry, index) => {
@@ -447,7 +416,7 @@ export default function OverviewModal({
                                                     <span
                                                         className={`rounded-full border px-3 py-1 ${risk.tone}`}
                                                     >
-                                                        {risk.label}
+                                                        <LocalizedText source={risk.label} />
                                                     </span>
                                                 </div>
                                             </div>
@@ -460,15 +429,10 @@ export default function OverviewModal({
                                                     {entry.css} | x
                                                     {entry.baselineRatioPps60.toFixed(
                                                         2,
-                                                    )}{" "}
-                                                    del promedio
-                                                </div>
+                                                    )}{" "}<LocalizedText source={"del promedio "} /></div>
                                                 <div className="mt-1 text-xs text-stone-400">
                                                     pps60=
-                                                    {entry.pps60.toFixed(1)} |
-                                                    pico1s={entry.peakPps1s} |
-                                                    confirmados=
-                                                    {entry.odh +
+                                                    {entry.pps60.toFixed(1)}<LocalizedText source={" | pico1s="} />{entry.peakPps1s}<LocalizedText source={" | confirmados= "} />{entry.odh +
                                                         entry.frh +
                                                         entry.fph +
                                                         entry.rth +
@@ -479,15 +443,11 @@ export default function OverviewModal({
 
                                         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                                             <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
-                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500">
-                                                    Volumen
-                                                </div>
+                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500"><LocalizedText source={"Volumen "} /></div>
                                                 <div className="mt-2 text-sm text-stone-200">
                                                     total={entry.totalPackets}
                                                 </div>
-                                                <div className="text-sm text-stone-300">
-                                                    sin ping=
-                                                    {entry.nonPingPackets}
+                                                <div className="text-sm text-stone-300"><LocalizedText source={"sin ping= "} />{entry.nonPingPackets}
                                                 </div>
                                                 <div className="text-sm text-stone-400">
                                                     ping={entry.pingPackets}
@@ -495,12 +455,8 @@ export default function OverviewModal({
                                             </div>
 
                                             <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
-                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500">
-                                                    Ritmo
-                                                </div>
-                                                <div className="mt-2 text-sm text-stone-200">
-                                                    avgSesion=
-                                                    {entry.avgSessionPpm.toFixed(
+                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500"><LocalizedText source={"Ritmo "} /></div>
+                                                <div className="mt-2 text-sm text-stone-200"><LocalizedText source={"avgSesion= "} />{entry.avgSessionPpm.toFixed(
                                                         1,
                                                     )}{" "}
                                                     ppm
@@ -515,15 +471,10 @@ export default function OverviewModal({
                                             </div>
 
                                             <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
-                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500">
-                                                    Rafagas
+                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500"><LocalizedText source={"Rafagas "} /></div>
+                                                <div className="mt-2 text-sm text-stone-200"><LocalizedText source={"pico1s="} />{entry.peakPps1s}
                                                 </div>
-                                                <div className="mt-2 text-sm text-stone-200">
-                                                    pico1s={entry.peakPps1s}
-                                                </div>
-                                                <div className="text-sm text-stone-300">
-                                                    segs&gt;10pps=
-                                                    {
+                                                <div className="text-sm text-stone-300"><LocalizedText source={"segs&gt;10pps= "} />{
                                                         entry.burstSecondsOver10Pps1m
                                                     }
                                                 </div>
@@ -570,23 +521,15 @@ export default function OverviewModal({
                                                     npcs=
                                                     {entry.oan}
                                                 </div>
-                                                <div className="text-sm text-cyan-200">
-                                                    confirmados=
-                                                    {entry.odh}
+                                                <div className="text-sm text-cyan-200"><LocalizedText source={"confirmados= "} />{entry.odh}
                                                 </div>
                                             </div>
 
                                             <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
-                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500">
-                                                    Reacciones
+                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500"><LocalizedText source={"Reacciones "} /></div>
+                                                <div className="mt-2 text-sm text-stone-200"><LocalizedText source={"targetReactivo= "} />{entry.rth}
                                                 </div>
-                                                <div className="mt-2 text-sm text-stone-200">
-                                                    targetReactivo=
-                                                    {entry.rth}
-                                                </div>
-                                                <div className="text-sm text-stone-300">
-                                                    spellClavado=
-                                                    {entry.csh}
+                                                <div className="text-sm text-stone-300"><LocalizedText source={"spellClavado= "} />{entry.csh}
                                                 </div>
                                                 <div className="text-sm text-stone-400">
                                                     AP=
@@ -595,9 +538,7 @@ export default function OverviewModal({
                                             </div>
 
                                             <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
-                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500">
-                                                    Intervalos
-                                                </div>
+                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500"><LocalizedText source={"Intervalos "} /></div>
                                                 <div className="mt-2 text-sm text-stone-200">
                                                     min=
                                                     {
@@ -622,18 +563,12 @@ export default function OverviewModal({
                                             </div>
 
                                             <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-3 sm:col-span-2 xl:col-span-2">
-                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500">
-                                                    Tipos dominantes
-                                                </div>
+                                                <div className="text-[11px] uppercase tracking-[0.22em] text-stone-500"><LocalizedText source={"Tipos dominantes "} /></div>
                                                 <div className="mt-2 text-sm text-stone-200">
-                                                    {renderTypeShare(entry)}
+                                                    <LocalizedText source={renderTypeShare(entry)} />
                                                 </div>
-                                                <div className="mt-1 text-xs text-stone-400">
-                                                    Muestra de{" "}
-                                                    {entry.intervalsSampleSize}{" "}
-                                                    intervalos recientes
-                                                    no-ping.
-                                                </div>
+                                                <div className="mt-1 text-xs text-stone-400"><LocalizedText source={"Muestra de"} />{" "}
+                                                    {entry.intervalsSampleSize}{" "}<LocalizedText source={"intervalos recientes no-ping. "} /></div>
                                             </div>
                                         </div>
                                     </article>
@@ -652,12 +587,9 @@ export default function OverviewModal({
                                             }
                                             disabled={currentPage <= 1}
                                             className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-200 transition enabled:hover:border-white/20 enabled:hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                                        >
-                                            Anterior
-                                        </button>
+                                        ><LocalizedText source={"Anterior "} /></button>
 
-                                        <span>
-                                            Pagina {currentPage} de {totalPages}
+                                        <span><LocalizedText source={"Pagina "} />{currentPage}<LocalizedText source={" de "} />{totalPages}
                                         </span>
 
                                         <button
@@ -672,9 +604,7 @@ export default function OverviewModal({
                                             }
                                             disabled={currentPage >= totalPages}
                                             className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-200 transition enabled:hover:border-white/20 enabled:hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                                        >
-                                            Siguiente
-                                        </button>
+                                        ><LocalizedText source={"Siguiente "} /></button>
                                     </div>
                                 </div>
                             ) : null}

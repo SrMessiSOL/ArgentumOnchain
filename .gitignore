@@ -21,3 +21,21 @@ playwright-report/
 *.cer
 *.jks
 *.keystore
+
+# Local operation data and artifacts must never be published.
+.next*/
+*.log
+*.dump
+*.dpapi
+*.tsbuildinfo
+*.json.tmp
+/screenshots/
+/work/
+/backups/
+**/*issuer*.json
+**/*keypair*.json
+**/*secret*.json
+
+# Internal findings remain local while remediation is in progress.
+/SECURITY-AUDIT-*.md
+/SECURITY-REVIEW.md

@@ -1,3 +1,4 @@
+import {assertPlayableCharacter} from "../game-asset-policy";
 import crypto from "crypto";
 import { z } from "zod";
 import type { PoolClient } from "pg";
@@ -113,9 +114,9 @@ const displayNameSchema = z
 
 const loginSchema = z
     .object({
-        identifier: z.string().trim().min(1).optional(),
-        email: z.string().trim().min(1).optional(),
-        password: z.string().min(1),
+        identifier: z.string().trim().min(1).max(254).optional(),
+        email: z.string().trim().min(1).max(254).optional(),
+        password: z.string().min(1).max(100),
     })
     .transform(({ identifier, email, password }) => ({
         identifier: identifier?.trim() || email?.trim() || "",
@@ -354,12 +355,12 @@ function toAuthCharacterSummary(
     const useLastAppearance = character.navegando;
     const classNameById: Record<number, string> = {
         1: "Mago",
-        2: "Clérigo",
+        2: "ClÃ©rigo",
         3: "Guerrero",
         4: "Asesino",
         6: "Bardo",
         7: "Druida",
-        8: "Paladín",
+        8: "PaladÃ­n",
         9: "Cazador",
     };
     const raceNameById: Record<number, string> = {
@@ -850,7 +851,9 @@ export async function requestPasswordReset(
 
     if (account && resetToken) {
         try {
+            const preference = await pool.query<{locale:string}>("SELECT locale FROM account_preferences WHERE account_id = $1", [account.id]);
             await sendPasswordResetEmail({
+                locale: preference.rows[0]?.locale === 'es' ? 'es' : 'en',
                 to: account.email,
                 displayName: account.name,
                 resetUrl: getPasswordResetUrl(resetToken),
@@ -1027,6 +1030,7 @@ export async function deleteCharacterForSession(
         FROM characters
         WHERE id = $1
           AND account_id = $2
+          AND economy_lock IS NULL
           AND deleted_at IS NULL
         LIMIT 1
         FOR UPDATE
@@ -1140,6 +1144,7 @@ export async function createGameTicket(
         FROM characters
         WHERE id = $1
           AND account_id = $2
+          AND economy_lock IS NULL
           AND deleted_at IS NULL
         LIMIT 1
         FOR UPDATE
@@ -1147,6 +1152,7 @@ export async function createGameTicket(
             [session.selected_character_id, session.account_id],
         );
 
+        if (characterResult.rowCount) await assertPlayableCharacter(session.selected_character_id!, session.account_id, client);
         if (!characterResult.rowCount) {
             await client.query("ROLLBACK");
             return null;
@@ -1236,7 +1242,7 @@ export async function consumeGameTicket(
 
         const storedTicket = ticketResult.rows[0];
 
-        if (!storedTicket) {
+        if (!storedTicket || storedTicket.mode === "arena") {
             await client.query("ROLLBACK");
             return null;
         }
@@ -1257,6 +1263,7 @@ export async function consumeGameTicket(
           FROM characters
           WHERE id = $1
             AND account_id = $2
+            AND economy_lock IS NULL
             AND deleted_at IS NULL
           LIMIT 1
           FOR UPDATE
@@ -1264,7 +1271,8 @@ export async function consumeGameTicket(
                 [storedTicket.character_id, storedTicket.account_id],
             );
 
-            if (!characterResult.rowCount) {
+            if (characterResult.rowCount) await assertPlayableCharacter(storedTicket.character_id!, storedTicket.account_id, client);
+        if (!characterResult.rowCount) {
                 await client.query("ROLLBACK");
                 return null;
             }
@@ -1284,6 +1292,7 @@ export async function consumeGameTicket(
             }
         }
 
+        await client.query("UPDATE characters SET economy_login_until=NOW()+INTERVAL '30 seconds' WHERE id=$1 AND economy_lock IS NULL",[storedTicket.character_id]);
         await client.query(
             `
         UPDATE game_tickets
@@ -1419,6 +1428,7 @@ export async function selectSessionCharacter(
         [characterId, session.account_id],
     );
 
+    if (characterMatch.rowCount) await assertPlayableCharacter(characterId,session.account_id);
     if (!characterMatch.rowCount) {
         throw new Error("Personaje invalido");
     }
@@ -1442,3 +1452,7 @@ export async function selectSessionCharacter(
 
     return getPublicSessionByToken(token);
 }
+
+
+
+

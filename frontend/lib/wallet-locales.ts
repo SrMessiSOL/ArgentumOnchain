@@ -1,0 +1,33 @@
+export const walletEnglish = {
+    "wallet.unsupported": "This wallet cannot sign the required message or transaction. Choose another compatible Solana wallet.",
+    title: "Your Solana wallet", optional: "Character ownership & game assets",
+    description: "Link your wallet to mint and stake new characters, trade character NFTs and move gold or item receipts. Existing unminted characters can opt in.",
+    boundary: "This only verifies wallet control. It does not mint items, transfer funds or put gameplay on-chain.",
+    unlinked: "No wallet linked", linked: "Wallet verified", connect: "Link Solana wallet",
+    replace: "Link a different Solana wallet", pending: "Check your wallet…", back: "Back to characters",
+    loading: "Loading account…", language: "Language", signInLink: "Sign in",
+    "wallet.signIn": "Sign in to your game account first.",
+    "wallet.noProvider": "Open this page in a browser with a compatible Solana wallet installed. New characters need a linked wallet to mint and stake.",
+    "wallet.invalidAddress": "The wallet address is invalid.",
+    "wallet.invalidProof": "The signature could not be verified. Please try again.",
+    "wallet.expiredProof": "This request expired or was already used. Please start again.",
+    "wallet.alreadyLinked": "This wallet is already linked to another game account.",
+    "wallet.failed": "Wallet linking was cancelled or could not finish. Your game is unaffected.",
+};
+export type WalletTextKey = keyof typeof walletEnglish;
+export const walletSpanish: Record<WalletTextKey, string> = {
+    "wallet.unsupported": "Esta wallet no puede firmar el mensaje o la transacción requeridos. Elegí otra wallet compatible de Solana.",
+    title: "Tu wallet de Solana", optional: "Personajes y activos del juego",
+    description: "Vinculá tu wallet para mintear y stakear personajes nuevos, intercambiar NFTs y mover oro u objetos. Los personajes existentes pueden optar por mintear.",
+    boundary: "Esto solo verifica el control de la wallet. No crea ítems, transfiere fondos ni pone el juego on-chain.",
+    unlinked: "Sin wallet vinculada", linked: "Wallet verificada", connect: "Vincular Solana wallet",
+    replace: "Vincular otra Solana wallet", pending: "Revisá tu wallet…", back: "Volver a personajes",
+    loading: "Cargando cuenta…", language: "Idioma", signInLink: "Ingresar",
+    "wallet.signIn": "Primero ingresá a tu cuenta del juego.",
+    "wallet.noProvider": "Abrí esta página en un navegador con una wallet compatible instalada. No necesitás una wallet para jugar.",
+    "wallet.invalidAddress": "La dirección de la wallet no es válida.",
+    "wallet.invalidProof": "No se pudo verificar la firma. Intentá de nuevo.",
+    "wallet.expiredProof": "La solicitud venció o ya fue utilizada. Volvé a empezar.",
+    "wallet.alreadyLinked": "Esta wallet ya está vinculada a otra cuenta del juego.",
+    "wallet.failed": "Se canceló la vinculación o no pudo completarse. El juego no se ve afectado.",
+};

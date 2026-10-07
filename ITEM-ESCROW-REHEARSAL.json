@@ -1,0 +1,11 @@
+{
+  "network": "devnet",
+  "method": "Dedicated disposable test character; temporary game-item fixture; no wallet payment sent",
+  "item": "Escudo Imperial",
+  "listingId": "3af002bd-c893-4187-9609-5f958fd50f31",
+  "quantityListed": 2,
+  "priceLamports": 1000000,
+  "cancellationReturnedQuantity": true,
+  "originalInventoryRestored": true,
+  "finishedAt": "2026-10-06T02:53:52.765Z"
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import {LocalizedText} from '@/components/LocalizedText';
 import React from "react";
 
 type PanelPosition = {
@@ -147,11 +148,11 @@ export default function FloatingHudPanel({
             >
                 <div>
                     <h2 className="text-sm font-semibold text-white">
-                        {title}
+                        <LocalizedText source={title} />
                     </h2>
                 </div>
                 <span className="rounded-full border border-white/10 px-2 py-1 text-[11px] text-cyan-100/80">
-                    {subtitle || "Arrastrar"}
+                    <LocalizedText source={subtitle || "Arrastrar"} />
                 </span>
             </div>
 

@@ -57,7 +57,7 @@ export async function getRankingHeadSprites(
         );
     } catch (error) {
         console.error(
-            "No se pudieron resolver las cabezas del ranking:",
+            "Could not resolve ranking character heads:",
             error,
         );
         return {};

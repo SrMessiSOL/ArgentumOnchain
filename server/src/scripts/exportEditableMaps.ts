@@ -263,14 +263,14 @@ function buildEditableMap(
     specials: EditableSpecials;
 } {
     if (!rawMapJson || typeof rawMapJson !== "object" || Array.isArray(rawMapJson)) {
-        throw new Error(`Mapa ${mapId}: formato JSON inválido.`);
+        throw new Error(`Map ${mapId}: invalid JSON format.`);
     }
 
     const root = rawMapJson as Record<string, unknown>;
     const mapNode = root[String(mapId)];
 
     if (!mapNode || typeof mapNode !== "object" || Array.isArray(mapNode)) {
-        throw new Error(`Mapa ${mapId}: no se encontró el nodo principal ${mapId}.`);
+        throw new Error(`Map ${mapId}: root node ${mapId} not found.`);
     }
 
     const rowKeys = Object.keys(mapNode)
@@ -413,11 +413,11 @@ function exportMap(mapId: number, inputDir: string, datsDir: string, outputDir: 
     const datFilePath = path.join(datsDir, `mapa_${mapId}.json`);
 
     if (!fs.existsSync(mapFilePath)) {
-        throw new Error(`Mapa ${mapId}: no existe ${mapFilePath}`);
+        throw new Error(`Map ${mapId}: ${mapFilePath} does not exist`);
     }
 
     if (!fs.existsSync(datFilePath)) {
-        throw new Error(`Mapa ${mapId}: no existe ${datFilePath}`);
+        throw new Error(`Map ${mapId}: ${datFilePath} does not exist`);
     }
 
     const { terrain, specials } = buildEditableMap(mapId, readJsonFile(mapFilePath));
@@ -429,7 +429,7 @@ function exportMap(mapId: number, inputDir: string, datsDir: string, outputDir: 
     writeJsonFile(path.join(mapOutputDir, "specials.json"), specials, pretty);
 
     console.log(
-        `Exportado mapa ${mapId} -> ${path.relative(process.cwd(), mapOutputDir)} ` +
+        `Exported map ${mapId} -> ${path.relative(process.cwd(), mapOutputDir)} ` +
             `(terrainPalette=${Object.keys(terrain.palette).length}, exits=${Object.keys(specials.exits).length}, ` +
             `objects=${Object.keys(specials.objects).length}, npcs=${Object.keys(specials.npcs).length}, ` +
             `triggers=${Object.keys(specials.triggers).length})`,
@@ -441,14 +441,14 @@ function main(): void {
     const resolvedMapIds = mapIds.length > 0 ? mapIds : getAvailableMapIds(inputDir, datsDir);
 
     if (resolvedMapIds.length === 0) {
-        throw new Error("No se encontraron mapas para exportar.");
+        throw new Error("No maps found to export.");
     }
 
     for (const mapId of resolvedMapIds) {
         exportMap(mapId, inputDir, datsDir, outputDir, pretty);
     }
 
-    console.log(`Listo. Mapas exportados: ${resolvedMapIds.length}`);
+    console.log(`Done. Maps exported: ${resolvedMapIds.length}`);
 }
 
 main();

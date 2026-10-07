@@ -102,42 +102,42 @@ async function main(): Promise<void> {
 
   if (!["all", "objs", "npcs", "crafting", "smelting"].includes(mode)) {
     throw new Error(
-      "Uso: pnpm import-game-data [all|objs|npcs|crafting|smelting] [--objects-path ruta] [--npcs-path ruta] [--crafting-path ruta] [--smelting-path ruta]",
+      "Usage: pnpm import-game-data [all|objs|npcs|crafting|smelting] [--objects-path path] [--npcs-path path] [--crafting-path path] [--smelting-path path]",
     );
   }
 
   if (mode === "all" || mode === "objs") {
     const objects = await importObjects(objectsPath);
     console.log(
-      `Objects importados. Total: ${objects.total}. Nuevos/actualizados: ${objects.changed}. Sin cambios: ${objects.unchanged}.`,
+      `Objects imported. Total: ${objects.total}. New/updated: ${objects.changed}. Unchanged: ${objects.unchanged}.`,
     );
   }
 
   if (mode === "all" || mode === "npcs") {
     const npcs = await importNpcs(npcsPath);
     console.log(
-      `NPCs importados. Total: ${npcs.total}. Nuevos/actualizados: ${npcs.changed}. Sin cambios: ${npcs.unchanged}.`,
+      `NPCs imported. Total: ${npcs.total}. New/updated: ${npcs.changed}. Unchanged: ${npcs.unchanged}.`,
     );
   }
 
   if (mode === "all" || mode === "crafting") {
     const crafting = await importCraftingRecipes(craftingPath);
     console.log(
-      `Crafting importado. Total: ${crafting.total}. Nuevos/actualizados: ${crafting.changed}. Sin cambios: ${crafting.unchanged}.`,
+      `Crafting imported. Total: ${crafting.total}. New/updated: ${crafting.changed}. Unchanged: ${crafting.unchanged}.`,
     );
   }
 
   if (mode === "all" || mode === "smelting") {
     const smelting = await importSmeltingRecipes(smeltingPath);
     console.log(
-      `Fundicion importada. Total: ${smelting.total}. Nuevos/actualizados: ${smelting.changed}. Sin cambios: ${smelting.unchanged}.`,
+      `Smelting imported. Total: ${smelting.total}. New/updated: ${smelting.changed}. Unchanged: ${smelting.unchanged}.`,
     );
   }
 }
 
 void main()
   .catch((error) => {
-    console.error("No se pudo importar game data", error);
+    console.error("Could not import game data", error);
     process.exit(1);
   })
   .finally(async () => {

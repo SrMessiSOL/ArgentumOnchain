@@ -1,9 +1,12 @@
+"use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 /* eslint-disable @next/next/no-img-element */
 
-"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Crown, Flame, Trophy } from "lucide-react";
+import { Crown, Flame, Trophy, RefreshCw } from "lucide-react";
+import BrowseToolbar from "@/components/BrowseToolbar";
+import {useI18n} from "@/components/I18nProvider";
 import { formatNumber } from "@/lib/number-format";
 import type {
     RankingCharacter,
@@ -14,6 +17,7 @@ import type {
 type RankingViewProps = {
     characters: RankingCharacter[];
     headSpritesById: Record<string, RankingHeadSprite | null>;
+    unavailable?: boolean;
 };
 
 type RankingSortKey = "level" | "kills";
@@ -47,7 +51,7 @@ const raceLabels: Record<number, string> = {
 
 const factionColors = {
     armada: "#00AFFF",
-    caos: "#9B0000",
+    caos: "#fb7185",
 } as const;
 
 const classFilterOptions = [
@@ -90,7 +94,7 @@ function getCharacterMeta(character: RankingCharacter) {
         classLabels[character.idClase] ?? `Clase ${character.idClase}`;
     const raceLabel =
         raceLabels[character.idRaza] ?? `Raza ${character.idRaza}`;
-    return `${classLabel} · ${raceLabel}`;
+    return <><LocalizedText source={classLabel} />{" · "}<LocalizedText source={raceLabel} /></>;
 }
 
 function getCharacterNameColor(character: RankingCharacter) {
@@ -102,7 +106,7 @@ function getCharacterNameColor(character: RankingCharacter) {
         return factionColors.caos;
     }
 
-    return character.criminal ? "red" : "#3333ff";
+    return character.criminal ? "#fb7185" : "#93c5fd";
 }
 
 function getClanTag(character: RankingCharacter) {
@@ -110,7 +114,7 @@ function getClanTag(character: RankingCharacter) {
 }
 
 function formatUpdatedAt(value: string) {
-    return new Intl.DateTimeFormat("es-AR", {
+    return new Intl.DateTimeFormat("en-US", {
         dateStyle: "medium",
         timeStyle: "short",
     }).format(new Date(value));
@@ -178,7 +182,7 @@ function RankingHead({
                     imageRendering: "pixelated",
                 }}
             >
-                <img
+                <LocalizedLabel><img
                     src={`/graphics/${sprite.numFile}.png`}
                     alt=""
                     draggable={false}
@@ -192,347 +196,52 @@ function RankingHead({
                         transformOrigin: `${sprite.sourceX}px ${sprite.sourceY}px`,
                         imageRendering: "pixelated",
                     }}
-                />
+                /></LocalizedLabel>
             </div>
         </div>
     );
 }
 
-export default function RankingView({
-    characters,
-    headSpritesById,
-}: RankingViewProps) {
-    const [sortKey, setSortKey] = useState<RankingSortKey>("level");
-    const [classFilter, setClassFilter] = useState<RankingClassFilter>("all");
-    const [rankingCharacters, setRankingCharacters] = useState(characters);
-    const [rankingHeads, setRankingHeads] = useState(headSpritesById);
-    const [isLoading, setIsLoading] = useState(false);
-    const hasLoadedInitialDataRef = useRef(false);
-
-    useEffect(() => {
-        if (!hasLoadedInitialDataRef.current) {
-            hasLoadedInitialDataRef.current = true;
-            return;
-        }
-
-        const controller = new AbortController();
-        const query = new URLSearchParams({ sort: sortKey });
-
-        if (classFilter !== "all") {
-            query.set("classId", String(classFilter));
-        }
-
-        setIsLoading(true);
-        setRankingCharacters([]);
-        setRankingHeads({});
-
-        fetch(`/api/ranking?${query.toString()}`, {
-            signal: controller.signal,
-            cache: "no-store",
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    throw new Error("No se pudo cargar el ranking");
-                }
-
-                return (await response.json()) as RankingPageData;
-            })
-            .then((result) => {
-                setRankingCharacters(result.characters);
-                setRankingHeads(result.headSpritesById);
-            })
-            .catch((error) => {
-                if (controller.signal.aborted) {
-                    return;
-                }
-
-                console.error("No se pudo actualizar el ranking:", error);
-            })
-            .finally(() => {
-                if (!controller.signal.aborted) {
-                    setIsLoading(false);
-                }
-            });
-
-        return () => controller.abort();
-    }, [sortKey, classFilter]);
-
-    const sortedCharacters = useMemo(
-        () => sortCharacters(rankingCharacters, sortKey),
-        [rankingCharacters, sortKey],
-    );
-    const podium = sortedCharacters.slice(0, 3);
-    const latestUpdatedAt = useMemo(() => {
-        if (rankingCharacters.length === 0) {
-            return null;
-        }
-
-        return rankingCharacters.reduce((latest, character) =>
-            new Date(character.updatedAt).getTime() >
-            new Date(latest.updatedAt).getTime()
-                ? character
-                : latest,
-        ).updatedAt;
-    }, [rankingCharacters]);
-
-    if (
-        characters.length === 0 &&
-        rankingCharacters.length === 0 &&
-        !isLoading
-    ) {
-        return (
-            <main className="min-h-screen overflow-y-auto bg-[radial-gradient(circle_at_top,#0f766e33,transparent_35%),radial-gradient(circle_at_bottom,#f59e0b22,transparent_30%),linear-gradient(180deg,#020617,#0c0a09)] px-4 py-12 text-stone-100">
-                <div className="mx-auto max-w-4xl rounded-[32px] border border-white/8 bg-stone-950/80 p-8 text-center shadow-2xl backdrop-blur-md">
-                    <p className="text-[11px] uppercase tracking-[0.34em] text-amber-200/75">
-                        AOWeb
-                    </p>
-                    <h1 className="mt-3 text-3xl font-semibold text-white">
-                        Ranking
-                    </h1>
-                    <p className="mt-4 text-stone-400">
-                        Todavía no hay personajes para mostrar en el ranking.
-                    </p>
-                </div>
-            </main>
-        );
-    }
-
-    return (
-        <main className="min-h-screen overflow-y-auto bg-[radial-gradient(circle_at_top,#0f766e33,transparent_35%),radial-gradient(circle_at_bottom,#f59e0b22,transparent_30%),linear-gradient(180deg,#020617,#0c0a09)] px-4 py-12 text-stone-100">
-            <div className="mx-auto max-w-6xl space-y-8">
-                <section>
-                    <div className="mt-3 flex items-start gap-3">
-                        <div className="rounded-2xl border border-amber-300/20 bg-amber-400/10 p-3 text-amber-300">
-                            <Trophy className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-semibold text-white md:text-4xl">
-                                Ranking
-                            </h1>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="grid gap-4 lg:grid-cols-3">
-                    {podium.map((character, index) => {
-                        const Icon =
-                            index === 0 ? Crown : index === 1 ? Trophy : Flame;
-                        const accentClass =
-                            index === 0
-                                ? "text-amber-300 border-amber-300/20 bg-amber-400/10"
-                                : index === 1
-                                  ? "text-stone-200 border-white/10 bg-white/5"
-                                  : "text-orange-300 border-orange-300/20 bg-orange-400/10";
-
-                        return (
-                            <article
-                                key={character.id}
-                                className="relative overflow-hidden rounded-[28px] border border-white/8 bg-stone-950/80 p-5 shadow-2xl backdrop-blur-md"
-                            >
-                                <div className="pointer-events-none absolute -right-8 top-4 h-28 w-28 rounded-full bg-white/5 blur-3xl" />
-                                <div className="relative flex items-center gap-4">
-                                    <RankingHead
-                                        sprite={
-                                            rankingHeads[
-                                                String(character.headId)
-                                            ] ?? null
-                                        }
-                                        size={84}
-                                        className="shrink-0 rounded-[24px]"
-                                    />
-
-                                    <div className="min-w-0 flex-1">
-                                        <div
-                                            className={`inline-flex rounded-2xl border p-3 ${accentClass}`}
-                                        >
-                                            <Icon className="h-5 w-5" />
-                                        </div>
-                                        <p className="mt-4 text-sm text-stone-400">
-                                            Top {index + 1}{" "}
-                                            {sortKey === "level"
-                                                ? "Nivel"
-                                                : "Kills"}
-                                        </p>
-                                        <p
-                                            className="mt-1 truncate text-2xl font-semibold"
-                                            style={{
-                                                color: getCharacterNameColor(
-                                                    character,
-                                                ),
-                                            }}
-                                        >
-                                            {character.name}
-                                        </p>
-                                        {getClanTag(character) ? (
-                                            <p className="mt-1 truncate text-sm text-stone-300">
-                                                {getClanTag(character)}
-                                            </p>
-                                        ) : null}
-                                        <p className="mt-1 text-lg text-amber-300">
-                                            {getMetricLabel(character, sortKey)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </article>
-                        );
-                    })}
-                </section>
-
-                <section className="rounded-[32px] border border-white/8 bg-stone-950/80 p-5 shadow-2xl backdrop-blur-md md:p-6">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <h2 className="text-2xl font-semibold text-white">
-                                Tabla de clasificación
-                            </h2>
-                            {latestUpdatedAt ? (
-                                <p className="mt-2 text-sm text-stone-400">
-                                    Ultima actualización:{" "}
-                                    {formatUpdatedAt(latestUpdatedAt)}
-                                </p>
-                            ) : null}
-                        </div>
-
-                        <div className="flex flex-col gap-3 self-start md:self-auto">
-                            <div className="flex items-center gap-3">
-                                <span className="text-sm text-stone-400">
-                                    Ordenar por:
-                                </span>
-                                <div className="inline-flex rounded-2xl border border-white/8 bg-black/20 p-1">
-                                    {sortOptions.map((option) => (
-                                        <button
-                                            key={option.key}
-                                            type="button"
-                                            onClick={() =>
-                                                setSortKey(option.key)
-                                            }
-                                            className={`rounded-xl px-4 py-2 text-sm transition ${
-                                                sortKey === option.key
-                                                    ? "bg-amber-300 text-stone-950"
-                                                    : "text-stone-300 hover:bg-white/5"
-                                            }`}
-                                        >
-                                            {option.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <span className="text-sm text-stone-400">
-                                    Filtrar por:
-                                </span>
-                                <select
-                                    value={String(classFilter)}
-                                    onChange={(event) => {
-                                        const value = event.target.value;
-                                        setClassFilter(
-                                            value === "all"
-                                                ? "all"
-                                                : Number(value),
-                                        );
-                                    }}
-                                    className="rounded-2xl border border-white/8 bg-black/20 px-4 py-2 text-sm text-stone-200 outline-none"
-                                >
-                                    {classFilterOptions.map((option) => (
-                                        <option
-                                            key={String(option.value)}
-                                            value={String(option.value)}
-                                        >
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {isLoading ? (
-                        <p className="mt-4 text-sm text-stone-500">
-                            Actualizando ranking...
-                        </p>
-                    ) : null}
-
-                    <div className="mt-6 overflow-x-auto rounded-[24px] border border-white/8 bg-black/15">
-                        <div className="min-w-[720px]">
-                            <div className="grid grid-cols-[72px_minmax(0,1.9fr)_160px_120px] gap-3 border-b border-white/8 px-4 py-4 text-[11px] uppercase tracking-[0.26em] text-stone-500 md:px-6">
-                                <span>#</span>
-                                <span>Jugador</span>
-                                <span>Nivel</span>
-                                <span>Kills</span>
-                            </div>
-
-                            <div>
-                                {sortedCharacters.length === 0 ? (
-                                    <div className="px-6 py-8 text-sm text-stone-400">
-                                        No hay personajes para ese filtro.
-                                    </div>
-                                ) : (
-                                    sortedCharacters.map((character, index) => (
-                                        <div
-                                            key={character.id}
-                                            className="grid grid-cols-[72px_minmax(0,1.9fr)_160px_120px] items-center gap-3 border-b border-white/6 px-4 py-4 last:border-b-0 md:px-6"
-                                        >
-                                            <div className="text-lg text-stone-400">
-                                                {index + 1}
-                                            </div>
-
-                                            <div className="flex min-w-0 items-center gap-4">
-                                                <RankingHead
-                                                    sprite={
-                                                        rankingHeads[
-                                                            String(
-                                                                character.headId,
-                                                            )
-                                                        ] ?? null
-                                                    }
-                                                    size={58}
-                                                    className="shrink-0 rounded-[20px]"
-                                                />
-
-                                                <div className="min-w-0 flex-1">
-                                                    <p
-                                                        className="truncate text-base"
-                                                        style={{
-                                                            color: getCharacterNameColor(
-                                                                character,
-                                                            ),
-                                                        }}
-                                                    >
-                                                        {character.name}
-                                                    </p>
-                                                    {getClanTag(character) ? (
-                                                        <p className="truncate text-sm text-stone-300">
-                                                            {getClanTag(
-                                                                character,
-                                                            )}
-                                                        </p>
-                                                    ) : null}
-                                                    <p className="truncate text-sm text-stone-400">
-                                                        {getCharacterMeta(
-                                                            character,
-                                                        )}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="text-sm font-medium text-stone-200">
-                                                {formatNumber(character.level)}
-                                                {!isMaxLevelCharacter(character)
-                                                    ? ` (${formatExperiencePercent(character)})`
-                                                    : ""}
-                                            </div>
-
-                                            <div className="text-sm font-medium text-rose-300">
-                                                {formatNumber(character.kills)}
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </main>
-    );
+function characterName(character:RankingCharacter){return character.name;}
+export default function RankingView({characters,headSpritesById,unavailable=false}:RankingViewProps) {
+ const {locale,text}=useI18n();
+ const copy=locale==='es'?{eyebrow:'LEYENDAS DEL REINO',title:'Tabla de clasificación',intro:'Cada nivel se gana. Cada rival cuenta. Conocé a quienes dejan su huella en Argentum.',level:'Nivel',kills:'Kills',all:'Todas las clases',class:'Clase',leaders:'Líderes del reino',players:'Personajes',updated:'Progreso registrado',loading:'Actualizando clasificación…',error:'No pudimos actualizar la clasificación.',retry:'Reintentar',empty:'El reino espera sus primeras leyendas.',none:'No hay personajes para estos filtros.',reset:'Limpiar filtros',help:'Ordenado por nivel o kills. El porcentaje indica el progreso hacia el próximo nivel.'}:{eyebrow:'LEGENDS OF THE REALM',title:'Leaderboard',intro:'Every level earned. Every rival counted. Meet the adventurers making their mark in Argentum.',level:'Level',kills:'Kills',all:'All classes',class:'Class',leaders:'Realm leaders',players:'Characters',updated:'Progress recorded',loading:'Updating leaderboard…',error:'We couldn’t update the leaderboard.',retry:'Try again',empty:'The realm awaits its first legends.',none:'No characters match these filters.',reset:'Clear filters',help:'Ranked by level or kills. The percentage shows progress toward the next level.'};
+ const [sortKey,setSortKey]=useState<RankingSortKey>('level');
+ const [classFilter,setClassFilter]=useState<RankingClassFilter>('all');
+ const [query,setQuery]=useState('');
+ const [rankingCharacters,setRankingCharacters]=useState(characters);
+ const [rankingHeads,setRankingHeads]=useState(headSpritesById);
+ const [isLoading,setIsLoading]=useState(false);
+ const [failed,setFailed]=useState(unavailable);
+ const [retry,setRetry]=useState(0);
+ const first=useRef(true);
+ useEffect(()=>{
+  if(first.current){first.current=false;return;}
+  const controller=new AbortController();
+  const params=new URLSearchParams({sort:sortKey});
+  if(classFilter!=='all')params.set('classId',String(classFilter));
+  setIsLoading(true);setFailed(false);
+  fetch(`/api/ranking?${params}`,{signal:controller.signal,cache:'no-store'}).then(async r=>{
+   if(!r.ok)throw Error('Leaderboard unavailable');
+   return await r.json() as RankingPageData;
+  }).then(data=>{if(!controller.signal.aborted){setRankingCharacters(data.characters);setRankingHeads(data.headSpritesById);}}).catch(()=>{if(!controller.signal.aborted)setFailed(true);}).finally(()=>{if(!controller.signal.aborted)setIsLoading(false);});
+  return ()=>controller.abort();
+ },[sortKey,classFilter,retry]);
+ const ranked=useMemo(()=>sortCharacters(rankingCharacters,sortKey).filter(c=>classFilter==='all'||c.idClase===classFilter),[rankingCharacters,sortKey,classFilter]);
+ const visible=ranked.map((character,index)=>({character,rank:index+1})).filter(({character})=>character.name.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+ const leaders=ranked.slice(0,3);
+ const latest=ranked.reduce((value,c)=>Math.max(value,new Date(c.updatedAt).getTime()||0),0);
+ const head=(c:RankingCharacter,size:number)=><RankingHead sprite={rankingHeads[String(c.headId)]??null} size={size} className="shrink-0"/>;
+ return <main className="realm-ranking realm-leaderboard"><div className="leaderboard-wrap">
+  <header className="leaderboard-heading"><div><p className="exchange-eyebrow">{copy.eyebrow}</p><h1>{text(copy.title)}</h1><p>{copy.intro}</p></div><Trophy size={48} aria-hidden="true"/></header>
+  <div className="leaderboard-controls"><div className="leaderboard-tabs" aria-label={locale==='es'?'Ordenar clasificación':'Leaderboard ranking'}>{sortOptions.map(o=><button key={o.key} type="button" aria-pressed={sortKey===o.key} onClick={()=>setSortKey(o.key)}>{o.key==='level'?<Crown size={16}/>:<Flame size={16}/>} {o.key==='level'?copy.level:copy.kills}</button>)}</div><label>{copy.class}<select value={classFilter} onChange={e=>setClassFilter(e.target.value==='all'?'all':Number(e.target.value))}><option value="all">{copy.all}</option>{classFilterOptions.filter(o=>o.value!=='all').map(o=><option key={o.value} value={o.value}>{text(o.label)}</option>)}</select></label></div>
+  <div className="leaderboard-status" role="status" aria-live="polite">{isLoading?copy.loading:failed?copy.error:copy.help}{failed&&<button type="button" onClick={()=>setRetry(v=>v+1)}><RefreshCw size={14}/>{copy.retry}</button>}</div>
+  <BrowseToolbar kind="characters" query={query} onQuery={setQuery} count={visible.length}/>
+  {leaders.length>0&&<section className="leaderboard-podium" aria-label={copy.leaders}>{leaders.map((c,i)=><article key={c.id}><span className="leaderboard-place"><Trophy size={14}/> #{i+1}</span><div className="leaderboard-champion">{head(c,64)}<div><h2 title={characterName(c)}>{characterName(c)}</h2><p>{getCharacterMeta(c)}</p>{c.clanName&&<small>{c.clanName}</small>}</div></div><div className="leaderboard-score"><strong>{formatNumber(c[sortKey])}</strong><span>{sortKey==='level'?copy.level:copy.kills}</span>{sortKey==='level'&&!isMaxLevelCharacter(c)&&<small>{formatExperiencePercent(c)} XP</small>}</div></article>)}</section>}
+  <section className="leaderboard-list" aria-busy={isLoading}><div className="leaderboard-list-heading"><h2>{copy.players}</h2>{latest>0&&<small>{copy.updated}: {new Intl.DateTimeFormat(locale==='es'?'es-AR':'en-US',{dateStyle:'medium'}).format(latest)}</small>}</div>
+   <div className="leaderboard-column-head" aria-hidden="true"><span>#</span><span>{copy.players}</span><span>{copy.level}</span><span>{copy.kills}</span></div>
+   <ol className="leaderboard-rows">{visible.map(({character:c,rank})=><li key={c.id}><span className="leaderboard-rank">{rank}</span><div className="leaderboard-player">{head(c,44)}<div><h3 style={{color:getCharacterNameColor(c)}} title={characterName(c)}>{characterName(c)}</h3><p>{getCharacterMeta(c)}</p>{c.clanName&&<small>{c.clanName}</small>}</div></div><div className="leaderboard-stat"><span>{copy.level}</span><b>{formatNumber(c.level)}</b>{!isMaxLevelCharacter(c)&&<small>{formatExperiencePercent(c)} XP</small>}</div><div className="leaderboard-stat kills"><span>{copy.kills}</span><b>{formatNumber(c.kills)}</b></div></li>)}</ol>
+   {!visible.length&&!isLoading&&!failed&&<div className="leaderboard-empty"><Trophy size={28}/><h3>{query||classFilter!=='all'?copy.none:copy.empty}</h3>{(query||classFilter!=='all')&&<button onClick={()=>{setQuery('');setClassFilter('all');}}>{copy.reset}</button>}</div>}
+  </section>
+ </div></main>;
 }

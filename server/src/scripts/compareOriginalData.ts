@@ -762,9 +762,9 @@ function main() {
 
     fs.writeFileSync(path.join(outputDir, "summary.json"), JSON.stringify(summary, null, 2), "utf8");
 
-    console.log(`Comparacion generada en: ${outputDir}`);
-    console.log(`Objs con diferencias: ${objRows.length}`);
-    console.log(`NPCs con diferencias: ${npcRows.length}`);
+    console.log(`Comparison generated at: ${outputDir}`);
+    console.log(`Objects with differences: ${objRows.length}`);
+    console.log(`NPCs with differences: ${npcRows.length}`);
 }
 
 main();

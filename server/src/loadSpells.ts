@@ -8,7 +8,7 @@ class LoadObjs {
     async initialize() {
         await this.load();
 
-        console.log("Spells Cargados.");
+        console.log("Spells loaded.");
     }
 
     load() {

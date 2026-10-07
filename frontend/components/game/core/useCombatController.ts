@@ -461,10 +461,10 @@ export function useCombatController(options: UseCombatControllerOptions) {
             `melee: ${remaining(cooldowns.nextMeleeAt)}ms`,
             `range: ${remaining(cooldowns.nextRangeAt)}ms`,
             `spell: ${remaining(cooldowns.nextSpellAt)}ms`,
-            `golpe->hech: ${remaining(cooldowns.nextSpellAfterMeleeAt)}ms`,
-            `hech->golpe: ${remaining(cooldowns.nextMeleeAfterSpellAt)}ms`,
+            `melee->spell: ${remaining(cooldowns.nextSpellAfterMeleeAt)}ms`,
+            `spell->melee: ${remaining(cooldowns.nextMeleeAfterSpellAt)}ms`,
             `item: ${remaining(nextUseItemAtRef.current)}ms`,
-            `golpe->item: ${remaining(cooldowns.nextUseItemAfterMeleeAt)}ms`,
+            `melee->item: ${remaining(cooldowns.nextUseItemAfterMeleeAt)}ms`,
             `spell->spell click: ${spellAttemptIntervalMs ?? "--"}ms`,
         ].join("\n");
 

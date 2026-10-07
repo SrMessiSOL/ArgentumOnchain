@@ -1,5 +1,6 @@
 import type { EntityId, FishingState, Position, RuntimeCharacter, RuntimeClient } from "./types/runtime";
 import type { HandleProtocolApi } from "./handleProtocol";
+import { bankOperations } from './bankOperationGuard';
 import type { SocketApi } from "./socket";
 import { getCharacterById, getClientById } from "./runtimeRegistry";
 
@@ -358,6 +359,7 @@ const fishing: FishingApi = {
         for (const idUser in vars.personajes) {
             const user = getUser(idUser);
             const state = user?.fishing;
+            if (user && bankOperations.isBusy(user.id)) continue;
 
             if (!user || !state?.active || !state.nextTickAt || now < state.nextTickAt) {
                 continue;

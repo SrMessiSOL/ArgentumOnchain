@@ -1,0 +1,66 @@
+{
+  "network": "devnet",
+  "method": "Dedicated local test keys signing real devnet transactions; Phantom approval UI not exercised",
+  "mint": "8ZRpbVW8oJCnZpqjEyQEbFky53CoHqoiPVj7HJy8eo5k",
+  "steps": [
+    {
+      "step": "Funded dedicated test wallet with 0.01 test SOL",
+      "wallet": "AzjWUVPHE9ABSntnhmFTuReXuCCfEzPAFkrUxVTwCFbG",
+      "signature": "415EuQ2xRasmxBpFV1xrXcPCwncu42XUSnVFRebGcp1i4rg1nCXSACX7oYGUvAewAKcqGZciLk4XqGiweFz5FTi5"
+    },
+    {
+      "step": "Funded dedicated test wallet with 0.01 test SOL",
+      "wallet": "Hw79kyWbMymBzoMSU4qdcGnVykL2VhsC59rbFVqb51tH",
+      "signature": "2RqVknXr6fQmn1H17HEUP6VVcEvss4YkTX86EMo9oj7ikX71UQixNxb8y59m75wEAzmSEiqcxa61gZnCWKC2tXub"
+    },
+    {
+      "step": "Submitted withdraw",
+      "intentId": "f9452320-d798-4484-beae-417937f4c243",
+      "signature": "5m1yXoYbedfbXHM5bmCSH7X2dBFoAcJfvisxia1n9QmXqZxroHCJQoU4J5bWFC6BXF9SwKjvTW1mA7YrLtosiPBb"
+    },
+    {
+      "step": "Verified SPL withdrawal",
+      "signature": "5m1yXoYbedfbXHM5bmCSH7X2dBFoAcJfvisxia1n9QmXqZxroHCJQoU4J5bWFC6BXF9SwKjvTW1mA7YrLtosiPBb",
+      "amount": 2
+    },
+    {
+      "step": "Submitted deposit",
+      "intentId": "c947cdfc-b568-443c-8bfa-34ba414db469",
+      "signature": "47hnjZdYsuD2uyskeSRYviar3NryGxFtLeYDRTn2ZQykVq8EtHmckzwgua7c7vr5wVBtz5TfvAjdGqrcTfg9SdfQ"
+    },
+    {
+      "step": "Verified burn deposit and restored game gold",
+      "signature": "47hnjZdYsuD2uyskeSRYviar3NryGxFtLeYDRTn2ZQykVq8EtHmckzwgua7c7vr5wVBtz5TfvAjdGqrcTfg9SdfQ",
+      "amount": 2,
+      "goldBefore": 8,
+      "goldAfter": 8
+    },
+    {
+      "step": "Submitted purchase",
+      "intentId": "c7436a0d-44a3-4f3f-b643-45eca9c62f87",
+      "signature": "5YTBVG8GmFEEgT5jJd4uUVXfbMHu14MLvHTMX6zgoJW5cGdXG4ukwxGwaxFuwEdQxVzvydLHVPP3Jwc81hjmZjEn"
+    },
+    {
+      "step": "Verified character purchase",
+      "character": "Tunnelwalker",
+      "signature": "5YTBVG8GmFEEgT5jJd4uUVXfbMHu14MLvHTMX6zgoJW5cGdXG4ukwxGwaxFuwEdQxVzvydLHVPP3Jwc81hjmZjEn",
+      "priceLamports": 1000000
+    },
+    {
+      "step": "Submitted purchase",
+      "intentId": "5ebc515c-65b5-4cdf-ba64-4e330af65b5a",
+      "signature": "v2PY5xAkZU8WJx5dqXjYwYmYVwk31NPSRgXwuAfmmwaZc21zRu2FsWG4DWPQrZ3aidXfTeMANpKyXcb9wbQL4sf"
+    },
+    {
+      "step": "Returned test character; account ownership and level verified. Full persisted bundle proof is in DEVNET-BUNDLE-RECEIPT.json.",
+      "character": "Tunnelwalker",
+      "signature": "v2PY5xAkZU8WJx5dqXjYwYmYVwk31NPSRgXwuAfmmwaZc21zRu2FsWG4DWPQrZ3aidXfTeMANpKyXcb9wbQL4sf"
+    },
+    {
+      "step": "Selected earned First Hunt title on its character",
+      "character": "Spelltester"
+    }
+  ],
+  "complete": true,
+  "finishedAt": "2026-10-06T01:06:05.889Z"
+}

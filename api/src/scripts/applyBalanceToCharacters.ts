@@ -29,7 +29,7 @@ function getExpectedStats(character: CharacterRecord) {
   const base = RACE_BASE_STATS[character.id_raza];
   if (!base) {
     throw new Error(
-      `Raza invalida para character ${character.id}: ${character.id_raza}`,
+      `Invalid race for character ${character.id}: ${character.id_raza}`,
     );
   }
 
@@ -115,7 +115,7 @@ async function main() {
 
     await client.query("COMMIT");
 
-    console.log(`Characters actualizados: ${updatedCount}`);
+    console.log(`Characters updated: ${updatedCount}`);
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

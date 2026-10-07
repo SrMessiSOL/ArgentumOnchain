@@ -1,4 +1,5 @@
 import { AnimatedSprite, Container, Sprite } from "pixi.js";
+import {addLocalizedSign} from './localizedSigns';
 import type { MapTile } from "../../../types/game";
 import { getTileAt } from "../../../utils/gameLoader";
 import type { TileBounds } from "../assets/scenePreload";
@@ -275,6 +276,7 @@ export function renderTileLayer(
         }
     }
 
+    addLocalizedSign(sprite,graphicId,graphicData.width,graphicData.height,engine.mapNumber);
     sprite.x = (x - 1) * 32;
     sprite.y = (y - 1) * 32;
 

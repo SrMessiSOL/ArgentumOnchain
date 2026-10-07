@@ -101,7 +101,7 @@ function loadPersistedNpcRespawnCooldowns(): void {
         }
     } catch (error) {
         console.warn(
-            `[NPC RESPAWN] No se pudo leer npcRespawnCooldowns.json: ${error instanceof Error ? error.message : "error desconocido"}.`,
+            `[NPC RESPAWN] Could not read npcRespawnCooldowns.json: ${error instanceof Error ? error.message : "error desconocido"}.`,
         );
         persistedCooldowns.clear();
     }

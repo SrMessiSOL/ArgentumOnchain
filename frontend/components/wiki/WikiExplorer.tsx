@@ -1,5 +1,11 @@
 "use client";
 
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
+import {useI18n} from '@/components/I18nProvider';
+import {uxEnglish,uxSpanish} from "@/lib/ux-copy";
+import NpcArtwork from './NpcArtwork';
+import BrowseToolbar from "@/components/BrowseToolbar";
+import {browseEnglish,browseSpanish} from "@/lib/browse-copy";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatNumber } from "@/lib/number-format";
@@ -193,15 +199,15 @@ function formatMapLevelRestriction(
     return "Sin restriccion de nivel";
 }
 
-function getAllowedClassLabels(blockedClasses: number[]): string {
+function getAllowedClassLabels(blockedClasses: number[], text: (source:string)=>string): string {
     const blockedSet = new Set(blockedClasses);
     const allowed = PLAYABLE_CLASS_IDS.filter(
         (classId) => !blockedSet.has(classId),
     );
 
     return allowed.length > 0
-        ? allowed.map((classId) => PLAYABLE_CLASS_LABELS[classId]).join(", ")
-        : "Ninguna";
+        ? allowed.map((classId) => text(PLAYABLE_CLASS_LABELS[classId])).join(", ")
+        : text("Ninguna");
 }
 
 function ItemGraphic({
@@ -222,7 +228,7 @@ function ItemGraphic({
 
     return (
         <div className="relative h-10 w-10 overflow-hidden rounded-sm">
-            <div
+            <LocalizedLabel><div
                 aria-label={name}
                 className="absolute left-1/2 top-1/2 bg-no-repeat"
                 style={{
@@ -233,12 +239,22 @@ function ItemGraphic({
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: "center",
                 }}
-            />
+            /></LocalizedLabel>
         </div>
     );
 }
 
-export default function WikiExplorer({ data, section }: WikiExplorerProps) {
+export default function WikiExplorer({ data: sourceData, section }: WikiExplorerProps) {
+    const {text,locale}=useI18n();
+    const [query,setQuery]=useState('');
+    const browse=locale==='es'?browseSpanish:browseEnglish;
+    const matches=(entry:{id:number;name:string})=>!query.trim()||entry.name.toLocaleLowerCase(locale).includes(query.trim().toLocaleLowerCase(locale))||String(entry.id)===query.trim();
+    const data=useMemo(()=>{
+        // This response contains only published world data, never player names or chat.
+        const labels=new Set(['name','description','npcName','itemName','mapName','npcTypeLabel','objTypeLabel','categoryLabel']);
+        const visit=(value:unknown,key=''):unknown=>typeof value==='string'?(labels.has(key)?text(value):value):Array.isArray(value)?value.map(v=>visit(v)):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,visit(v,k)])):value;
+        return visit(sourceData) as PublicWikiResponse;
+    },[sourceData,text]);
     const [graphicsDB, setGraphicsDB] = useState<Record<string, GraphicData>>(
         {},
     );
@@ -270,9 +286,9 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
 
     const filteredMaps = useMemo(() => {
         return data.trainingMaps.filter((map) =>
-            TRAINING_MAP_ID_SET.has(map.id),
+            TRAINING_MAP_ID_SET.has(map.id) && matches(map),
         );
-    }, [data.trainingMaps]);
+    }, [data.trainingMaps,query,locale]);
 
     const curatedTrainingMaps = useMemo(
         () =>
@@ -290,22 +306,18 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
     );
 
     const filteredNpcs = useMemo(() => {
-        return data.npcs.filter(
-            (npc) =>
-                npc.isCombatNpc &&
-                (npc.expReward > 0 ||
-                    npc.goldReward > 0 ||
-                    npc.drops.length > 0),
-        );
-    }, [data.npcs]);
+        const groups=new Map<string,typeof data.npcs>();
+        for(const npc of data.npcs){if(!npc.isCombatNpc||!(npc.expReward>0||npc.goldReward>0||npc.drops.length))continue;const key=npc.name.trim().toLocaleLowerCase(locale);groups.set(key,[...(groups.get(key)??[]),npc]);}
+        return Array.from(groups.values()).filter(group=>group.some(matches)).map(entries=>({...entries[0],maps:Array.from(new Map(entries.flatMap(n=>n.maps).map(m=>[m.mapId,m])).values())}));
+    }, [data.npcs,query,locale]);
 
     const filteredEquipment = useMemo(() => {
-        return data.equipment;
-    }, [data.equipment]);
+        return data.equipment.filter(matches);
+    }, [data.equipment,query,locale]);
 
     const filteredSpells = useMemo(() => {
-        return data.spells;
-    }, [data.spells]);
+        return data.spells.filter(matches);
+    }, [data.spells,query,locale]);
 
     const equipmentSections = useMemo(
         () => [
@@ -376,7 +388,7 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
     const formatNpcWithMap = (npcId: number, npcName: string): string => {
         const npc = npcById.get(npcId);
         const mapId = npc?.maps[0]?.mapId;
-        return mapId ? `${npcName} (Mapa: ${mapId})` : npcName;
+        return mapId ? `${npcName} (${text("Mapa")}: ${mapId})` : npcName;
     };
 
     const dedupeNpcReferences = (
@@ -414,8 +426,9 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
     };
 
     return (
-        <div className="space-y-6">
-            <section className="rounded-[28px] border border-white/8 bg-[#08101a] p-4 shadow-xl">
+        <div className="realm-wiki-explorer space-y-6">
+            <header className="realm-reference-heading"><p className="realm-eyebrow">ARGENTUM ONCHAIN</p><h1>{locale === "es" ? uxSpanish.wiki : uxEnglish.wiki}</h1><p>{locale === "es" ? uxSpanish.wikiHelp : uxEnglish.wikiHelp}</p></header>
+            <nav aria-label={locale==='es'?'Secciones de la Wiki':'Wiki sections'} className="wiki-section-navigation">
                 <div className="flex flex-wrap gap-2">
                     {(
                         [
@@ -429,37 +442,30 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                         <Link
                             key={tab}
                             href={getWikiSectionHref(tab)}
+                            aria-current={section === tab ? "page" : undefined}
                             className={`rounded-2xl px-4 py-2 text-sm transition ${
                                 section === tab
                                     ? "bg-amber-300 text-stone-950"
                                     : "border border-white/10 bg-white/5 text-stone-300 hover:bg-white/10"
                             }`}
                         >
-                            {WIKI_SECTION_LABELS[tab]}
+                            <LocalizedText source={WIKI_SECTION_LABELS[tab]} />
                         </Link>
                     ))}
                 </div>
-            </section>
+            </nav>
 
+            {section !== 'factions' && <><BrowseToolbar query={query} onQuery={setQuery} kind="guide" count={section==='equipment'?filteredEquipment.length:section==='spells'?filteredSpells.length:section==='npcs'?filteredNpcs.length:filteredMaps.length}/><p className="realm-table-hint">{browse.guideHelp}</p>{query && (section==='equipment'?filteredEquipment.length:section==='spells'?filteredSpells.length:section==='npcs'?filteredNpcs.length:filteredMaps.length)===0&&<div className="realm-no-results"><h2>{browse.noResults}</h2><p>{browse.noResultsHelp}</p><button onClick={()=>setQuery('')}>{browse.clear}</button></div>}</>}
             {section === "factions" ? (
                 <section className="space-y-5">
                     <article className="rounded-[28px] border border-white/8 bg-[#08101a] p-5 shadow-xl">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/70">
-                                    Sistema faccionario
-                                </p>
-                                <h2 className="mt-2 text-xl font-semibold text-white">
-                                    Como funcionan Armada y Caos
-                                </h2>
+                                <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/70"><LocalizedText source={"Sistema faccionario "} /></p>
+                                <h2 className="mt-2 text-xl font-semibold text-white"><LocalizedText source={"Como funcionan Armada y Caos "} /></h2>
                             </div>
-                            <div className="max-w-md text-sm leading-6 text-stone-300">
-                                Las facciones usan puntos de faccion para
-                                enlistar, ascender y consultar progreso. El
-                                ascenso se reclama manualmente con{" "}
-                                <code>/recompensa</code> en el NPC de tu
-                                faccion.
-                            </div>
+                            <div className="max-w-md text-sm leading-6 text-stone-300"><LocalizedText source={"Las facciones usan puntos de faccion para enlistar, ascender y consultar progreso. El ascenso se reclama manualmente con"} />{" "}
+                                <code>{locale==='en'?'/reward':'/recompensa'}</code><LocalizedText source={" en el NPC de tu faccion. "} /></div>
                         </div>
 
                         <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -471,36 +477,29 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                     <h3
                                         className={`text-lg font-semibold ${guide.colorClass}`}
                                     >
-                                        {guide.faction}
+                                        <LocalizedText source={guide.faction} />
                                     </h3>
                                     <div className="mt-3 space-y-2 text-sm text-stone-300">
                                         <p>
                                             <span className="font-medium text-white">
                                                 NPC:
                                             </span>{" "}
-                                            {guide.npc} ({guide.npcLocation})
+                                            <LocalizedText source={guide.npc} /> (<LocalizedText source={guide.npcLocation} />)
                                         </p>
                                         <p>
-                                            <span className="font-medium text-white">
-                                                Comandos:
-                                            </span>{" "}
-                                            <code>{guide.enlistCommand}</code>{" "}
-                                            para enlistarte y{" "}
-                                            <code>{guide.rewardCommand}</code>{" "}
-                                            para ascender.
-                                        </p>
+                                            <span className="font-medium text-white"><LocalizedText source={"Comandos: "} /></span>{" "}
+                                            <code>{locale==='en'?'/enlist':guide.enlistCommand}</code>{" "}<LocalizedText source={"para enlistarte y"} />{" "}
+                                            <code>{locale==='en'?'/reward':guide.rewardCommand}</code>{" "}<LocalizedText source={"para ascender. "} /></p>
                                     </div>
 
                                     <div className="mt-4 space-y-3">
                                         <div>
-                                            <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                                Requisitos para enlistar
-                                            </p>
+                                            <p className="text-xs uppercase tracking-[0.2em] text-stone-500"><LocalizedText source={"Requisitos para enlistar "} /></p>
                                             <ul className="mt-2 space-y-1 text-sm text-stone-300">
                                                 {guide.requirements.map(
                                                     (item) => (
                                                         <li key={item}>
-                                                            • {item}
+                                                            • <LocalizedText source={item} />
                                                         </li>
                                                     ),
                                                 )}
@@ -508,14 +507,12 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                         </div>
 
                                         <div>
-                                            <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                                Como suma puntos
-                                            </p>
+                                            <p className="text-xs uppercase tracking-[0.2em] text-stone-500"><LocalizedText source={"Como suma puntos "} /></p>
                                             <ul className="mt-2 space-y-1 text-sm text-stone-300">
                                                 {guide.scoreRules.map(
                                                     (item) => (
                                                         <li key={item}>
-                                                            • {item}
+                                                            • <LocalizedText source={item} />
                                                         </li>
                                                     ),
                                                 )}
@@ -523,12 +520,10 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                         </div>
 
                                         <div>
-                                            <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                                Rangos
-                                            </p>
+                                            <p className="text-xs uppercase tracking-[0.2em] text-stone-500"><LocalizedText source={"Rangos "} /></p>
                                             <ul className="mt-2 space-y-1 text-sm text-stone-300">
                                                 {guide.ranks.map((item) => (
-                                                    <li key={item}>• {item}</li>
+                                                    <li key={item}>• <LocalizedText source={item} /></li>
                                                 ))}
                                             </ul>
                                         </div>
@@ -539,27 +534,21 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                     </article>
 
                     <article className="rounded-[28px] border border-white/8 bg-[#08101a] p-5 shadow-xl">
-                        <h2 className="text-lg font-semibold text-white">
-                            Reglas de puntos de faccion
-                        </h2>
+                        <h2 className="text-lg font-semibold text-white"><LocalizedText source={"Reglas de puntos de faccion "} /></h2>
                         <div className="mt-4 grid gap-4 lg:grid-cols-2">
                             <div className="rounded-2xl border border-white/8 bg-black/15 p-4">
-                                <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                    Cuando cuentan
-                                </p>
+                                <p className="text-xs uppercase tracking-[0.2em] text-stone-500"><LocalizedText source={"Cuando cuentan "} /></p>
                                 <ul className="mt-3 space-y-2 text-sm text-stone-300">
                                     {FACTION_SCORE_RULES.map((item) => (
-                                        <li key={item}>• {item}</li>
+                                        <li key={item}>• <LocalizedText source={item} /></li>
                                     ))}
                                 </ul>
                             </div>
                             <div className="rounded-2xl border border-white/8 bg-black/15 p-4">
-                                <p className="text-xs uppercase tracking-[0.2em] text-stone-500">
-                                    Ascensos y perdida de faccion
-                                </p>
+                                <p className="text-xs uppercase tracking-[0.2em] text-stone-500"><LocalizedText source={"Ascensos y perdida de faccion "} /></p>
                                 <ul className="mt-3 space-y-2 text-sm text-stone-300">
                                     {FACTION_LOSS_RULES.map((item) => (
-                                        <li key={item}>• {item}</li>
+                                        <li key={item}>• <LocalizedText source={item} /></li>
                                     ))}
                                 </ul>
                             </div>
@@ -568,6 +557,7 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                 </section>
             ) : null}
 
+            {section === "maps" && <figure className="wiki-world-map"><h2>{locale==='es'?'Mapa del mundo':'World map'}</h2><a href="/imgs/world-map-general.png" target="_blank" rel="noreferrer"><img src="/imgs/world-map-general.png" alt={locale==='es'?'Mapa del mundo de Argentum Online':'Argentum Online world map'}/></a></figure>}
             {section === "maps" ? (
                 <section className="space-y-5">
                     {curatedTrainingMaps.map((group) => (
@@ -577,11 +567,9 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                         >
                             <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
-                                    <p className="text-[11px] uppercase tracking-[0.28em] text-emerald-200/70">
-                                        Zona para entrenar
-                                    </p>
+                                    <p className="text-[11px] uppercase tracking-[0.28em] text-emerald-200/70"><LocalizedText source={"Zona para entrenar "} /></p>
                                     <h2 className="mt-2 text-xl font-semibold text-white">
-                                        {group.label}
+                                        <LocalizedText source={group.label} />
                                     </h2>
                                 </div>
                                 <div className="text-sm text-stone-400">
@@ -596,24 +584,20 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                         className="rounded-2xl border border-white/8 bg-black/15 p-4"
                                     >
                                         <p className="text-sm font-semibold text-white">
-                                            {map.name} (Mapa: {map.id})
+                                            <LocalizedText source={map.name} /><LocalizedText source={" (Mapa: "} />{map.id})
                                         </p>
                                         <div className="mt-2 flex flex-wrap gap-2 text-xs text-stone-300">
                                             <span className="rounded-full border border-amber-300/20 px-3 py-1 text-amber-100">
-                                                {formatMapLevelRestriction(map)}
+                                                <LocalizedText source={formatMapLevelRestriction(map)} />
                                             </span>
                                             <span className="rounded-full border border-white/10 px-3 py-1">
                                                 {formatNumber(
                                                     map.uniqueCombatNpcs,
-                                                )}{" "}
-                                                tipos de NPC
-                                            </span>
+                                                )}{" "}<LocalizedText source={map.uniqueCombatNpcs === 1 ? "tipo de NPC" : "tipos de NPC "} /></span>
                                             <span className="rounded-full border border-white/10 px-3 py-1">
                                                 {formatNumber(
                                                     map.totalCombatSpawns,
-                                                )}{" "}
-                                                spawns de combate
-                                            </span>
+                                                )}{" "}<LocalizedText source={map.totalCombatSpawns === 1 ? "spawn de combate" : "spawns de combate "} /></span>
                                         </div>
                                         <div className="mt-4 space-y-3">
                                             {map.topNpcs.map((npc) => (
@@ -623,14 +607,13 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                                 >
                                                     <div>
                                                         <p className="font-medium text-white">
-                                                            {npc.npcName}
+                                                            <LocalizedText source={npc.npcName} />
                                                         </p>
                                                         <p className="text-stone-400">
                                                             Exp{" "}
                                                             {formatNumber(
                                                                 npc.expReward,
-                                                            )}{" "}
-                                                            | Vida{" "}
+                                                            )}{" "}<LocalizedText source={"| Vida"} />{" "}
                                                             {formatNumber(
                                                                 npc.maxHp,
                                                             )}
@@ -640,7 +623,7 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                                         {formatNumber(
                                                             npc.spawns,
                                                         )}{" "}
-                                                        NPCs
+                                                        {npc.spawns === 1 ? "NPC" : "NPCs"}
                                                     </span>
                                                 </div>
                                             ))}
@@ -658,10 +641,10 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                     <div className="overflow-x-auto rounded-[28px] border border-white/8 bg-[#08101a] shadow-xl">
                         <div className="grid min-w-[950px] grid-cols-[1.8fr_110px_110px_110px_1.8fr_1.6fr] gap-3 border-b border-white/8 px-4 py-3 text-xs uppercase tracking-[0.18em] text-stone-500">
                             <span>NPC</span>
-                            <span>Vida</span>
+                            <span><LocalizedText source={"Vida"} /></span>
                             <span>Exp</span>
-                            <span>Oro</span>
-                            <span>Mapas</span>
+                            <span><LocalizedText source={"Oro"} /></span>
+                            <span><LocalizedText source={"Mapas"} /></span>
                             <span>Drop</span>
                         </div>
                         {filteredNpcs.map((npc) => (
@@ -671,7 +654,7 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                             >
                                 <div>
                                     <p className="font-medium text-white">
-                                        {npc.name}
+                                        <NpcArtwork bodyId={npc.bodyId} headId={npc.headId} name={npc.name}/><LocalizedText source={npc.name} />
                                     </p>
                                 </div>
                                 <span>{formatNumber(npc.maxHp)}</span>
@@ -679,12 +662,8 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                 <span>{formatNumber(npc.goldReward)}</span>
                                 <span className="text-xs leading-5 text-stone-400">
                                     {npc.maps
-                                        .slice(0, 4)
-                                        .map(
-                                            (map) =>
-                                                `${map.mapName} (Mapa: ${map.mapId})`,
-                                        )
-                                        .join(" | ") || "-"}
+                                        .map((map) => map.mapId)
+                                        .join(", ") || "-"}
                                 </span>
                                 <span className="text-xs leading-5 text-stone-400">
                                     {formatNpcDrops(npc.drops)}
@@ -697,26 +676,26 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
 
             {section === "equipment" ? (
                 <section className="space-y-4">
-                    {equipmentSections.map((group) => (
+                    {equipmentSections.filter(group=>group.items.length>0).map((group) => (
                         <div key={group.key} className="space-y-3">
                             <h2 className="text-lg font-semibold text-white">
-                                {group.label}
+                                <LocalizedText source={group.label} />
                             </h2>
                             <div className="overflow-x-auto rounded-[28px] border border-white/8 bg-[#08101a] shadow-xl">
                                 <div className="grid min-w-[1120px] grid-cols-[90px_84px_1.7fr_140px_100px_120px_90px_1.8fr_220px] gap-3 border-b border-white/8 px-4 py-3 text-xs uppercase tracking-[0.18em] text-stone-500">
                                     <span>ID</span>
                                     <span>Img</span>
                                     <span>Item</span>
-                                    <span>Tipo</span>
-                                    <span>Valor</span>
+                                    <span><LocalizedText source={"Tipo"} /></span>
+                                    <span><LocalizedText source={"Valor"} /></span>
                                     <span>
-                                        {getEquipmentStatLabel(
+                                        <LocalizedText source={getEquipmentStatLabel(
                                             group.key as PublicWikiResponse["equipment"][number]["category"],
-                                        )}
+                                        )} />
                                     </span>
                                     <span>Tier</span>
-                                    <span>Dropean</span>
-                                    <span>Clases permitidas</span>
+                                    <span><LocalizedText source={"Dropean"} /></span>
+                                    <span><LocalizedText source={"Clases permitidas"} /></span>
                                 </div>
                                 {group.items.map((item) => (
                                     <div
@@ -736,7 +715,7 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                         </div>
                                         <div>
                                             <p className="font-medium text-white">
-                                                {item.name}
+                                                <LocalizedText source={item.name} />
                                             </p>
                                             {item.newbie ? (
                                                 <p className="mt-1 text-xs text-cyan-200">
@@ -744,7 +723,7 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                                 </p>
                                             ) : null}
                                         </div>
-                                        <span>{item.objTypeLabel}</span>
+                                        <span><LocalizedText source={item.objTypeLabel} /></span>
                                         <span>{formatNumber(item.value)}</span>
                                         <span>{formatEquipmentStat(item)}</span>
                                         <span>
@@ -755,17 +734,14 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                         </span>
                                         <span className="text-xs leading-5 text-stone-400">
                                             {getAllowedClassLabels(
-                                                item.blockedClasses,
+                                                item.blockedClasses, text,
                                             )}
                                         </span>
                                     </div>
                                 ))}
                                 {group.items.length === 0 ? (
-                                    <div className="px-4 py-6 text-sm text-stone-400">
-                                        No hay resultados para{" "}
-                                        {group.label.toLowerCase()} con el
-                                        filtro actual.
-                                    </div>
+                                    <div className="px-4 py-6 text-sm text-stone-400"><LocalizedText source={"No hay resultados para"} />{" "}
+                                        <LocalizedText source={group.label.toLowerCase()} /><LocalizedText source={" con el filtro actual. "} /></div>
                                 ) : null}
                             </div>
                         </div>
@@ -778,12 +754,12 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                     <div className="overflow-x-auto rounded-[28px] border border-white/8 bg-[#08101a] shadow-xl">
                         <div className="grid min-w-[1200px] grid-cols-[80px_1.5fr_100px_100px_120px_1.4fr_1.7fr_1.7fr] gap-3 border-b border-white/8 px-4 py-3 text-xs uppercase tracking-[0.18em] text-stone-500">
                             <span>ID</span>
-                            <span>Hechizo</span>
+                            <span><LocalizedText source={"Hechizo"} /></span>
                             <span>Skill</span>
                             <span>Mana</span>
-                            <span>Poder</span>
-                            <span>Palabras</span>
-                            <span>Vende</span>
+                            <span><LocalizedText source={"Poder"} /></span>
+                            <span><LocalizedText source={"Palabras"} /></span>
+                            <span><LocalizedText source={"Vende"} /></span>
                             <span>Drop</span>
                         </div>
                         {filteredSpells.map((spell) => (
@@ -794,11 +770,11 @@ export default function WikiExplorer({ data, section }: WikiExplorerProps) {
                                 <span>{spell.id}</span>
                                 <div>
                                     <p className="font-medium text-white">
-                                        {spell.name}
+                                        <LocalizedText source={spell.name} />
                                     </p>
                                     {spell.description ? (
                                         <p className="mt-1 line-clamp-2 text-xs text-stone-400">
-                                            {spell.description}
+                                            <LocalizedText source={spell.description} />
                                         </p>
                                     ) : null}
                                 </div>

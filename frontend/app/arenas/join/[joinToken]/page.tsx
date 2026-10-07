@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText } from '@/components/LocalizedText';
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AuthErrorResponse } from "../../../../lib/auth";
@@ -63,17 +64,14 @@ export default function ArenaJoinPage() {
             <div className="w-full max-w-md rounded-[28px] border border-white/10 bg-stone-950/85 p-6 text-center shadow-2xl">
                 <p className="text-[11px] uppercase tracking-[0.34em] text-amber-200/75">Arenas</p>
                 <h1 className="mt-3 text-2xl font-semibold text-white">
-                    {error
+                    <LocalizedText source={error
                         ? "No se pudo entrar"
                         : loading
                           ? "Verificando sesion..."
-                          : "Entrando a la sala..."}
+                          : "Entrando a la sala..."} />
                 </h1>
                 <p className="mt-3 text-sm text-stone-300">
-                    {error ??
-                        (loading
-                            ? "Estamos validando tu acceso."
-                            : "Estamos resolviendo tu link privado.")}
+                    <LocalizedText source={error ?? (loading ? "Estamos validando tu acceso." : "Estamos resolviendo tu link privado.")} />
                 </p>
             </div>
         </main>

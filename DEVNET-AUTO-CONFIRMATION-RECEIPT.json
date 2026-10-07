@@ -1,0 +1,35 @@
+{
+  "network": "devnet",
+  "method": "Dedicated local test keys signing real devnet transactions; Phantom approval UI not exercised",
+  "mint": "8ZRpbVW8oJCnZpqjEyQEbFky53CoHqoiPVj7HJy8eo5k",
+  "steps": [
+    {
+      "step": "Submitted purchase",
+      "intentId": "89df88e6-70a5-4786-aada-72c1db4503ef",
+      "signature": "5tWdgsT3gZAQ9HrtPbm3T9tbVM39ZjRYVjGHFveDPaUD8kTcTGstLFP3KoUY2phUNbELp1vEN9oD86Cp9gVgjvZE"
+    },
+    {
+      "step": "Test character moved to dedicated recipient before UI return",
+      "signature": "5tWdgsT3gZAQ9HrtPbm3T9tbVM39ZjRYVjGHFveDPaUD8kTcTGstLFP3KoUY2phUNbELp1vEN9oD86Cp9gVgjvZE"
+    },
+    {
+      "step": "Return submitted; only automatic server recovery and webpage polling will confirm",
+      "intentId": "29759e44-1fc3-4f51-b3c2-0452bbdb0d97",
+      "signature": "s4fze5hyFjQ5zQCFHkW1oWvL6xtsNQCibsGgcJZSQTyYraT8FcTgF6ydX71XTAMWk3RiiX6VgFfq4XkZtgNk8J7"
+    },
+    {
+      "step": "Return submitted; only automatic server recovery and webpage polling will confirm",
+      "intentId": "d7f67088-8289-4e4c-9ef4-1ff799236adb",
+      "signature": "41GiqJgBjQpbhgbZRNQayLHoGNQeCvQdDzHdJeBBT3uhdnnvVa9LdGFHpGmSs2Q9EvZYssAVqdEaMFbqwewsbqpq"
+    },
+    {
+      "step": "Return submitted; only automatic server recovery and webpage polling will confirm",
+      "intentId": "9e4a03e9-f686-4505-a110-d5c8488752e3",
+      "signature": "nN45KZj747G3JRurYimarQvBxqtqMThRviKWJMR8GemUNGkJUZ16gjCJiaQubAFqe1SMV5wURuD6LWEVaH3vg4y"
+    }
+  ],
+  "browserOutcome": "Observed awaiting request -> confirming -> Character purchased automatically. Play this character opened Tunnelwalker in-game with nine inventory rows. Logged out normally; original test ownership restored.",
+  "validationBoundary": "Dedicated local test keys; Phantom approval not exercised. Successful return also rebroadcast identical persisted signed bytes directly to primary RPC after previous RPC/expiry failures. No manual reconcile or browser refresh after submission was used for final completion.",
+  "complete": true,
+  "finishedAt": "2026-10-06T02:31:14.6103864Z"
+}

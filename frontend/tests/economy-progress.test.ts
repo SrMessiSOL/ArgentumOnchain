@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {updateEconomyProgress,economyInProgress,type EconomyIntent,type EconomyProgress} from '../lib/economy-progress';
+const intent:EconomyIntent={id:'receipt',kind:'purchase',state:'signed',amount:'10000000',signature:'saved-signature',character_id:'hero',listing_id:'listing'};
+let progress=updateEconomyProgress(null,[intent],[{id:'hero',name:'Player Authored Name'}]);
+assert.equal(progress?.stage,'confirming');assert.equal(progress?.name,'Player Authored Name');assert.equal(progress?.characterId,'hero');assert.equal(economyInProgress(progress),true);
+progress=updateEconomyProgress(progress,[{...intent,state:'complete'}],[]);assert.equal(progress?.stage,'complete');assert.equal(economyInProgress(progress),false);assert.equal(progress?.signature,'saved-signature');
+assert.equal(updateEconomyProgress(progress,[{...intent,state:'signed'}],[])?.stage,'complete');
+assert.equal(updateEconomyProgress(null,[{...intent,state:'complete'}],[]),null);
+const signing:EconomyProgress={id:'receipt',kind:'purchase',name:'Hero',stage:'signing'};
+assert.equal(updateEconomyProgress(signing,[{...intent,state:'prepared',signature:null}],[],true)?.stage,'signing');
+assert.equal(updateEconomyProgress(signing,[{...intent,state:'prepared',signature:null}],[],false)?.stage,'awaitingExpiry');
+assert.equal(updateEconomyProgress(signing,[{...intent,state:'failed',signature:null}],[])?.stage,'failed');
+assert.equal(updateEconomyProgress(signing,[],[])?.stage,'signing');
+assert.equal(updateEconomyProgress({kind:'purchase',name:'Hero',stage:'failed'},[intent],[])?.stage,'confirming');
+console.log('PASS: reload recovery, finalized completion, stale-state protection, cancelled unsigned reservation, failure and unknown receipt boundaries.');

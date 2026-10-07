@@ -56,6 +56,8 @@ type WikiSpellSourceReference = {
 };
 
 type WikiNpcEntry = {
+    bodyId: number;
+    headId: number;
     id: number;
     name: string;
     npcType: number;
@@ -570,6 +572,8 @@ export async function getPublicWiki(): Promise<PublicWikiResponse> {
             return {
                 id: entry.id,
                 name: String(data.name ?? `NPC ${entry.id}`),
+                bodyId: toNumber(data.idBody),
+                headId: toNumber(data.idHead),
                 npcType,
                 npcTypeLabel: getNpcTypeLabel(npcType),
                 description: String(data.desc ?? ""),

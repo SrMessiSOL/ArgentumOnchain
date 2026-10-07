@@ -1,8 +1,10 @@
+"use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 /* eslint-disable @next/next/no-img-element */
 
-"use client";
 
 import React from "react";
+import { useI18n } from "./I18nProvider";
 import {
     OBJECT_TYPE,
     type InventoryItem,
@@ -68,7 +70,7 @@ function ItemGraphic({
             className="relative overflow-hidden rounded-sm"
             style={{ height: size, width: size }}
         >
-            <div
+            <LocalizedLabel><div
                 aria-label={name}
                 className="absolute left-1/2 top-1/2 bg-no-repeat"
                 style={{
@@ -79,7 +81,7 @@ function ItemGraphic({
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: "center",
                 }}
-            />
+            /></LocalizedLabel>
         </div>
     );
 }
@@ -155,6 +157,7 @@ export default function MacroBar({
     onCastSpell,
     onSendCommand,
 }: MacroBarProps) {
+    const { locale } = useI18n();
     const items = React.useMemo(
         () => (hud?.inventory ?? []).slice().sort((a, b) => a.slot - b.slot),
         [hud?.inventory],
@@ -697,7 +700,7 @@ export default function MacroBar({
                             key={`macro-${index}`}
                             className="relative min-w-0"
                         >
-                            <button
+                            <LocalizedLabel><button
                                 type="button"
                                 onClick={() => {
                                     if (macro) {
@@ -731,19 +734,19 @@ export default function MacroBar({
                                             size={40}
                                         />
                                     ) : macro.targetType === "command" ? (
-                                        <img
+                                        <LocalizedLabel><img
                                             src={SPELL_MACRO_ICON_URL}
                                             alt={displayLabel || "Comando"}
                                             className="h-8 w-8 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]"
                                             draggable={false}
-                                        />
+                                        /></LocalizedLabel>
                                     ) : (
-                                        <img
+                                        <LocalizedLabel><img
                                             src={SPELL_MACRO_ICON_URL}
                                             alt={displayLabel || "Hechizo"}
                                             className="h-8 w-8 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]"
                                             draggable={false}
-                                        />
+                                        /></LocalizedLabel>
                                     )
                                 ) : (
                                     <span className="text-xl text-stone-700">
@@ -753,10 +756,10 @@ export default function MacroBar({
 
                                 {macro?.keyCode ? (
                                     <span className="pointer-events-none absolute bottom-1.5 right-1.5 rounded bg-black/75 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-amber-100 shadow-lg">
-                                        {formatHotkeyCode(macro.keyCode)}
+                                        <LocalizedText source={formatHotkeyCode(macro.keyCode)} />
                                     </span>
                                 ) : null}
-                            </button>
+                            </button></LocalizedLabel>
 
                             {isEditing ? (
                                 <div className="absolute bottom-full left-1/2 z-50 mb-3 w-[240px] -translate-x-1/2 rounded-[18px] border border-[#8a633d] bg-[linear-gradient(180deg,rgba(32,22,16,0.99),rgba(15,10,8,0.99))] p-3 shadow-[0_20px_40px_rgba(0,0,0,0.65)]">
@@ -770,16 +773,12 @@ export default function MacroBar({
                                                 setEditingIndex(null)
                                             }
                                             className="text-xs text-stone-400 transition hover:text-stone-100"
-                                        >
-                                            Cerrar
-                                        </button>
+                                        ><LocalizedText source={"Cerrar "} /></button>
                                     </div>
 
                                     <div className="space-y-3">
                                         <div>
-                                            <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-stone-400">
-                                                Tecla
-                                            </p>
+                                            <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-stone-400"><LocalizedText source={"Tecla "} /></p>
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -789,26 +788,24 @@ export default function MacroBar({
                                                 className="flex w-full items-center justify-between rounded-xl border border-[#765838] bg-black/25 px-3 py-2 text-left text-sm text-stone-100 transition hover:border-amber-300/60"
                                             >
                                                 <span>
-                                                    {listeningForKey
+                                                    <LocalizedText source={listeningForKey
                                                         ? "Presiona una tecla"
                                                         : draftKeyCode
                                                           ? formatHotkeyCode(
                                                                 draftKeyCode,
                                                             )
-                                                          : "Sin asignar"}
+                                                          : "Sin asignar"} />
                                                 </span>
                                                 <span className="text-[10px] uppercase tracking-[0.16em] text-stone-400">
-                                                    {listeningForKey
+                                                    <LocalizedText source={listeningForKey
                                                         ? "Esc cancela"
-                                                        : "Cambiar"}
+                                                        : "Cambiar"} />
                                                 </span>
                                             </button>
                                         </div>
 
                                         <div>
-                                            <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-stone-400">
-                                                Tipo
-                                            </p>
+                                            <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-stone-400"><LocalizedText source={"Tipo "} /></p>
                                             <div className="grid grid-cols-3 gap-2">
                                                 <button
                                                     type="button"
@@ -849,9 +846,7 @@ export default function MacroBar({
                                                             ? "border-amber-300/70 bg-[#5c2411] text-amber-50"
                                                             : "border-[#5a422b] bg-[#1a120f] text-stone-300 hover:border-amber-400/35"
                                                     }`}
-                                                >
-                                                    Hechizo
-                                                </button>
+                                                ><LocalizedText source={"Hechizo "} /></button>
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -869,16 +864,12 @@ export default function MacroBar({
                                                             ? "border-amber-300/70 bg-[#5c2411] text-amber-50"
                                                             : "border-[#5a422b] bg-[#1a120f] text-stone-300 hover:border-amber-400/35"
                                                     }`}
-                                                >
-                                                    Comando
-                                                </button>
+                                                ><LocalizedText source={"Comando "} /></button>
                                             </div>
                                         </div>
 
                                         <div>
-                                            <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-stone-400">
-                                                Seleccion
-                                            </p>
+                                            <p className="mb-1 text-[10px] uppercase tracking-[0.18em] text-stone-400"><LocalizedText source={"Seleccion "} /></p>
                                             <div className="mb-2 flex h-16 items-center gap-3 rounded-xl border border-[#6f5334] bg-black/30 px-3">
                                                 <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/8 bg-black/35">
                                                     {draftTargetType ===
@@ -895,16 +886,16 @@ export default function MacroBar({
                                                         />
                                                     ) : draftTargetType ===
                                                       "command" ? (
-                                                        <img
+                                                        <LocalizedLabel><img
                                                             src={
                                                                 SPELL_MACRO_ICON_URL
                                                             }
                                                             alt="Comando"
                                                             className="h-8 w-8 object-contain"
                                                             draggable={false}
-                                                        />
+                                                        /></LocalizedLabel>
                                                     ) : draftSpell ? (
-                                                        <img
+                                                        <LocalizedLabel><img
                                                             src={
                                                                 SPELL_MACRO_ICON_URL
                                                             }
@@ -913,7 +904,7 @@ export default function MacroBar({
                                                             }
                                                             className="h-8 w-8 object-contain"
                                                             draggable={false}
-                                                        />
+                                                        /></LocalizedLabel>
                                                     ) : (
                                                         <span className="text-stone-600">
                                                             ?
@@ -924,27 +915,24 @@ export default function MacroBar({
                                                     <p className="truncate text-sm font-semibold text-stone-100">
                                                         {draftTargetType ===
                                                         "item"
-                                                            ? (draftItem?.name ??
-                                                              "Sin item seleccionado")
+                                                            ? <LocalizedText source={draftItem?.name ?? "Sin item seleccionado"} />
                                                             : draftTargetType ===
                                                                 "spell"
-                                                              ? (draftSpell?.name ??
-                                                                "Sin hechizo seleccionado")
-                                                              : draftCommand ||
-                                                                "Sin comando"}
+                                                              ? <LocalizedText source={draftSpell?.name ?? "Sin hechizo seleccionado"} />
+                                                              : draftCommand || <LocalizedText source="Sin comando" />}
                                                     </p>
                                                     <p className="text-[11px] text-stone-400">
                                                         {draftTargetType ===
                                                         "item"
                                                             ? draftItem
                                                                 ? `Slot ${draftItem.slot}${draftItem.amount > 1 ? ` x${formatNumber(draftItem.amount)}` : ""}`
-                                                                : "Elegi un item del inventario"
+                                                                : <LocalizedText source={"Elegi un item del inventario"} />
                                                             : draftTargetType ===
                                                                 "spell"
                                                               ? draftSpell
                                                                   ? `Slot ${draftSpell.slot}`
-                                                                  : "Elegi un hechizo disponible"
-                                                              : "Ejemplo: /meditar"}
+                                                                  : <LocalizedText source={"Elegi un hechizo disponible"} />
+                                                              : locale === 'en' ? "Example: /meditate" : "Ejemplo: /meditar"}
                                                     </p>
                                                 </div>
                                             </div>
@@ -980,15 +968,11 @@ export default function MacroBar({
                                                                       graphicData={
                                                                           itemGraphic
                                                                       }
-                                                                      name={
-                                                                          item.name
-                                                                      }
+                                                                      name={item.name}
                                                                       size={26}
                                                                   />
                                                                   <span className="min-w-0 flex-1 truncate">
-                                                                      {
-                                                                          item.name
-                                                                      }
+                                                                      <LocalizedText source={item.name} />
                                                                   </span>
                                                                   <span className="text-[10px] text-stone-400">
                                                                       {item.amount >
@@ -1020,7 +1004,7 @@ export default function MacroBar({
                                                                         : "text-stone-200 hover:bg-white/8"
                                                                 }`}
                                                             >
-                                                                <img
+                                                                <LocalizedLabel><img
                                                                     src={
                                                                         SPELL_MACRO_ICON_URL
                                                                     }
@@ -1031,9 +1015,9 @@ export default function MacroBar({
                                                                     draggable={
                                                                         false
                                                                     }
-                                                                />
+                                                                /></LocalizedLabel>
                                                                 <span className="min-w-0 flex-1 truncate">
-                                                                    {spell.name}
+                                                                    <LocalizedText source={spell.name} />
                                                                 </span>
                                                                 <span className="text-[10px] text-stone-400">
                                                                     #
@@ -1046,7 +1030,7 @@ export default function MacroBar({
                                                 {draftTargetType ===
                                                 "command" ? (
                                                     <div className="space-y-2 p-1">
-                                                        <input
+                                                        <LocalizedLabel><input
                                                             type="text"
                                                             value={draftCommand}
                                                             maxLength={16}
@@ -1059,38 +1043,28 @@ export default function MacroBar({
                                                                 );
                                                                 setError(null);
                                                             }}
-                                                            placeholder="/meditar"
+                                                            placeholder={locale === 'en' ? '/meditate' : '/meditar'}
                                                             className="w-full rounded-lg border border-[#765838] bg-black/35 px-3 py-2 text-sm text-stone-100 outline-none placeholder:text-stone-500"
-                                                        />
-                                                        <p className="px-1 text-[11px] text-stone-400">
-                                                            Solo letras A-Z,
-                                                            maximo 15
-                                                            caracteres.
-                                                        </p>
+                                                        /></LocalizedLabel>
+                                                        <p className="px-1 text-[11px] text-stone-400"><LocalizedText source={"Solo letras A-Z, maximo 15 caracteres. "} /></p>
                                                     </div>
                                                 ) : null}
 
                                                 {draftTargetType === "item" &&
                                                 items.length === 0 ? (
-                                                    <div className="px-2 py-4 text-center text-sm text-stone-500">
-                                                        No hay items para
-                                                        asignar.
-                                                    </div>
+                                                    <div className="px-2 py-4 text-center text-sm text-stone-500"><LocalizedText source={"No hay items para asignar. "} /></div>
                                                 ) : null}
 
                                                 {draftTargetType === "spell" &&
                                                 spells.length === 0 ? (
-                                                    <div className="px-2 py-4 text-center text-sm text-stone-500">
-                                                        No hay hechizos para
-                                                        asignar.
-                                                    </div>
+                                                    <div className="px-2 py-4 text-center text-sm text-stone-500"><LocalizedText source={"No hay hechizos para asignar. "} /></div>
                                                 ) : null}
                                             </div>
                                         </div>
 
                                         {error ? (
                                             <p className="rounded-lg border border-rose-500/35 bg-rose-950/25 px-2 py-1.5 text-xs text-rose-200">
-                                                {error}
+                                                <LocalizedText source={error} />
                                             </p>
                                         ) : null}
 
@@ -1100,17 +1074,13 @@ export default function MacroBar({
                                                     type="button"
                                                     onClick={deleteMacro}
                                                     className="rounded-xl border border-rose-500/40 bg-rose-950/20 px-3 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-400/65 hover:bg-rose-900/30"
-                                                >
-                                                    Borrar
-                                                </button>
+                                                ><LocalizedText source={"Borrar "} /></button>
                                             ) : null}
                                             <button
                                                 type="button"
                                                 onClick={saveMacro}
                                                 className="ml-auto rounded-xl bg-amber-300 px-4 py-2 text-sm font-semibold text-stone-950 transition hover:bg-amber-200"
-                                            >
-                                                Guardar
-                                            </button>
+                                            ><LocalizedText source="Guardar macro" /></button>
                                         </div>
                                     </div>
                                 </div>

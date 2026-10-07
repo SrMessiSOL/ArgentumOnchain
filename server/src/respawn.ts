@@ -227,7 +227,7 @@ function Respawn(this: any) {
                         "red",
                         1,
                         0,
-                        ws,
+                        ws, undefined, undefined, vars.npcs[idPersonaje].nameCharacter,
                     );
                     user.npcMatados++;
                     npcs.tirarItems(idPersonaje, ws);

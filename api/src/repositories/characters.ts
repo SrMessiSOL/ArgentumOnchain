@@ -1,4 +1,6 @@
+import {assertPlayableCharacter} from "../game-asset-policy";
 import { z } from "zod";
+import { createHash } from 'node:crypto';
 import type { PoolClient } from "pg";
 import pool from "../db";
 import type {
@@ -72,6 +74,11 @@ const storagePatchSchema = z.object({
 
 const characterPatchSchema = z
     .object({
+        operationId: z.string().uuid().optional(),
+        floorChanges: z.array(z.discriminatedUnion('action', [
+            z.object({ action: z.literal('put'), dropId: z.string().uuid(), map: z.number().int().positive(), x: z.number().int().min(0), y: z.number().int().min(0), itemId: z.number().int().positive(), amount: z.number().int().positive() }),
+            z.object({ action: z.literal('take'), dropId: z.string().uuid() }),
+        ])).max(100).optional(),
         name: z.string().min(1).optional(),
         idClase: z.coerce.number().int().optional(),
         map: z.coerce.number().int().optional(),
@@ -1087,6 +1094,24 @@ export async function patchCharacter(
 
     try {
         await client.query("BEGIN");
+        if (parsed.operationId) {
+            const hash = createHash('sha256').update(JSON.stringify(parsed)).digest('hex');
+            const inserted = await client.query(
+                `INSERT INTO character_save_receipts(operation_id,character_id,payload_hash)
+                 VALUES($1,$2,$3) ON CONFLICT(operation_id) DO NOTHING RETURNING operation_id`,
+                [parsed.operationId, characterId, hash],
+            );
+            if (!inserted.rowCount) {
+                const receipt = (await client.query<{ character_id: string; payload_hash: string; response: {ok:true;updatedAt:string}|null }>(
+                    'SELECT character_id,payload_hash,response FROM character_save_receipts WHERE operation_id=$1 FOR UPDATE', [parsed.operationId],
+                )).rows[0];
+                if (!receipt || receipt.character_id !== characterId.toLowerCase() || receipt.payload_hash !== hash || !receipt.response) {
+                    throw new Error('Character save ID does not match its original operation');
+                }
+                await client.query('COMMIT');
+                return receipt.response;
+            }
+        }
 
         const assignments: string[] = [];
         const values: unknown[] = [characterId];
@@ -1132,12 +1157,24 @@ export async function patchCharacter(
             await replaceSpells(client, characterId, parsed.spells);
         }
 
-        await client.query("COMMIT");
+        if (parsed.floorChanges?.length && !parsed.operationId) throw new Error('Ground transfer requires a durable operation ID');
+        for (const change of parsed.floorChanges ?? []) {
+            if (change.action === 'put') {
+                await client.query(`INSERT INTO dropped_floor_items(drop_id,map_id,x,y,item_id,amount) VALUES($1,$2,$3,$4,$5,$6)
+                    ON CONFLICT(map_id,x,y) DO UPDATE SET drop_id=EXCLUDED.drop_id,item_id=EXCLUDED.item_id,amount=EXCLUDED.amount`,
+                    [change.dropId,change.map,change.x,change.y,change.itemId,change.amount]);
+            } else {
+                const removed = await client.query('DELETE FROM dropped_floor_items WHERE drop_id=$1 RETURNING drop_id',[change.dropId]);
+                if (!removed.rowCount) throw new Error('Ground item is no longer available');
+            }
+        }
 
-        return {
-            ok: true,
-            updatedAt: updateResult.rows[0].updated_at.toISOString(),
-        };
+        const response = { ok: true as const, updatedAt: updateResult.rows[0].updated_at.toISOString() };
+        if (parsed.operationId) {
+            await client.query('UPDATE character_save_receipts SET response=$2::jsonb WHERE operation_id=$1', [parsed.operationId, JSON.stringify(response)]);
+        }
+        await client.query("COMMIT");
+        return response;
     } catch (error) {
         await client.query("ROLLBACK");
         throw error;
@@ -1203,7 +1240,7 @@ export async function patchCharacterSpells(
     });
 }
 
-export async function claimCharacterConnection(characterId: string): Promise<
+export async function claimCharacterConnection(characterId: string, accountId?: string): Promise<
     | {
           ok: true;
           updatedAt: string;
@@ -1224,6 +1261,8 @@ export async function claimCharacterConnection(characterId: string): Promise<
 
     try {
         await client.query("BEGIN");
+        const owner=(await client.query("SELECT account_id FROM characters WHERE id=$1 FOR UPDATE",[characterId])).rows[0];
+        if(owner&&(!accountId||owner.account_id===accountId)) await assertPlayableCharacter(characterId,accountId??owner.account_id,client);
 
         const claimedResult = await client.query<{ updated_at: Date }>(
             `
@@ -1233,9 +1272,11 @@ export async function claimCharacterConnection(characterId: string): Promise<
         WHERE id = $1
           AND deleted_at IS NULL
           AND connected = FALSE
+          AND economy_lock IS NULL
+          AND ($2::uuid IS NULL OR account_id=$2)
         RETURNING updated_at
       `,
-            [characterId],
+            [characterId,accountId??null],
         );
 
         const updatedCharacter = claimedResult.rows[0];
@@ -1323,3 +1364,4 @@ export async function releaseCharacterConnection(characterId: string): Promise<{
         updatedAt: updatedCharacter.updated_at.toISOString(),
     };
 }
+

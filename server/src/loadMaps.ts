@@ -173,7 +173,7 @@ class LoadMaps {
 
         await Promise.all(arMapsToLoad);
 
-        console.log("Mapas Cargados.");
+        console.log("Maps loaded.");
 
         const LoadNpcs = new loadNpcs();
         await LoadNpcs.initialize();

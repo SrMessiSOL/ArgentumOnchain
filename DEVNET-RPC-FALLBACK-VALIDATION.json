@@ -1,0 +1,10 @@
+{
+  "network": "devnet",
+  "primaryFailure": "simulated HTTP 429",
+  "fallback": "real live Tatum public devnet",
+  "genesis": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
+  "freshBlockhash": true,
+  "knownPurchaseFinalized": true,
+  "noTransactionSignedOrSent": true,
+  "checkedAt": "2026-10-06T01:54:45.437Z"
+}

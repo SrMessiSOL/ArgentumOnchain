@@ -936,7 +936,7 @@ const challengeManager = {
     },
 
     getTeamDisplayName(team: MatchTeam) {
-        return team.participants.map((participant) => participant.name).join(" y ");
+        return team.participants.map((participant) => participant.name).join(" / ");
     },
 
     logFinishedMatch(match: ActiveMatch, winnerSide: TeamSide, reason?: string) {

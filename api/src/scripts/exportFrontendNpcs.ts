@@ -37,14 +37,14 @@ async function main(): Promise<void> {
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
     fs.writeFileSync(outputPath, json, "utf8");
 
-    console.log(`NPCs frontend exportados a ${outputPath}`);
+    console.log(`Frontend NPCs exported to ${outputPath}`);
     console.log(`Total NPCs: ${Object.keys(npcs).length}`);
-    console.log(`Tamanio: ${formatBytes(Buffer.byteLength(json, "utf8"))}`);
+    console.log(`Size: ${formatBytes(Buffer.byteLength(json, "utf8"))}`);
 }
 
 void main()
     .catch((error) => {
-        console.error("No se pudo exportar el npcs.json de frontend", error);
+        console.error("Could not export frontend npcs.json", error);
         process.exit(1);
     })
     .finally(async () => {

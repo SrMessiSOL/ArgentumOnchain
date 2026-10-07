@@ -114,6 +114,7 @@ const clientPacketID = {
     selfMapMetaDelta: 79,
     spellVisual: 80,
     entityVitalsDelta: 81,
+    cosmeticSnapshot: 82,
 } as const;
 
 const serverPacketID = {

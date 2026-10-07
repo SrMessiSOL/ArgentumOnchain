@@ -1,5 +1,16 @@
 "use client";
+import { LocalizedLabel } from '@/components/LocalizedText';
+import { useI18n } from "@/components/I18nProvider";
+import {useGameWallet} from './GameWalletProvider';
+import {ensureLinkedWallet,jsonPost} from '@/lib/game-wallet';
+import {Transaction} from '@solana/web3.js';
+import {economyEnglish,economySpanish} from '@/lib/economy-locales';
+import {walletEnglish,walletSpanish} from '@/lib/wallet-locales';
 
+import PortalModal from './PortalModal';
+import AssetTransactionVisual,{type AssetStage} from './AssetTransactionVisual';
+import Link from "next/link";
+import {uxEnglish,uxSpanish} from "@/lib/ux-copy";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import CharacterSpritePreview from "../components/CharacterSpritePreview";
@@ -80,6 +91,8 @@ function isRenderableBody(
 }
 
 export default function CreateCharacterView() {
+    const { locale, t: localizeKey, text: localizeText } = useI18n();
+
     const router = useRouter();
     const { session } = useAuthRedirect({
         redirectTo: "/login",
@@ -87,6 +100,9 @@ export default function CreateCharacterView() {
         preserveRedirect: true,
     });
     const [creatingCharacter, setCreatingCharacter] = useState(false);
+    const walletConnection=useGameWallet();
+    const [mintStage,setMintStage]=useState<AssetStage|null>(null);
+    const [draftId,setDraftId]=useState<string|null>(null);
     const [newCharacterName, setNewCharacterName] = useState("");
     const [selectedClass, setSelectedClass] =
         useState<CharacterClassKey>(initialClass);
@@ -209,10 +225,14 @@ export default function CreateCharacterView() {
             return;
         }
 
-        setCreatingCharacter(true);
+        setCreatingCharacter(true);setMintStage('preparing');
         setError(null);
 
         try {
+            const wallet=await walletConnection.connect();
+            await ensureLinkedWallet(wallet);
+            let characterId=draftId;
+            if(!characterId){
             const response = await fetch("/api/auth/create-character", {
                 method: "POST",
                 headers: {
@@ -239,12 +259,23 @@ export default function CreateCharacterView() {
                 );
             }
 
-            router.push("/characters");
+            characterId=result.characters.find(c=>c.name.toLowerCase()===trimmedName.toLowerCase())?._id??null;
+            if(!characterId)throw Error('assets.failed');
+            setDraftId(characterId);
+            }
+            const prepared=await jsonPost('/api/game-assets/prepare',{kind:'mint',characterId});
+            if(prepared.wallet!==wallet.address)throw Error('economy.wrongWallet');
+            setMintStage('signing');sessionStorage.setItem('aochain:asset-operation',prepared.id);
+            const signed=await wallet.signTransaction(Transaction.from(Uint8Array.from(atob(prepared.transaction),c=>c.charCodeAt(0))));
+            setMintStage('confirming');
+            await jsonPost('/api/game-assets/submit',{operationId:prepared.id,transaction:btoa(String.fromCharCode(...signed.serialize({requireAllSignatures:false})))});
+            router.push("/wallet?operation="+encodeURIComponent(prepared.id));
             router.refresh();
         } catch (creationError) {
+            setMintStage(null);
             setError(
                 creationError instanceof Error
-                    ? creationError.message
+                    ? (locale==='es'?economySpanish:economyEnglish)[creationError.message as keyof typeof economyEnglish]??(locale==='es'?walletSpanish:walletEnglish)[creationError.message as keyof typeof walletEnglish]??creationError.message
                     : "Error inesperado al crear el personaje",
             );
         } finally {
@@ -257,18 +288,19 @@ export default function CreateCharacterView() {
         { label: "Agi", value: baseStats.agilidad },
         { label: "Int", value: baseStats.inteligencia },
         { label: "Car", value: baseStats.carisma },
-        { label: "Con", value: baseStats.constitucion },
+        { label: "CON", value: baseStats.constitucion },
         { label: "HP", value: baseStats.vida },
         { label: "MP", value: baseStats.mana },
     ];
     return (
-        <main className="min-h-screen overflow-y-auto bg-[radial-gradient(circle_at_top,#0f766e33,transparent_35%),radial-gradient(circle_at_bottom,#f59e0b22,transparent_30%),linear-gradient(180deg,#0f172a,#0c0a09)] px-4 py-10 text-stone-100">
-            <div className="mx-auto max-w-4xl">
-                <div className="mb-6 flex items-center justify-between gap-4">
+        <main className="realm-creation player-portal portal-creation min-h-screen overflow-y-auto bg-[radial-gradient(circle_at_top,#0f766e33,transparent_35%),radial-gradient(circle_at_bottom,#f59e0b22,transparent_30%),linear-gradient(180deg,#0f172a,#0c0a09)] px-4 py-10 text-stone-100">
+            <div className="mx-auto max-w-full">
+                <div className="portal-page-heading">
                     <div>
-                        <h1 className="mt-2 text-3xl font-semibold text-stone-50">
-                            Crear personaje
-                        </h1>
+                        <Link className="realm-back-link" href="/characters">← {locale === "es" ? uxSpanish.back : uxEnglish.back}</Link>
+                        <h1 className="mt-2 text-3xl font-semibold text-stone-50">{localizeKey("characters.create")}</h1>
+                        <p className="realm-page-intro">{locale === "es" ? uxSpanish.creationHelp : uxEnglish.creationHelp}</p>
+                        <p>{locale==='es'?'Elegí tu wallet para crear, mintear y stakear. La wallet pedirá tu firma y cobrará la comisión de prueba en devnet.':'Your wallet approves the character mint and pays the devnet network fee.'}</p>
                     </div>
                 </div>
 
@@ -277,10 +309,10 @@ export default function CreateCharacterView() {
                         <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
                             <div className="space-y-4">
                                 <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
-                                    <label className="text-[11px] uppercase tracking-[0.28em] text-stone-400">
-                                        Nombre
-                                    </label>
-                                    <input
+                                    <label htmlFor="character-name" className="text-[11px] uppercase tracking-[0.28em] text-stone-400">{localizeKey("creation.name")}</label>
+                                    <LocalizedLabel><input
+                                        id="character-name"
+                                        aria-label={localizeKey("creation.name")}
                                         value={newCharacterName}
                                         onChange={(event) =>
                                             setNewCharacterName(
@@ -290,13 +322,11 @@ export default function CreateCharacterView() {
                                         maxLength={DISPLAY_NAME_MAX_LENGTH}
                                         className="mt-2 w-full rounded-[18px] border border-white/10 bg-black/25 px-4 py-3 text-sm text-white outline-none transition focus:border-amber-300/70"
                                         placeholder=""
-                                    />
+                                    /></LocalizedLabel>
                                 </div>
 
                                 <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
-                                    <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400">
-                                        Genero
-                                    </p>
+                                    <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400">{localizeKey("creation.gender")}</p>
                                     <div className="mt-3 grid grid-cols-2 gap-2">
                                         {(
                                             [
@@ -310,6 +340,7 @@ export default function CreateCharacterView() {
                                             return (
                                                 <button
                                                     key={key}
+                                                    aria-pressed={isActive}
                                                     type="button"
                                                     onClick={() =>
                                                         setSelectedGender(key)
@@ -320,7 +351,7 @@ export default function CreateCharacterView() {
                                                             : "border-white/8 bg-white/3 text-stone-200 hover:border-white/18 hover:bg-white/6"
                                                     }`}
                                                 >
-                                                    {label}
+                                                    {localizeText(label)}
                                                 </button>
                                             );
                                         })}
@@ -328,9 +359,7 @@ export default function CreateCharacterView() {
                                 </div>
 
                                 <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
-                                    <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400">
-                                        Clase
-                                    </p>
+                                    <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400">{localizeKey("creation.class")}</p>
                                     <div className="mt-3 grid gap-2 sm:grid-cols-2">
                                         {characterClassOptions.map((option) => {
                                             const isActive =
@@ -339,6 +368,7 @@ export default function CreateCharacterView() {
                                             return (
                                                 <button
                                                     key={option.key}
+                                                    aria-pressed={isActive}
                                                     type="button"
                                                     onClick={() =>
                                                         setSelectedClass(
@@ -352,7 +382,7 @@ export default function CreateCharacterView() {
                                                     }`}
                                                 >
                                                     <p className="text-sm font-semibold text-white">
-                                                        {option.label}
+                                                        {localizeText(option.label)}
                                                     </p>
                                                 </button>
                                             );
@@ -361,9 +391,7 @@ export default function CreateCharacterView() {
                                 </div>
 
                                 <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
-                                    <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400">
-                                        Raza
-                                    </p>
+                                    <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400">{localizeKey("creation.race")}</p>
                                     <div className="mt-3 grid gap-2 sm:grid-cols-2 md:grid-cols-3">
                                         {raceOptions.map((option) => {
                                             const isActive =
@@ -372,6 +400,7 @@ export default function CreateCharacterView() {
                                             return (
                                                 <button
                                                     key={option.key}
+                                                    aria-pressed={isActive}
                                                     type="button"
                                                     onClick={() =>
                                                         setSelectedRace(
@@ -385,7 +414,7 @@ export default function CreateCharacterView() {
                                                     }`}
                                                 >
                                                     <p className="text-sm font-semibold text-white">
-                                                        {option.label}
+                                                        {localizeText(option.label)}
                                                     </p>
                                                 </button>
                                             );
@@ -398,12 +427,10 @@ export default function CreateCharacterView() {
                                 <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
                                     <div className="flex items-center justify-between gap-3">
                                         <div>
-                                            <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">
-                                                Vista previa
-                                            </p>
+                                            <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">{localizeKey("creation.preview")}</p>
                                             <p className="mt-2 text-lg font-semibold text-white">
-                                                {selectedClassOption.label}{" "}
-                                                {selectedRaceOption.label}
+                                                {localizeText(selectedClassOption.label)}{" "}
+                                                {localizeText(selectedRaceOption.label)}
                                             </p>
                                         </div>
                                     </div>
@@ -418,10 +445,7 @@ export default function CreateCharacterView() {
                                                 scale={1.8}
                                             />
                                         ) : (
-                                            <div className="flex h-[248px] w-[202px] items-center justify-center rounded-[28px] border border-white/10 bg-black/20 px-4 text-center text-sm text-stone-400">
-                                                No hay un body o head valido
-                                                para esta combinacion.
-                                            </div>
+                                            <div className="flex h-[248px] w-[202px] items-center justify-center rounded-[28px] border border-white/10 bg-black/20 px-4 text-center text-sm text-stone-400">{localizeKey("creation.invalidAppearance")}</div>
                                         )}
                                     </div>
 
@@ -429,6 +453,7 @@ export default function CreateCharacterView() {
                                         <div className="flex items-center justify-between gap-3">
                                             <button
                                                 type="button"
+                                                aria-label={locale === "es" ? uxSpanish.previousHead : uxEnglish.previousHead}
                                                 onClick={() =>
                                                     cycleHead("prev")
                                                 }
@@ -437,15 +462,14 @@ export default function CreateCharacterView() {
                                                 &lt;
                                             </button>
                                             <div className="text-center">
-                                                <p className="text-[11px] uppercase tracking-[0.24em] text-stone-400">
-                                                    Cabeza
-                                                </p>
+                                                <p className="text-[11px] uppercase tracking-[0.24em] text-stone-400">{localizeKey("creation.head")}</p>
                                                 <p className="mt-1 text-lg font-semibold text-white">
                                                     {selectedHeadId ?? "-"}
                                                 </p>
                                             </div>
                                             <button
                                                 type="button"
+                                                aria-label={locale === "es" ? uxSpanish.nextHead : uxEnglish.nextHead}
                                                 onClick={() =>
                                                     cycleHead("next")
                                                 }
@@ -459,18 +483,16 @@ export default function CreateCharacterView() {
 
                                 <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
                                     <div className="mb-3 flex items-center justify-between gap-3">
-                                        <p className="text-[11px] uppercase tracking-[0.28em] text-cyan-200/75">
-                                            Stats iniciales
-                                        </p>
+                                        <p className="text-[11px] uppercase tracking-[0.28em] text-cyan-200/75">{localizeKey("creation.stats")}</p>
                                     </div>
                                     <div className="grid grid-cols-4 gap-2">
                                         {statItems.map((stat) => (
                                             <div
-                                                key={stat.label}
+                                                key={localizeText(stat.label)}
                                                 className="rounded-[16px] border border-white/8 bg-white/4 px-2 py-3 text-center"
                                             >
                                                 <p className="text-[10px] uppercase tracking-[0.18em] text-stone-400">
-                                                    {stat.label}
+                                                    {localizeText(stat.label)}
                                                 </p>
                                                 <p className="mt-1 text-lg font-semibold text-white">
                                                     {stat.value}
@@ -487,22 +509,22 @@ export default function CreateCharacterView() {
                                     className="w-full rounded-[20px] bg-amber-300 px-4 py-3.5 text-sm font-semibold text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
                                 >
                                     {creatingCharacter
-                                        ? "Creando..."
-                                        : "Crear personaje"}
+                                        ? localizeKey("creation.pending")
+                                        : locale==='es'?'Crear y mintear con wallet':'Create & mint with wallet'}
                                 </button>
                             </aside>
                         </div>
 
+                        {mintStage&&!error&&<PortalModal title={locale==='es'?'Creando tu personaje':'Creating your character'} locked={creatingCharacter} onClose={()=>setMintStage(null)}><AssetTransactionVisual stage={mintStage}><CharacterSpritePreview bodyId={selectedAppearance.bodyId} headId={selectedHeadId} scale={1.2}/></AssetTransactionVisual></PortalModal>}
                         {error ? (
-                            <div className="mt-4 rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
-                                {error}
-                            </div>
+                            <PortalModal title={locale==='es'?'No se pudo crear el personaje':'Could not create the character'} onClose={()=>{setError(null);setMintStage(null);}}><p role="alert">
+                                {localizeText(error)}</p>
+                                {draftId&&<><p>{locale==='es'?'El personaje ya está guardado. Reintentá el mint cuando la operación pendiente termine; no vuelvas a crearlo.':'Your character is saved. Retry minting after any pending operation ends; you do not need to create it again.'}</p><Link href="/wallet">{locale==='es'?'Ver personaje y operaciones':'View character and operations'}</Link></>}
+                            </PortalModal>
                         ) : null}
                     </section>
                 ) : (
-                    <div className="rounded-[28px] border border-white/8 bg-stone-950/80 p-6 text-stone-300 shadow-2xl backdrop-blur-md">
-                        Cargando creador...
-                    </div>
+                    <div className="rounded-[28px] border border-white/8 bg-stone-950/80 p-6 text-stone-300 shadow-2xl backdrop-blur-md">{localizeKey("creation.loading")}</div>
                 )}
             </div>
         </main>

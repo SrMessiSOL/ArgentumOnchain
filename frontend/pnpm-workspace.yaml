@@ -1,6 +1,8 @@
 allowBuilds:
+  bufferutil: false
   sharp: true
   unrs-resolver: true
+  utf-8-validate: false
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - sharp

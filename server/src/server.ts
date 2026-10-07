@@ -1,3 +1,9 @@
+import {InboundBudget,MAX_INBOUND_BYTES} from './inboundBudget';
+import { bankOperations } from './bankOperationGuard';
+import { vaultRecovery } from './vaultRecovery';
+import { characterRecovery } from './characterRecovery';
+import { worldRecovery } from './worldRecovery';
+import {CosmeticReplication, encodeCosmeticSnapshot} from './cosmeticReplication';
 import type { GameApi } from "./game";
 import type { HandleProtocolApi } from "./handleProtocol";
 import type { NpcsApi } from "./npcs";
@@ -17,7 +23,7 @@ import * as safeZone from "./safeZone";
 
 export {};
 const config = require("./config");
-const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesión...";
+const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesiÃ³n...";
 const UNSAFE_LOGOUT_DELAY_MS = 10000;
 const RECENT_PACKET_INTERVAL_LIMIT = 300;
 const RECENT_PACKET_PPS_WINDOW_MS = 5000;
@@ -168,9 +174,11 @@ const http = require("http");
 const WebSocketServer = require("ws").Server;
 const httpServer = http.createServer(handleHttpRequest);
 
-httpServer.listen(config.port);
+httpServer.listen(config.port, process.env.HOST ?? "127.0.0.1");
 wsServer = new WebSocketServer({
     server: httpServer,
+    maxPayload: MAX_INBOUND_BYTES,
+    perMessageDeflate: false,
 }) as WSServer;
 
 const loadMaps = require("./loadMaps");
@@ -192,8 +200,46 @@ const npcs = require("./npcs") as NpcsApi;
 const runtimeTiming = require("./runtimeTiming");
 const handleProtocol = require("./handleProtocol") as HandleProtocolApi;
 
+const cosmeticReplication = new CosmeticReplication(async characterId => {
+    const result = await require('./functions').fetchUrl('/internal/characters/'+encodeURIComponent(characterId)+'/cosmetic-title', {headers:{Authorization:vars.tokenAuth}});
+    return result.kind;
+});
+setInterval(() => {
+    if(!vars.serverReady)return;
+    const subjects = Object.values(vars.personajes).filter((user:any)=>user?.connected&&!user.cerrado) as RuntimeCharacter[];
+    cosmeticReplication.refresh(subjects);
+    for(const viewer of subjects){
+        const client=getClientById(viewer.id);
+        if(!client||client.readyState!==1)continue;
+        const nearby:RuntimeCharacter[]=[];
+        game.loopArea(client,target=>{if('_id' in target)nearby.push(target as RuntimeCharacter);});
+        const entries=cosmeticReplication.snapshot(viewer.map,nearby);
+        try{client.send(encodeCosmeticSnapshot(viewer.map,entries));}catch{/* A closed socket must not interrupt other players. */}
+    }
+},2000).unref();
+
+function getWorldSaveIntervalMs() {
+    // Database balance settings must not silently disable the operations save ceiling.
+    return Math.max(10000,Math.min(Number(vars.timing.worldSaveMs)||60000,Number(process.env.AOWEB_AUTOSAVE_MS)||60000));
+}
 function handleHttpRequest(request: any, response: any) {
-    void request;
+    if(request.method === 'GET' && request.url === '/health') {
+        response.statusCode = vars.serverReady ? 200 : 503;
+        response.setHeader('Content-Type','application/json');
+        response.end(JSON.stringify({ready:vars.serverReady,players:Number(vars.usuariosOnline)+Number(vars.usuariosOnlinePvP),uptimeSeconds:Math.floor(process.uptime()),autosaveMs:getWorldSaveIntervalMs()}));
+        return;
+    }
+    if(request.method === 'POST' && request.url === '/internal/save') {
+        if(!config.tokenAuth || request.headers.authorization !== config.tokenAuth) {
+            response.statusCode=401; response.end('Unauthorized'); return;
+        }
+        void game.worldSave(result => {
+            response.statusCode=result?.ok ? 200 : 503;
+            response.setHeader('Content-Type','application/json');
+            response.end(JSON.stringify(result));
+        });
+        return;
+    }
 
     response.statusCode = 404;
     response.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -424,6 +470,10 @@ function trackClientActivity(ws: RuntimeClient, packageID: number) {
 (async () => {
     const startInitialize = Date.now();
 
+    // Resolve crash-era transfers before resetting sessions or allowing characters to load.
+    await vaultRecovery.recover();
+    await characterRecovery.recover();
+    await worldRecovery.recover();
     await runtimeTiming.loadRuntimeTimingConfig();
 
     if (config.resetConnectedCharactersOnStartup) {
@@ -436,7 +486,7 @@ function trackClientActivity(ws: RuntimeClient, packageID: number) {
         })) as { updated: number };
 
         console.log(
-            `[Servidor] Personajes marcados como desconectados al iniciar: ${resetCharactersResponse.updated}.`,
+            `[Server] Characters marked disconnected at startup: ${resetCharactersResponse.updated}.`,
         );
     }
 
@@ -456,9 +506,10 @@ function trackClientActivity(ws: RuntimeClient, packageID: number) {
         LoadSmeltingRecipes.initialize(),
     ]);
 
+    await game.restoreDroppedFloorItems();
     vars.serverReady = true;
     const endInitialize = Date.now() - startInitialize;
-    const textInitializeServer = `[Servidor] Iniciado en ${endInitialize}ms.`;
+    const textInitializeServer = `[Server] Started in ${endInitialize}ms.`;
 
     funct.sendTelegramMessage(textInitializeServer);
 
@@ -467,6 +518,11 @@ function trackClientActivity(ws: RuntimeClient, packageID: number) {
 
 wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnectionRequest) {
     ws.clientIp = getConnectionIp(request, ws);
+    const inboundBudget = new InboundBudget();
+    const authTimeout = setTimeout(() => {
+        if (!ws.id || vars.clients[ws.id] !== ws) ws.close(1008, 'Login timed out');
+    }, 30000);
+    authTimeout.unref();
 
     ws.on("message", function (data: unknown) {
         try {
@@ -474,6 +530,14 @@ wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnecti
                 return;
             }
 
+            const size = Buffer.isBuffer(data) ? data.length : data instanceof ArrayBuffer ? data.byteLength : 0;
+            if (!inboundBudget.allow(size)) {
+                ws.close(1008, 'Packet budget exceeded');
+                return;
+            }
+            // Do not allow another client inventory action or tab switch during a bank save.
+            // Packet bytes are still budgeted above; nothing is queued for later replay.
+            if (ws.id && bankOperations.isBusy(ws.id)) return;
             pkg.setData(data as PacketPayload);
             const packageID = pkg.getPackageID();
 
@@ -485,7 +549,9 @@ wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnecti
         }
     });
 
+    ws.on("error", () => { /* ws closes invalid/oversized frames; keep errors off the process event loop. */ });
     ws.on("close", function () {
+        clearTimeout(authTimeout);
         try {
             handleSocketClosed(ws);
         } catch (err) {
@@ -737,7 +803,7 @@ function processIdleCharactersTick(now: number) {
 
         handleProtocol.console("Desconectado por inactividad.", "white", 0, 0, client);
 
-        funct.sendTelegramMessage(`[Servidor] Usuario ${user.nameCharacter} desconectado por inactividad.`);
+        funct.sendTelegramMessage(`[Server] User ${user.nameCharacter} disconnected due to inactivity.`);
 
         game.closeForce(idUser);
     }
@@ -914,7 +980,7 @@ createDynamicScheduler(
 );
 
 createDynamicScheduler(
-    () => vars.timing.worldSaveMs,
+    () => getWorldSaveIntervalMs(),
     function () {
         game.worldSave(() => {});
     },

@@ -5,13 +5,14 @@ type PasswordResetEmailInput = {
   to: string;
   displayName: string;
   resetUrl: string;
+  locale?: "en" | "es";
 };
 
 let sesClient: SESv2Client | null = null;
 
 function getSesClient(): SESv2Client {
   if (!config.sesRegion || !config.sesAccessKeyId || !config.sesSecretAccessKey || !config.sesFromEmail) {
-    throw new Error("Amazon SES no esta configurado");
+    throw new Error("Amazon SES is not configured");
   }
 
   if (!sesClient) {
@@ -36,17 +37,17 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function buildPasswordResetHtml({ displayName, resetUrl }: PasswordResetEmailInput): string {
+export function buildPasswordResetHtml({ displayName, resetUrl, locale = "en" }: PasswordResetEmailInput): string {
   const safeName = escapeHtml(displayName);
   const safeUrl = escapeHtml(resetUrl);
 
   return `
 <!DOCTYPE html>
-<html lang="es">
+<html lang="${locale}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recuperar contraseña</title>
+    <title>${locale === "es" ? "Recuperar contraseña" : "Reset password"}</title>
   </head>
   <body style="margin:0;padding:0;background:#09090b;font-family:Arial,sans-serif;color:#e7e5e4;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:radial-gradient(circle at top,#1f293755,transparent 35%),linear-gradient(180deg,#0c0a09,#111827);padding:32px 16px;">
@@ -56,25 +57,25 @@ function buildPasswordResetHtml({ displayName, resetUrl }: PasswordResetEmailInp
             <tr>
               <td style="padding:28px 28px 20px;background:radial-gradient(circle at top,#f59e0b33,transparent 55%),linear-gradient(135deg,#1c1917,#0f172a);">
                 <div style="font-size:11px;letter-spacing:0.34em;text-transform:uppercase;color:#fde68a;opacity:0.85;">AOWeb</div>
-                <h1 style="margin:14px 0 8px;font-size:30px;line-height:1.2;color:#fafaf9;">Recupera tu acceso</h1>
-                <p style="margin:0;font-size:15px;line-height:1.7;color:#d6d3d1;">Hola ${safeName}, recibimos un pedido para cambiar la contraseña de tu cuenta.</p>
+                <h1 style="margin:14px 0 8px;font-size:30px;line-height:1.2;color:#fafaf9;">${locale === "es" ? "Recupera tu acceso" : "Recover your account"}</h1>
+                <p style="margin:0;font-size:15px;line-height:1.7;color:#d6d3d1;">${locale === "es" ? "Hola" : "Hello"} ${safeName}, ${locale === "es" ? "recibimos un pedido para cambiar la contraseña de tu cuenta." : "we received a request to reset your account password."}</p>
               </td>
             </tr>
             <tr>
               <td style="padding:28px;">
-                <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#d6d3d1;">El enlace vence en 30 minutos y solo sirve una vez.</p>
+                <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#d6d3d1;">${locale === "es" ? "El enlace vence en 30 minutos y solo sirve una vez." : "This link expires in 30 minutes and can only be used once."}</p>
                 <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 20px;">
                   <tr>
                     <td align="center" bgcolor="#fde68a" style="border-radius:16px;">
-                      <a href="${safeUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;color:#111827;text-decoration:none;">Cambiar contraseña</a>
+                      <a href="${safeUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;color:#111827;text-decoration:none;">${locale === "es" ? "Cambiar contraseña" : "Reset password"}</a>
                     </td>
                   </tr>
                 </table>
-                <p style="margin:0 0 10px;font-size:13px;line-height:1.7;color:#a8a29e;">Si el boton no funciona, copia y pega este link en tu navegador:</p>
+                <p style="margin:0 0 10px;font-size:13px;line-height:1.7;color:#a8a29e;">${locale === "es" ? "Si el boton no funciona, copia y pega este link en tu navegador:" : "If the button does not work, copy and paste this link into your browser:"}</p>
                 <p style="margin:0 0 20px;word-break:break-word;font-size:13px;line-height:1.7;color:#67e8f9;">${safeUrl}</p>
                 <div style="border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);padding:16px;">
-                  <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#fef3c7;">Seguridad</p>
-                  <p style="margin:0;font-size:13px;line-height:1.7;color:#d6d3d1;">Si no fuiste vos, ignora este mensaje. Tu contraseña actual seguira funcionando hasta que completes el cambio.</p>
+                  <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#fef3c7;">${locale === "es" ? "Seguridad" : "Security"}</p>
+                  <p style="margin:0;font-size:13px;line-height:1.7;color:#d6d3d1;">${locale === "es" ? "Si no fuiste vos, ignora este mensaje. Tu contraseña actual seguira funcionando hasta que completes el cambio." : "If you did not request this, ignore this message. Your current password will keep working until you complete the reset."}</p>
                 </div>
               </td>
             </tr>
@@ -86,17 +87,17 @@ function buildPasswordResetHtml({ displayName, resetUrl }: PasswordResetEmailInp
 </html>`.trim();
 }
 
-function buildPasswordResetText({ displayName, resetUrl }: PasswordResetEmailInput): string {
+export function buildPasswordResetText({ displayName, resetUrl, locale = "en" }: PasswordResetEmailInput): string {
   return [
-    `Hola ${displayName},`,
+    `${locale === "es" ? "Hola" : "Hello"} ${displayName},`,
     "",
-    "Recibimos un pedido para cambiar la password de tu cuenta de AOWeb.",
+    (locale === "es" ? "Recibimos un pedido para cambiar la password de tu cuenta de AOWeb." : "We received a request to reset your AOWeb account password."),
     "",
-    "Abre este link para elegir una nueva password:",
+    (locale === "es" ? "Abre este link para elegir una nueva password:" : "Open this link to choose a new password:"),
     resetUrl,
     "",
-    "El enlace vence en 30 minutos y solo se puede usar una vez.",
-    "Si no fuiste vos, ignora este email.",
+    (locale === "es" ? "El enlace vence en 30 minutos y solo se puede usar una vez." : "This link expires in 30 minutes and can only be used once."),
+    (locale === "es" ? "Si no fuiste vos, ignora este email." : "If you did not request this, ignore this email."),
   ].join("\n");
 }
 
@@ -111,7 +112,7 @@ export async function sendPasswordResetEmail(input: PasswordResetEmailInput): Pr
     Content: {
       Simple: {
         Subject: {
-          Data: "AOWeb | Recuperacion de contraseña",
+          Data: input.locale === "es" ? "AOWeb | Recuperacion de contraseña" : "AOWeb | Password reset",
           Charset: "UTF-8",
         },
         Body: {

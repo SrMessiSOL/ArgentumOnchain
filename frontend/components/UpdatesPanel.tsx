@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText } from '@/components/LocalizedText';
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import changelogEntries from "@/data/changelog.json";
@@ -87,9 +88,7 @@ export default function UpdatesPanel({
                         href={backHref}
                         prefetch={false}
                         className="text-sm text-stone-300 transition hover:text-stone-100"
-                    >
-                        Volver
-                    </Link>
+                    ><LocalizedText source={"Volver "} /></Link>
                 </div>
             ) : null}
 
@@ -108,9 +107,7 @@ export default function UpdatesPanel({
                                 navigateToUpdatesSection("changelog")
                             }
                             className="text-xs font-medium uppercase tracking-[0.22em] text-cyan-100 transition hover:text-white"
-                        >
-                            Mostrar mas
-                        </button>
+                        ><LocalizedText source={"Mostrar mas "} /></button>
                     ) : null}
                 </div>
 
@@ -135,7 +132,7 @@ export default function UpdatesPanel({
                                                 className="flex gap-2 leading-6"
                                             >
                                                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-amber-200" />
-                                                <span>{feature}</span>
+                                                <span><LocalizedText source={feature} /></span>
                                             </li>
                                         ))}
                                 </ul>
@@ -165,7 +162,7 @@ export default function UpdatesPanel({
                                             className="flex gap-2 leading-6"
                                         >
                                             <span className="mt-2 h-1.5 w-1.5 rounded-full bg-amber-200" />
-                                            <span>{feature}</span>
+                                            <span><LocalizedText source={feature} /></span>
                                         </li>
                                     ))}
                                 </ul>
@@ -181,9 +178,9 @@ export default function UpdatesPanel({
                             }
                             className="w-full rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm font-medium text-cyan-100 transition hover:border-cyan-300/40 hover:bg-cyan-300/15"
                         >
-                            {isChangelogExpanded
+                            <LocalizedText source={isChangelogExpanded
                                 ? "Mostrar menos"
-                                : "Mostrar mas"}
+                                : "Mostrar mas"} />
                         </button>
                     ) : null}
                 </div>
@@ -202,9 +199,7 @@ export default function UpdatesPanel({
                             type="button"
                             onClick={() => navigateToUpdatesSection("roadmap")}
                             className="text-xs font-medium uppercase tracking-[0.22em] text-amber-100 transition hover:text-white"
-                        >
-                            Mostrar mas
-                        </button>
+                        ><LocalizedText source={"Mostrar mas "} /></button>
                     ) : null}
                 </div>
 
@@ -213,7 +208,7 @@ export default function UpdatesPanel({
                         roadmapPreview ? (
                             <article className="relative overflow-hidden rounded-2xl border border-white/7 bg-white/4 p-4">
                                 <p className="text-base font-semibold text-white">
-                                    {roadmapPreview.title}
+                                    <LocalizedText source={roadmapPreview.title} />
                                 </p>
 
                                 <ul className="mt-4 space-y-2 text-sm text-stone-300">
@@ -225,7 +220,7 @@ export default function UpdatesPanel({
                                                 className="flex gap-2 leading-6"
                                             >
                                                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-200" />
-                                                <span>{item}</span>
+                                                <span><LocalizedText source={item} /></span>
                                             </li>
                                         ))}
                                 </ul>
@@ -238,12 +233,12 @@ export default function UpdatesPanel({
                     ) : (
                         visibleRoadmapEntries.map((entry) => (
                             <article
-                                key={`${entry.title}`}
+                                key={entry.title}
                                 className="rounded-2xl border border-white/7 bg-white/4 p-4"
                             >
                                 <div className="flex flex-wrap items-center justify-between gap-3">
                                     <p className="text-base font-semibold text-white">
-                                        {entry.title}
+                                        <LocalizedText source={entry.title} />
                                     </p>
                                 </div>
 
@@ -254,7 +249,7 @@ export default function UpdatesPanel({
                                             className="flex gap-2 leading-6"
                                         >
                                             <span className="mt-2 h-1.5 w-1.5 rounded-full bg-cyan-200" />
-                                            <span>{item}</span>
+                                            <span><LocalizedText source={item} /></span>
                                         </li>
                                     ))}
                                 </ul>
@@ -270,9 +265,9 @@ export default function UpdatesPanel({
                             }
                             className="w-full rounded-2xl border border-amber-300/20 bg-amber-300/10 px-4 py-3 text-sm font-medium text-amber-100 transition hover:border-amber-300/40 hover:bg-amber-300/15"
                         >
-                            {isRoadmapExpanded
+                            <LocalizedText source={isRoadmapExpanded
                                 ? "Mostrar menos"
-                                : "Mostrar mas"}
+                                : "Mostrar mas"} />
                         </button>
                     ) : null}
                 </div>

@@ -7,7 +7,7 @@ const { initializeSmeltingRecipesFromApi } = require("./gameDataSync");
 class LoadSmeltingRecipes {
     async initialize() {
         await this.load();
-        console.log("Recetas de fundición cargadas.");
+        console.log("Smelting recipes loaded.");
     }
 
     async load() {
@@ -16,10 +16,10 @@ class LoadSmeltingRecipes {
         try {
             const result = await initializeSmeltingRecipesFromApi();
             console.log(
-                `[GAME DATA] Fundición hidratada desde DB: ${result.loadedRecipes}. Version aplicada: ${result.currentVersion}.`,
+                `[GAME DATA] Smelting loaded from DB: ${result.loadedRecipes}. Applied version: ${result.currentVersion}.`,
             );
         } catch {
-            console.warn("[GAME DATA] No se pudo hidratar fundición desde API al iniciar. Se usan datos locales.");
+            console.warn("[GAME DATA] Could not load smelting from API at startup. Using local data.");
         }
     }
 }

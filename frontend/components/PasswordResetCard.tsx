@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type {
@@ -129,30 +130,23 @@ export default function PasswordResetCard({ token }: PasswordResetCardProps) {
     };
 
     return (
-        <div className="mx-auto w-full max-w-md overflow-hidden rounded-[32px] border border-stone-700/70 bg-stone-950/88 text-stone-100 shadow-2xl backdrop-blur-md">
+        <div className="realm-auth-card mx-auto w-full max-w-md overflow-hidden rounded-[32px] border border-stone-700/70 bg-stone-950/88 text-stone-100 shadow-2xl backdrop-blur-md">
             <div className="border-b border-white/8 bg-[radial-gradient(circle_at_top,#f59e0b33,transparent_55%),linear-gradient(135deg,#111827,#0f172a)] px-6 py-6">
                 <p className="text-[11px] uppercase tracking-[0.34em] text-amber-200/80">
                     AOWeb
                 </p>
-                <h1 className="mt-2 text-3xl font-semibold text-stone-50">
-                    Elegi una nueva contraseña
-                </h1>
-                <p className="mt-2 text-sm text-stone-300/80">
-                    Usa una clave de al menos 8 caracteres. El link sirve una
-                    sola vez.
-                </p>
+                <h1 className="mt-2 text-3xl font-semibold text-stone-50"><LocalizedText source={"Elegi una nueva contraseña "} /></h1>
+                <p className="mt-2 text-sm text-stone-300/80"><LocalizedText source={"Usa una clave de al menos 8 caracteres. El link sirve una sola vez. "} /></p>
             </div>
 
             <div className="p-6">
                 {checking ? (
-                    <div className="rounded-2xl bg-white/5 px-4 py-3 text-sm text-stone-300">
-                        Validando link seguro...
-                    </div>
+                    <div className="rounded-2xl bg-white/5 px-4 py-3 text-sm text-stone-300"><LocalizedText source={"Validando link seguro... "} /></div>
                 ) : null}
 
                 {!checking && valid ? (
                     <form className="space-y-3" onSubmit={submit}>
-                        <input
+                        <LocalizedLabel><input
                             value={password}
                             onChange={(event) =>
                                 setPassword(event.target.value)
@@ -163,8 +157,8 @@ export default function PasswordResetCard({ token }: PasswordResetCardProps) {
                             autoComplete="new-password"
                             minLength={8}
                             required
-                        />
-                        <input
+                        /></LocalizedLabel>
+                        <LocalizedLabel><input
                             value={confirmPassword}
                             onChange={(event) =>
                                 setConfirmPassword(event.target.value)
@@ -175,27 +169,27 @@ export default function PasswordResetCard({ token }: PasswordResetCardProps) {
                             autoComplete="new-password"
                             minLength={8}
                             required
-                        />
+                        /></LocalizedLabel>
 
                         <button
                             type="submit"
                             disabled={pending}
                             className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
                         >
-                            {pending ? "Guardando..." : "Actualizar contraseña"}
+                            <LocalizedText source={pending ? "Guardando..." : "Actualizar contraseña"} />
                         </button>
                     </form>
                 ) : null}
 
                 {message ? (
-                    <div className="mt-4 rounded-2xl bg-emerald-500/12 px-4 py-3 text-sm text-emerald-200">
-                        {message}
+                    <div role="status" className="mt-4 rounded-2xl bg-emerald-500/12 px-4 py-3 text-sm text-emerald-200">
+                        <LocalizedText source={message} />
                     </div>
                 ) : null}
 
                 {error ? (
-                    <div className="mt-4 rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
-                        {error}
+                    <div role="alert" className="mt-4 rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
+                        <LocalizedText source={error} />
                     </div>
                 ) : null}
 
@@ -204,9 +198,7 @@ export default function PasswordResetCard({ token }: PasswordResetCardProps) {
                         href="/login"
                         prefetch={false}
                         className="font-medium text-cyan-300 transition hover:text-cyan-200"
-                    >
-                        Ir a inicio de sesión
-                    </Link>
+                    ><LocalizedText source={"Ir a inicio de sesión "} /></Link>
                 </div>
             </div>
         </div>

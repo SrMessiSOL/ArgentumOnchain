@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText } from '@/components/LocalizedText';
 import React from "react";
 import type { RuntimeTimingConfig } from "../lib/runtime-config";
 
@@ -307,22 +308,16 @@ export default function AdminIntervalsModal({
     }
 
     return (
-        <div className="fixed inset-0 z-[96] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
-            <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-[#6f5c39] bg-[radial-gradient(circle_at_top,#3f311d_0%,#18110c_46%,#090807_100%)] text-stone-100 shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
+        <div className="game-modal-backdrop fixed inset-0 z-[96] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
+            <div className="game-modal-panel flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-[#6f5c39] bg-[radial-gradient(circle_at_top,#3f311d_0%,#18110c_46%,#090807_100%)] text-stone-100 shadow-[0_40px_140px_rgba(0,0,0,0.65)]">
                 <div className="border-b border-amber-200/10 bg-black/20 px-6 py-5">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                             <p className="text-[11px] uppercase tracking-[0.34em] text-amber-300/75">
                                 Panel
                             </p>
-                            <h2 className="mt-2 text-2xl font-semibold text-[#f5ead2]">
-                                Intervalos del servidor
-                            </h2>
-                            <p className="mt-2 max-w-3xl text-sm text-stone-300/85">
-                                Cambia timings en caliente. Cada guardado
-                                ejecuta el comando interno y actualiza server,
-                                DB y este cliente.
-                            </p>
+                            <h2 className="mt-2 text-2xl font-semibold text-[#f5ead2]"><LocalizedText source={"Intervalos del servidor "} /></h2>
+                            <p className="mt-2 max-w-3xl text-sm text-stone-300/85"><LocalizedText source={"Cambia timings en caliente. Cada guardado ejecuta el comando interno y actualiza server, DB y este cliente. "} /></p>
                         </div>
 
                         <div className="flex gap-2">
@@ -330,16 +325,12 @@ export default function AdminIntervalsModal({
                                 type="button"
                                 onClick={onRefresh}
                                 className="rounded-full border border-cyan-200/15 bg-cyan-300/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100 transition hover:border-cyan-200/30 hover:bg-cyan-300/15"
-                            >
-                                Recargar
-                            </button>
+                            ><LocalizedText source={"Recargar "} /></button>
                             <button
                                 type="button"
                                 onClick={onClose}
                                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-200 transition hover:border-white/20 hover:bg-white/10"
-                            >
-                                Cerrar
-                            </button>
+                            ><LocalizedText source={"Cerrar "} /></button>
                         </div>
                     </div>
                 </div>
@@ -354,7 +345,7 @@ export default function AdminIntervalsModal({
                                 <h3
                                     className={`text-lg font-semibold ${section.accent}`}
                                 >
-                                    {section.title}
+                                    <LocalizedText source={section.title} />
                                 </h3>
                             </div>
 
@@ -390,17 +381,17 @@ export default function AdminIntervalsModal({
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex flex-wrap items-center gap-2">
                                                         <div className="text-sm font-semibold text-stone-100">
-                                                            {field.label}
+                                                            <LocalizedText source={field.label} />
                                                         </div>
                                                         <span className="rounded-full border border-amber-200/10 bg-amber-200/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-amber-100/80">
                                                             {field.alias}
                                                         </span>
                                                     </div>
                                                     <div className="mt-1 text-xs text-stone-400">
-                                                        {field.description}
+                                                        <LocalizedText source={field.description} />
                                                     </div>
                                                     <div className="mt-1 text-[11px] text-stone-500">
-                                                        `{field.path}` actual:{" "}
+                                                        `{field.path}<LocalizedText source={"` actual:"} />{" "}
                                                         {currentValue}
                                                         {alphaField
                                                             ? " alpha"
@@ -487,9 +478,9 @@ export default function AdminIntervalsModal({
                                                                     "linear-gradient(135deg, #f7d488 0%, #d8aa57 100%)",
                                                             }}
                                                         >
-                                                            {isSaving
+                                                            <LocalizedText source={isSaving
                                                                 ? "Guardando"
-                                                                : "Aplicar"}
+                                                                : "Aplicar"} />
                                                         </button>
                                                     </div>
                                                 </div>

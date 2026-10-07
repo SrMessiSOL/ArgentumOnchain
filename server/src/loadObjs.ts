@@ -8,7 +8,7 @@ class LoadObjs {
     async initialize() {
         await this.load();
 
-        console.log("Objs Cargados.");
+        console.log("Objects loaded.");
     }
 
     load() {
@@ -18,10 +18,10 @@ class LoadObjs {
             try {
                 const result = await initializeObjectsFromApi();
                 console.log(
-                    `[GAME DATA] Objs hidratados desde DB: ${result.loadedObjects}. Version aplicada: ${result.currentVersion}.`,
+                    `[GAME DATA] Objects loaded from DB: ${result.loadedObjects}. Applied version: ${result.currentVersion}.`,
                 );
                 if (result.loadedObjects <= 0) {
-                    reject(new Error("No se pudieron cargar objetos desde la API."));
+                    reject(new Error("Could not load objects from the API."));
                     return;
                 }
             } catch (error) {

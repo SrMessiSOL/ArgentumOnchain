@@ -1,4 +1,7 @@
 "use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
+import { localizeItemDetails } from "@/lib/game-i18n";
+import { useI18n } from "@/components/I18nProvider";
 
 import React from "react";
 import type { GraphicData } from "../types/game";
@@ -38,6 +41,7 @@ function ItemGraphic({
     graphicData?: GraphicData;
     name: string;
 }) {
+    const {text: localizeText} = useI18n();
     if (!graphicData?.numFile) {
         return <div className="h-10 w-10 rounded-md bg-black/20" />;
     }
@@ -49,8 +53,8 @@ function ItemGraphic({
 
     return (
         <div className="relative h-10 w-10 overflow-hidden rounded-sm">
-            <div
-                aria-label={name}
+            <LocalizedLabel><div
+                aria-label={localizeText(name)}
                 className="absolute left-1/2 top-1/2 bg-no-repeat"
                 style={{
                     width: graphicData.width,
@@ -60,7 +64,7 @@ function ItemGraphic({
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: "center",
                 }}
-            />
+            /></LocalizedLabel>
         </div>
     );
 }
@@ -97,12 +101,12 @@ function parseItemDetails(details: string): string[] {
 
 function parseTradeItemStats(details: string) {
     const defense = details.match(/Defensa:\s*(\d+\/\d+)/i)?.[1] ?? null;
-    const damage = details.match(/Daño:\s*(\d+\/\d+)/i)?.[1] ?? null;
+    const damage = details.match(/DaÃ±o:\s*(\d+\/\d+)/i)?.[1] ?? null;
     const tier = details.match(/Tier:\s*(\d+)/i)?.[1] ?? null;
     const magicResistance =
-        details.match(/Resistencia mágica:\s*(\d+%)/i)?.[1] ?? null;
+        details.match(/Resistencia mÃ¡gica:\s*(\d+%)/i)?.[1] ?? null;
     const magicDamageBonus =
-        details.match(/Bonus daño mágico:\s*(\d+%)/i)?.[1] ?? null;
+        details.match(/Bonus daÃ±o mÃ¡gico:\s*(\d+%)/i)?.[1] ?? null;
 
     return { defense, damage, tier, magicResistance, magicDamageBonus };
 }
@@ -118,15 +122,16 @@ function ItemOverlayMeta({
     amountLabel?: string | null;
     forceAmountLabel?: boolean;
 }) {
+    const {text: localizeText} = useI18n();
     const stats = parseTradeItemStats(details);
     const combatLabel = stats.magicResistance
-        ? `RM ${stats.magicResistance}`
+        ? `${localizeText("RM")} ${stats.magicResistance}`
         : stats.magicDamageBonus
           ? `MAG ${stats.magicDamageBonus}`
           : stats.defense
             ? `DEF ${stats.defense}`
             : stats.damage
-              ? `ATQ ${stats.damage}`
+              ? `${localizeText("ATQ")} ${stats.damage}`
               : null;
     const primaryLabel = forceAmountLabel
         ? (amountLabel ?? null)
@@ -208,6 +213,8 @@ export default function TradeModal({
     onEquipRequest,
     onMoveBankItem,
 }: TradeModalProps) {
+    const { locale, t: localizeKey, text: localizeText } = useI18n();
+
     const isBank = mode === "bank";
     const [graphicsDB, setGraphicsDB] = React.useState<Record<
         string,
@@ -442,7 +449,7 @@ export default function TradeModal({
         : [];
     const isSharedVault = isBank && bankTab !== "character";
     const vaultGoldLabel =
-        bankTab === "clan" ? "Oro bóveda clan" : "Oro bóveda cuenta";
+        bankTab === "clan" ? "Oro bÃ³veda clan" : "Oro bÃ³veda cuenta";
     const tabs: Array<{
         key: "character" | "account" | "clan";
         label: string;
@@ -458,8 +465,8 @@ export default function TradeModal({
     ];
 
     return (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-sm">
-            <div className="w-full max-w-4xl overflow-hidden rounded-[28px] border border-[#5f4630] bg-[linear-gradient(180deg,#2b1d13_0%,#18110c_100%)] text-stone-100 shadow-[0_32px_120px_rgba(0,0,0,0.55)]">
+        <div className="game-modal-backdrop fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-sm">
+            <div className="game-modal-panel w-full max-w-4xl overflow-hidden rounded-[28px] border border-[#5f4630] bg-[linear-gradient(180deg,#2b1d13_0%,#18110c_100%)] text-stone-100 shadow-[0_32px_120px_rgba(0,0,0,0.55)]">
                 <div className="border-b border-[#6a4f39] bg-[#120d09]/85 px-5 py-4">
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex min-w-0 items-center gap-3">
@@ -477,27 +484,27 @@ export default function TradeModal({
                             </div>
                             <div className="min-w-0">
                                 <p className="text-[11px] uppercase tracking-[0.28em] text-amber-300/75">
-                                    {isBank ? "Banco" : "Comerciante"}
+                                    {localizeText(isBank ? "Banco" : "Comerciante")}
                                 </p>
                                 <h2 className="truncate text-xl font-semibold text-stone-50">
-                                    {previewItem?.name ?? "Selecciona un item"}
+                                    {localizeText(previewItem?.name ?? "Selecciona un item")}
                                 </h2>
                                 <p className="mt-1 text-sm text-stone-400">
                                     {previewItem
                                         ? selectedMerchantItem
                                             ? isBank
-                                                ? `Guardados: ${formatNumber(previewItem.amount)}`
-                                                : `${formatNumber(Math.floor(previewItem.value / 2))} oro por unidad`
+                                                ? `${localizeText("Guardados")}: ${formatNumber(previewItem.amount)}`
+                                                : `${formatNumber(Math.floor(previewItem.value / 2))} ${localizeText("oro por unidad")}`
                                             : isBank
-                                              ? "Guarda o retira items desde tu banco."
-                                              : `${formatNumber(previewItem.value)} oro por unidad`
+                                              ? localizeText("Guarda o retira items desde tu banco.")
+                                              : `${formatNumber(previewItem.value)} ${localizeText("oro por unidad")}`
                                         : isBank
-                                          ? "Guarda o retira items desde este panel."
-                                          : "Compra o vende items desde este panel."}
+                                          ? localizeText("Guarda o retira items desde este panel.")
+                                          : localizeText("Compra o vende items desde este panel.")}
                                 </p>
                                 {previewItem && !previewItem.validForUser ? (
                                     <p className="mt-1 text-xs font-medium text-rose-300">
-                                        No lo puede usar tu personaje.
+                                        {localizeText("No lo puede usar tu personaje.")}
                                     </p>
                                 ) : null}
                                 {previewDetails.length > 0 ? (
@@ -507,7 +514,7 @@ export default function TradeModal({
                                                 key={detail}
                                                 className="rounded-full border border-stone-100/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-stone-200"
                                             >
-                                                {detail}
+                                                {localizeItemDetails(detail, locale)}
                                             </span>
                                         ))}
                                     </div>
@@ -519,9 +526,7 @@ export default function TradeModal({
                             type="button"
                             onClick={onClose}
                             className="rounded-2xl border border-stone-700 bg-stone-950/60 px-3 py-2 text-sm text-stone-300 transition hover:border-stone-500 hover:text-white"
-                        >
-                            Cerrar
-                        </button>
+                        >{localizeKey("common.close")}</button>
                     </div>
 
                     {isBank ? (
@@ -538,7 +543,7 @@ export default function TradeModal({
                                             : "border border-stone-700 bg-stone-950/40 text-stone-300 hover:border-stone-500 hover:text-white"
                                     }`}
                                 >
-                                    {tab.label}
+                                    {localizeText(tab.label)}
                                 </button>
                             ))}
                         </div>
@@ -546,7 +551,7 @@ export default function TradeModal({
 
                     {!isBank ? (
                         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-sm text-amber-100">
-                            <span className="text-base">Oro:</span>
+                            <span className="text-base">{localizeText("Oro:")}</span>
                             <span className="font-semibold">
                                 {formatNumber(gold)}
                             </span>
@@ -554,13 +559,13 @@ export default function TradeModal({
                     ) : isSharedVault ? (
                         <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-stone-300">
                             <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-amber-100">
-                                <span>Tu oro:</span>
+                                <span>{localizeText("Tu oro:")}</span>
                                 <span className="font-semibold">
                                     {formatNumber(gold)}
                                 </span>
                             </span>
                             <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 text-cyan-100">
-                                <span>{vaultGoldLabel}:</span>
+                                <span>{localizeText(vaultGoldLabel)}:</span>
                                 <span className="font-semibold">
                                     {formatNumber(vaultGold)}
                                 </span>
@@ -573,7 +578,7 @@ export default function TradeModal({
                     <section className="rounded-[22px] border border-amber-300/10 bg-black/20 p-3">
                         <div className="mb-3 flex items-center justify-between">
                             <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-300">
-                                {isBank ? "Banco" : "Comerciante"}
+                                {localizeText(isBank ? "Banco" : "Comerciante")}
                             </h3>
                             <span className="text-xs text-stone-500">
                                 {merchantItems.length} items
@@ -692,9 +697,7 @@ export default function TradeModal({
 
                     <section className="rounded-[22px] border border-cyan-300/10 bg-black/20 p-3">
                         <div className="mb-3 flex items-center justify-between">
-                            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-300">
-                                Inventario
-                            </h3>
+                            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-300">{localizeKey("hud.inventory")}</h3>
                             <span className="text-xs text-stone-500">
                                 {playerItems.length} items
                             </span>
@@ -760,9 +763,7 @@ export default function TradeModal({
                         <div className="mb-4 rounded-[20px] border border-amber-300/10 bg-black/20 p-3">
                             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                                 <div>
-                                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-300">
-                                        Oro compartido
-                                    </p>
+                                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-300"><LocalizedText source={"Oro compartido "} /></p>
                                 </div>
                                 <div className="flex items-center gap-2 rounded-2xl border border-stone-700 bg-black/30 px-3 py-2">
                                     <input
@@ -785,9 +786,7 @@ export default function TradeModal({
                                         }
                                         disabled={gold < 1}
                                         className="flex h-11 items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#8c3418_0%,#661b0d_100%)] px-5 text-sm font-semibold uppercase tracking-[0.14em] text-amber-50 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
-                                    >
-                                        Depositar oro
-                                    </button>
+                                    ><LocalizedText source={"Depositar oro "} /></button>
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -800,9 +799,7 @@ export default function TradeModal({
                                         }
                                         disabled={vaultGold < 1}
                                         className="flex h-11 items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-5 text-sm font-semibold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-200/40 hover:bg-cyan-300/16 disabled:cursor-not-allowed disabled:opacity-40"
-                                    >
-                                        Retirar oro
-                                    </button>
+                                    ><LocalizedText source={"Retirar oro "} /></button>
                                 </div>
                             </div>
                         </div>
@@ -810,7 +807,7 @@ export default function TradeModal({
 
                     {bankStatusMessage ? (
                         <div className="mb-4 rounded-2xl border border-rose-300/20 bg-rose-950/30 px-4 py-3 text-sm text-rose-100">
-                            {bankStatusMessage}
+                            <LocalizedText source={bankStatusMessage} />
                         </div>
                     ) : null}
 
@@ -839,7 +836,7 @@ export default function TradeModal({
                                         : "bg-[linear-gradient(180deg,#8c3418_0%,#661b0d_100%)]"
                                 }`}
                             >
-                                {isBank ? "Retirar" : "Comprar"}
+                                {isBank ? localizeText("Retirar") : localizeKey("hud.buy")}
                             </button>
                             {isBank ? (
                                 <button
@@ -856,9 +853,7 @@ export default function TradeModal({
                                     }}
                                     disabled={!selectedMerchantItem}
                                     className="flex h-12 w-full items-center justify-center rounded-2xl border border-amber-300/30 bg-amber-300/10 px-5 text-sm font-semibold uppercase tracking-[0.14em] text-amber-100 transition hover:border-amber-200/50 hover:bg-amber-300/16 sm:w-[156px] disabled:cursor-not-allowed disabled:opacity-40"
-                                >
-                                    Retirar todo
-                                </button>
+                                ><LocalizedText source={"Retirar todo "} /></button>
                             ) : null}
                         </div>
 
@@ -921,7 +916,7 @@ export default function TradeModal({
                                 disabled={!selectedPlayerItem}
                                 className="flex h-12 w-full items-center justify-center rounded-2xl bg-[linear-gradient(180deg,#8c3418_0%,#661b0d_100%)] px-5 text-sm font-semibold uppercase tracking-[0.14em] text-amber-50 transition hover:brightness-110 sm:w-[156px] disabled:cursor-not-allowed disabled:opacity-40"
                             >
-                                {isBank ? "Guardar" : "Vender"}
+                                {isBank ? localizeText("Guardar") : localizeKey("hud.sell")}
                             </button>
                             <button
                                 type="button"
@@ -938,7 +933,7 @@ export default function TradeModal({
                                 disabled={!selectedPlayerItem}
                                 className="flex h-12 w-full items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-5 text-sm font-semibold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-200/40 hover:bg-cyan-300/16 sm:w-[156px] disabled:cursor-not-allowed disabled:opacity-40"
                             >
-                                {isBank ? "Guardar todo" : "Vender todo"}
+                                {isBank ? localizeText("Guardar todo") : localizeText("Vender todo")}
                             </button>
                         </div>
                     </div>
@@ -947,58 +942,58 @@ export default function TradeModal({
                         {selectedMerchantItem ? (
                             <div className="flex flex-col gap-1.5">
                                 <p>
-                                    {isBank ? "Retirar" : "Comprar"}{" "}
+                                    {isBank ? localizeText("Retirar") : localizeKey("hud.buy")}{" "}
                                     <span className="font-semibold text-stone-100">
-                                        {selectedMerchantItem.name}
+                                        {localizeText(selectedMerchantItem.name)}
                                     </span>{" "}
                                     {isBank ? (
                                         "."
                                     ) : (
                                         <>
-                                            por {formatNumber(buyTotalPrice)}{" "}
-                                            oro.
+                                            {localizeText("por")} {formatNumber(buyTotalPrice)}{" "}
+                                            {localizeText("oro.")}
                                         </>
                                     )}
                                     {!selectedMerchantItem.validForUser
-                                        ? " No lo puede usar tu personaje."
+                                        ? localizeText(" No lo puede usar tu personaje.")
                                         : ""}
                                     {isSharedVault
-                                        ? ` Oro en la bóveda: ${formatNumber(vaultGold)}.`
+                                        ? localizeText(` Oro en la bÃ³veda: ${formatNumber(vaultGold)}.`)
                                         : ""}
                                 </p>
                             </div>
                         ) : selectedPlayerItem ? (
                             <div className="flex flex-col gap-1.5">
                                 <p>
-                                    {isBank ? "Guardar" : "Vender"}{" "}
+                                    {isBank ? localizeText("Guardar") : localizeKey("hud.sell")}{" "}
                                     <span className="font-semibold text-stone-100">
-                                        {selectedPlayerItem.name}
+                                        {localizeText(selectedPlayerItem.name)}
                                     </span>{" "}
                                     {isBank ? (
                                         "."
                                     ) : (
                                         <>
-                                            por {formatNumber(sellTotalPrice)}{" "}
-                                            oro.
+                                            {localizeText("por")} {formatNumber(sellTotalPrice)}{" "}
+                                            {localizeText("oro.")}
                                         </>
                                     )}
                                     {selectedPlayerItem.equipped
                                         ? isBank
-                                            ? " Primero debes desequiparlo para guardarlo."
-                                            : " Primero debes desequiparlo."
+                                            ? localizeText(" Primero debes desequiparlo para guardarlo.")
+                                            : localizeText(" Primero debes desequiparlo.")
                                         : ""}
                                 </p>
                                 {selectedPlayerItem.details ? (
                                     <p className="text-xs text-stone-400">
-                                        {selectedPlayerItem.details}
+                                        {localizeItemDetails(selectedPlayerItem.details, locale)}
                                     </p>
                                 ) : null}
                             </div>
                         ) : (
                             <p>
                                 {isBank
-                                    ? "Selecciona un item del banco o de tu inventario."
-                                    : "Selecciona un item del comerciante o de tu inventario."}
+                                    ? localizeText("Selecciona un item del banco o de tu inventario.")
+                                    : localizeText("Selecciona un item del comerciante o de tu inventario.")}
                             </p>
                         )}
                     </div>

@@ -6,6 +6,11 @@ export async function handleIncomingUiPacket({
     ctx,
 }: IncomingPacketHandlerArgs): Promise<boolean> {
     switch (packet.type) {
+        case "cosmeticSnapshot":
+            if(engine && packet.payload.map===engine.mapNumber){
+                engine.remoteCosmetics=new Map(packet.payload.entries.map((entry:{id:number;kind:"explorer"|"first-hunt"})=>[entry.id,{kind:entry.kind,expiresAt:Date.now()+6_000}]));
+            }
+            return true;
         case "console":
             if (
                 /Comienzas a pescar\.|Has dejado de pescar\.|La pesca se canceló\.|Debes equiparte la caña de pescar/i.test(
@@ -21,6 +26,7 @@ export async function handleIncomingUiPacket({
                 source: "console",
                 channel: packet.payload.channel ?? "console",
                 senderName: packet.payload.senderName,
+                npcName: packet.payload.npcName,
             });
             ctx.emitStatus({
                 connected: true,
@@ -34,7 +40,9 @@ export async function handleIncomingUiPacket({
             if (packet.payload.id > 0) {
                 ctx.showDialogBubble(
                     packet.payload.id,
-                    packet.payload.msg,
+                    engine?.personajes[packet.payload.id]?.isNpc
+                        ? (ctx.localizeNpcDialog?.(packet.payload.msg) ?? packet.payload.msg)
+                        : packet.payload.msg,
                     packet.payload.color,
                 );
             }

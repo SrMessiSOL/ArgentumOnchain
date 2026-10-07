@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS characters (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
+    chain_required BOOLEAN NOT NULL DEFAULT FALSE,
+    chain_state TEXT NOT NULL DEFAULT 'offchain',
+    asset_address TEXT UNIQUE,
     id_clase INTEGER NOT NULL DEFAULT 0,
     map_id INTEGER NOT NULL DEFAULT 1,
     pos_x INTEGER NOT NULL DEFAULT 50,
@@ -246,6 +249,23 @@ CREATE TABLE IF NOT EXISTS character_bank_items (
     id_item INTEGER NOT NULL,
     cant INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (character_id, id_pos)
+);
+
+CREATE TABLE IF NOT EXISTS character_save_receipts (
+    operation_id UUID PRIMARY KEY,
+    character_id UUID NOT NULL,
+    payload_hash TEXT NOT NULL,
+    response JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS vault_operation_receipts (
+    operation_id UUID PRIMARY KEY,
+    scope TEXT NOT NULL CHECK (scope IN ('account', 'clan')),
+    owner_id UUID NOT NULL,
+    payload_hash TEXT NOT NULL,
+    response JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS account_vaults (
@@ -558,3 +578,11 @@ CREATE INDEX IF NOT EXISTS idx_game_smelting_recipes_mineral_item_id ON game_sme
 CREATE INDEX IF NOT EXISTS idx_game_balance_updated_at ON game_balance(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_game_data_revisions_kind_id ON game_data_revisions(kind, id DESC);
 CREATE INDEX IF NOT EXISTS idx_challenge_history_finished_at ON challenge_history(finished_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS dropped_floor_items (
+ drop_id UUID PRIMARY KEY, map_id INTEGER NOT NULL CHECK(map_id>0), x INTEGER NOT NULL CHECK(x>=0), y INTEGER NOT NULL CHECK(y>=0),
+ item_id INTEGER NOT NULL CHECK(item_id>0), amount INTEGER NOT NULL CHECK(amount>0), UNIQUE(map_id,x,y)
+);
+
+CREATE TABLE IF NOT EXISTS floor_spawn_receipts(operation_id UUID PRIMARY KEY,payload_hash TEXT NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT NOW());

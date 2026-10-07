@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import { useEffect, useMemo, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import type { AuthErrorResponse } from "../../lib/auth";
@@ -79,7 +80,7 @@ const CHART_PADDING = {
 };
 
 function formatSampleLabel(value: string) {
-    return new Intl.DateTimeFormat("es-AR", {
+    return new Intl.DateTimeFormat("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         day: "2-digit",
@@ -88,7 +89,7 @@ function formatSampleLabel(value: string) {
 }
 
 function formatTickLabel(value: string) {
-    return new Intl.DateTimeFormat("es-AR", {
+    return new Intl.DateTimeFormat("en-US", {
         day: "2-digit",
         month: "short",
         hour: "2-digit",
@@ -340,7 +341,7 @@ export default function UsersOnlineStatsPage() {
             <div className="mx-auto max-w-7xl space-y-5">
                 {error ? (
                     <div className="rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
-                        {error}
+                        <LocalizedText source={error} />
                     </div>
                 ) : null}
 
@@ -359,7 +360,7 @@ export default function UsersOnlineStatsPage() {
                             {formatNumber(peakTotal)}
                         </p>
                         <p className="mt-2 text-lg text-stone-300">
-                            {selectedRange.label} peak
+                            <LocalizedText source={selectedRange.label} /> peak
                         </p>
                     </div>
 
@@ -376,9 +377,7 @@ export default function UsersOnlineStatsPage() {
                 <section className="rounded-[20px] border border-white/8 bg-[#202734] p-4 shadow-2xl md:p-5">
                     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/8 pb-4">
                         <div className="flex flex-wrap items-center gap-3">
-                            <span className="text-sm font-medium text-stone-300">
-                                Rango
-                            </span>
+                            <span className="text-sm font-medium text-stone-300"><LocalizedText source={"Rango "} /></span>
                             {rangeOptions.map((option) => (
                                 <button
                                     key={option.hours}
@@ -392,7 +391,7 @@ export default function UsersOnlineStatsPage() {
                                             : "border-white/10 bg-[#161d29] text-stone-300 hover:border-white/20"
                                     }`}
                                 >
-                                    {option.label}
+                                    <LocalizedText source={option.label} />
                                 </button>
                             ))}
 
@@ -420,37 +419,30 @@ export default function UsersOnlineStatsPage() {
                                         className="inline-block h-2.5 w-2.5 rounded-full"
                                         style={{ backgroundColor: entry.color }}
                                     />
-                                    {entry.label}
+                                    <LocalizedText source={entry.label} />
                                 </label>
                             ))}
                         </div>
 
-                        <div className="text-sm text-stone-400">
-                            Ultima muestra:{" "}
+                        <div className="text-sm text-stone-400"><LocalizedText source={"Ultima muestra:"} />{" "}
                             <span className="text-stone-200">
-                                {latestLabel}
+                                <LocalizedText source={latestLabel} />
                             </span>
                         </div>
                     </div>
 
                     <div className="mt-4 rounded-[18px] border border-white/8 bg-[#1b2230] p-3 md:p-4">
                         {isLoadingStats ? (
-                            <div className="flex h-[420px] items-center justify-center text-sm text-stone-400">
-                                Cargando grafico...
-                            </div>
+                            <div className="flex h-[420px] items-center justify-center text-sm text-stone-400"><LocalizedText source={"Cargando grafico... "} /></div>
                         ) : displayStats.length === 0 ? (
-                            <div className="flex h-[420px] items-center justify-center text-sm text-stone-400">
-                                Todavía no hay muestras guardadas.
-                            </div>
+                            <div className="flex h-[420px] items-center justify-center text-sm text-stone-400"><LocalizedText source={"Todavía no hay muestras guardadas. "} /></div>
                         ) : activeSeries.length === 0 ? (
-                            <div className="flex h-[420px] items-center justify-center text-sm text-stone-400">
-                                Activa al menos un check para ver la grafica.
-                            </div>
+                            <div className="flex h-[420px] items-center justify-center text-sm text-stone-400"><LocalizedText source={"Activa al menos un check para ver la grafica. "} /></div>
                         ) : (
                             <>
                                 <div className="overflow-x-auto">
                                     <div className="min-w-[780px]">
-                                        <svg
+                                        <LocalizedLabel><svg
                                             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
                                             className="h-[420px] w-full"
                                             role="img"
@@ -650,7 +642,7 @@ export default function UsersOnlineStatsPage() {
                                                     )
                                                 }
                                             />
-                                        </svg>
+                                        </svg></LocalizedLabel>
                                     </div>
                                 </div>
 
@@ -662,10 +654,7 @@ export default function UsersOnlineStatsPage() {
                                                     hoveredStat.sampledMinute,
                                                 )}
                                             </span>
-                                            <span className="text-stone-400">
-                                                Tooltip activo sobre la muestra
-                                                seleccionada
-                                            </span>
+                                            <span className="text-stone-400"><LocalizedText source={"Tooltip activo sobre la muestra seleccionada "} /></span>
                                         </div>
                                         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
                                             {statConfig.map((entry) => (
@@ -680,7 +669,7 @@ export default function UsersOnlineStatsPage() {
                                                                 entry.color,
                                                         }}
                                                     />
-                                                    <span>{entry.label}</span>
+                                                    <span><LocalizedText source={entry.label} /></span>
                                                     <span className="font-semibold text-white">
                                                         {formatNumber(
                                                             hoveredStat[
@@ -710,7 +699,7 @@ export default function UsersOnlineStatsPage() {
                                                             series.color,
                                                     }}
                                                 />
-                                                <span>{series.label}</span>
+                                                <span><LocalizedText source={series.label} /></span>
                                                 <span className="font-semibold text-white">
                                                     {formatNumber(currentValue)}
                                                 </span>
@@ -725,17 +714,11 @@ export default function UsersOnlineStatsPage() {
 
                 <section className="grid gap-4 lg:grid-cols-4">
                     <div className="rounded-[18px] border border-white/8 bg-[#202734] p-5 shadow-xl lg:col-span-1">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400">
-                            Ultima muestra
-                        </p>
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-stone-400"><LocalizedText source={"Ultima muestra "} /></p>
                         <p className="mt-3 text-xl font-semibold text-white">
-                            {latestLabel}
+                            <LocalizedText source={latestLabel} />
                         </p>
-                        <p className="mt-3 text-sm leading-7 text-stone-300">
-                            El eje vertical muestra valores reales, `totalUsers`
-                            queda como serie principal y el tooltip te da el
-                            detalle exacto por muestra.
-                        </p>
+                        <p className="mt-3 text-sm leading-7 text-stone-300"><LocalizedText source={"El eje vertical muestra valores reales, `totalUsers` queda como serie principal y el tooltip te da el detalle exacto por muestra. "} /></p>
                     </div>
 
                     {statConfig.map((entry) => (
@@ -745,13 +728,13 @@ export default function UsersOnlineStatsPage() {
                             style={{ backgroundColor: entry.glow }}
                         >
                             <p className="text-[11px] uppercase tracking-[0.28em] text-stone-300">
-                                {entry.label}
+                                <LocalizedText source={entry.label} />
                             </p>
                             <p className="mt-3 text-3xl font-semibold text-white">
                                 {formatNumber(latestStat?.[entry.key] ?? 0)}
                             </p>
                             <p className="mt-2 text-sm text-stone-300">
-                                Visible: {visibleStats[entry.key] ? "si" : "no"}
+                                Visible: <LocalizedText source={visibleStats[entry.key] ? "Sí" : "No"} />
                             </p>
                         </div>
                     ))}

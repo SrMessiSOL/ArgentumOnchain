@@ -1,3 +1,4 @@
+import { LocalizedText } from '@/components/LocalizedText';
 import type { RefObject } from "react";
 
 type InspectableNpc = {
@@ -53,14 +54,14 @@ export function NpcContextMenu({
                 style={{ left: npcContextMenu.x, top: npcContextMenu.y }}
             >
                 <div className="mb-2 px-2 text-[10px] uppercase tracking-[0.2em] text-stone-400">
-                    {npcContextMenu.npc.name}
+                    <LocalizedText source={npcContextMenu.npc.name} />
                 </div>
                 <button
                     type="button"
                     onClick={() => onInspectNpc(npcContextMenu.npc)}
                     className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-stone-100 transition hover:bg-cyan-300/12"
                 >
-                    <span>Inspeccionar</span>
+                    <span><LocalizedText source={"Inspeccionar"} /></span>
                     <span className="text-xs uppercase tracking-[0.16em] text-cyan-200/70">
                         NPC
                     </span>
@@ -76,7 +77,7 @@ export function NpcContextMenu({
                             onClick={() => onRemoveNpc(npcContextMenu.npc)}
                             className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-rose-100 transition hover:bg-rose-400/12 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            <span>Quitar del mapa</span>
+                            <span><LocalizedText source={"Quitar del mapa"} /></span>
                             <span className="text-xs uppercase tracking-[0.16em] text-rose-200/70">
                                 Admin
                             </span>
@@ -92,7 +93,7 @@ export function NpcContextMenu({
                             }
                             className="mt-1 flex w-full items-center justify-between rounded-xl border border-rose-300/20 bg-rose-500/10 px-3 py-2 text-left text-sm text-rose-100 transition hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            <span>Quitar permanente</span>
+                            <span><LocalizedText source={"Quitar permanente"} /></span>
                             <span className="text-xs uppercase tracking-[0.16em] text-rose-200/70">
                                 JSON
                             </span>
@@ -126,7 +127,7 @@ export function NpcContextMenu({
                 }
                 className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-400/12"
             >
-                <span>Revivir</span>
+                <span><LocalizedText source={"Revivir"} /></span>
                 <span className="text-xs uppercase tracking-[0.16em] text-emerald-200/70">
                     Admin
                 </span>

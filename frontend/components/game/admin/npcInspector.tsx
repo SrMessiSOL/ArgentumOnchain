@@ -1,3 +1,4 @@
+import { LocalizedLabel } from '@/components/LocalizedText';
 import React from "react";
 import { formatNumber } from "../../../lib/number-format";
 import type { GraphicData, NPCsDB } from "../../../types/game";
@@ -75,7 +76,7 @@ export function renderInspectableNpcItemGraphic(
 
     return (
         <div className="relative h-10 w-10 overflow-hidden rounded-md border border-cyan-200/15 bg-black/20">
-            <div
+            <LocalizedLabel><div
                 aria-label={name}
                 className="absolute left-1/2 top-1/2 bg-no-repeat"
                 style={{
@@ -86,7 +87,7 @@ export function renderInspectableNpcItemGraphic(
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: "center",
                 }}
-            />
+            /></LocalizedLabel>
         </div>
     );
 }

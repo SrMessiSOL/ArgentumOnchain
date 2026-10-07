@@ -1,5 +1,8 @@
 "use client";
 
+import {useI18n} from './I18nProvider';
+import {assetUiEnglish,assetUiSpanish} from '@/lib/asset-ui-copy';
+import { LocalizedText } from '@/components/LocalizedText';
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
     Application,
@@ -263,6 +266,8 @@ export default function CharacterSpritePreview({
     );
     const hostRef = useRef<HTMLDivElement | null>(null);
     const appRef = useRef<Application | null>(null);
+    const {locale}=useI18n();const ui=locale==='es'?assetUiSpanish:assetUiEnglish;
+    const [portraitReady,setPortraitReady]=useState(false),[portraitFailed,setPortraitFailed]=useState(false);
     const [isAppReady, setIsAppReady] = useState(false);
     const [graphicsDB, setGraphicsDB] = useState<GraphicsDB | null>(null);
     const [bodiesDB, setBodiesDB] = useState<BodiesDB | null>(null);
@@ -372,6 +377,7 @@ export default function CharacterSpritePreview({
 
     useEffect(() => {
         let cancelled = false;
+        setPortraitReady(false);setPortraitFailed(false);
         const app = appRef.current;
 
         if (!app || !isAppReady || !isDataReady) {
@@ -619,7 +625,9 @@ export default function CharacterSpritePreview({
                     (desiredCenterPx - currentCenterPx) / rendererResolution;
                 app.renderer.render(stage);
             }
+            if(!cancelled)setPortraitReady(true);
         })().catch((error) => {
+            if(!cancelled)setPortraitFailed(true);
             console.error("Error rendering character preview:", error);
         });
 
@@ -675,10 +683,8 @@ export default function CharacterSpritePreview({
 
             <div ref={hostRef} className="absolute inset-0" />
 
-            {!isDataReady || !isAppReady ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 text-xs uppercase tracking-[0.28em] text-stone-500">
-                    Cargando
-                </div>
+            {!isDataReady || !isAppReady || !portraitReady ? (
+                <div className="asset-portrait-loading absolute inset-0 flex items-center justify-center text-xs text-stone-400" role="status"><span aria-hidden="true" style={portraitFailed?{animation:'none'}:undefined}/><span className="sr-only">{portraitFailed?ui.portraitFailed:ui.portrait}</span></div>
             ) : null}
         </div>
     );

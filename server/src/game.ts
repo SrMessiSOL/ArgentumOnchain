@@ -1,3 +1,11 @@
+import {itemMatchesSearch} from './localization/itemSearch';
+import { claimLoadedVault } from './vaultClaim';
+import { bankOperations } from './bankOperationGuard';
+import { vaultRecovery } from './vaultRecovery';
+import { characterRecovery } from './characterRecovery';
+import { worldRecovery } from './worldRecovery';
+import { randomUUID } from 'node:crypto';
+import { PendingGoldRewards } from './pendingGoldRewards';
 import {
     getFactionColor,
     getFactionConfig,
@@ -183,6 +191,8 @@ function waitForNextEventLoopTurn(): Promise<void> {
         setImmediate(resolve);
     });
 }
+
+const pendingFloorDrops = new Set<string>();
 
 function getFloorItemRegistryKey(idMap: number, pos: Position): string {
     return `${idMap}:${pos.x}:${pos.y}`;
@@ -1460,6 +1470,7 @@ function canDropItemAtPosition(idMap: number, pos: Position, options?: DropPosit
         return false;
     }
 
+    if (pendingFloorDrops.has(getFloorItemRegistryKey(idMap, pos))) return false;
     if (options?.excludedPositions?.has(getFloorItemRegistryKey(idMap, pos))) {
         return false;
     }
@@ -1557,7 +1568,7 @@ function resolveTeleportPositionForUser(
     }
 
     console.log(
-        `[telep] Bajo a ${user.nameCharacter} del barco para teletransportarlo a ${numMap}@${posX},${posY} (${source ?? "origen desconocido"})`,
+        `[teleport] Disembarking ${user.nameCharacter} before teleporting to ${numMap}@${posX},${posY} (${source ?? "unknown source"})`,
     );
 
     dismountUser(user);
@@ -2406,7 +2417,9 @@ export type GameApi = {
     useItem: (ws: RuntimeClient, idPos: number | string) => Promise<void>;
     agarrarItem: (ws: RuntimeClient) => Promise<void>;
     putItemToInv: (idUser: EntityId, idItem: number, cant: number) => void;
-    placeDroppedFloorItem: (idMap: number, pos: Position, idItem: number, amount: number) => void;
+    spawnDroppedFloorItem: (map: number, pos: Position, itemId: number, amount: number) => Promise<void>;
+    restoreDroppedFloorItems: () => Promise<void>;
+    placeDroppedFloorItem: (idMap: number, pos: Position, idItem: number, amount: number, dropId?: string) => void;
     renderDroppedFloorItem: (idMap: number, pos: Position, idItem: number) => void;
     cleanupDroppedFloorItems: (batchSize?: number) => Promise<number>;
     cleanupDroppedFloorItemsInMap: (idMap: number, batchSize?: number) => Promise<number>;
@@ -2515,8 +2528,10 @@ export type GameApi = {
     closeTradeSession: (idUser: EntityId) => void;
     depositBankGold: (idUser: EntityId, amount: number) => Promise<void>;
     withdrawBankGold: (idUser: EntityId, amount: number) => Promise<void>;
+    persistCharacterPatch: (user: RuntimeCharacter, patch: Record<string, unknown>) => Promise<void>;
     persistCharacterSnapshot: (user: RuntimeCharacter, options?: CharacterSnapshotPersistOptions) => Promise<void>;
     persistCharacterItemsById: (idUser: EntityId) => Promise<void>;
+    persistCharacterEconomyById: (idUser: EntityId) => Promise<void>;
     waitForCharacterPersistence: (characterId?: string) => Promise<void>;
     openMarketTrade: (idUser: EntityId, idNpc: EntityId) => Promise<boolean>;
     getMarketState: (
@@ -3092,8 +3107,11 @@ async function persistSharedVaultAndCharacterState(
             ? `/internal/vaults/account/${encodeURIComponent(session.ownerId)}`
             : `/internal/vaults/clan/${encodeURIComponent(session.ownerId)}`;
 
-    await queueSharedVaultPersistence(session.key, async () => {
+    // Capture the exact paired state now, not when a queued callback eventually runs.
+    const operationId = randomUUID();
+    const payload = (() => {
         const body: Record<string, unknown> = {
+            operationId,
             characterId: user._id,
         };
 
@@ -3113,14 +3131,10 @@ async function persistSharedVaultAndCharacterState(
             body.gold = balance.clampGold(session.gold);
         }
 
-        await funct.fetchUrl(path, {
-            method: "PUT",
-            body: JSON.stringify(body),
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: vars.tokenAuth,
-            },
-        });
+        return JSON.stringify({ ...body, operationId: randomUUID() });
+    })();
+    await queueSharedVaultPersistence(session.key, async () => {
+        await queueCharacterPersistence(user._id!, () => vaultRecovery.persist({ operationId, endpoint: path, payload }));
     });
 }
 
@@ -3240,9 +3254,14 @@ async function acquireSharedVaultSession(
         items: state.items,
         gold: state.gold,
     };
-    sharedVaultSessions.set(key, session);
-
-    return { ok: true, session };
+    const claimed = claimLoadedVault(sharedVaultSessions, key, session);
+    if (claimed.holderCharacterId !== user.id) {
+        return {
+            ok: false,
+            message: `The vault is being used by ${claimed.holderCharacterName}. Wait until they close it.`,
+        };
+    }
+    return { ok: true, session: claimed };
 }
 
 async function setBankTabForUser(
@@ -3328,7 +3347,7 @@ async function persistCharacterStoragePatch(
         return;
     }
 
-    await queueCharacterPersistence(user._id, async () => {
+    const payload = (() => {
         const body: Record<string, unknown> = {};
 
         if (options.gold) {
@@ -3344,17 +3363,13 @@ async function persistCharacterStoragePatch(
         }
 
         if (Object.keys(body).length === 0) {
-            return;
+            return null;
         }
-
-        await funct.fetchUrl(`/character_save/${user._id}`, {
-            method: "PUT",
-            body: JSON.stringify(body),
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: vars.tokenAuth,
-            },
-        });
+        return JSON.stringify({ ...body, operationId: randomUUID() });
+    })();
+    if (payload === null) return;
+    await queueCharacterPersistence(user._id, async () => {
+        await characterRecovery.persist({ operationId: JSON.parse(payload).operationId, endpoint: `/character_save/${user._id}`, payload });
     });
 }
 
@@ -3417,16 +3432,20 @@ async function persistCharacterSnapshot(
         return;
     }
 
-    await queueCharacterPersistence(runtimeUser._id, async () => {
+    const snapshotKey = options?.connected === false ? 'snapshot:disconnect' : options?.connected === true ? 'snapshot:connected' : 'snapshot:default';
+    await bankOperations.runAfter(runtimeUser.id, snapshotKey, async () => {
+      await queueCharacterPersistence(runtimeUser._id!, async () => {
         try {
-            await funct.fetchUrl(`/character_save/${runtimeUser._id}`, {
-                method: "PUT",
-                body: JSON.stringify(buildCharacterSnapshotPayload(runtimeUser, options)),
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: vars.tokenAuth,
-                },
+          for (;;) {
+            // Include queued rewards before capture, and resave rewards arriving during the write.
+            // Otherwise a disconnect could remove the character immediately after crediting memory.
+            bankOperations.flushSettledActions(runtimeUser.id);
+            const operationId = randomUUID();
+            await characterRecovery.persist({ operationId, endpoint: `/character_save/${runtimeUser._id}`,
+                payload: JSON.stringify({ ...buildCharacterSnapshotPayload(runtimeUser, runtimeUser.cerrado ? { connected: false } : options), operationId }),
             });
+            if (!bankOperations.hasSettledActions(runtimeUser.id)) break;
+          }
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
 
@@ -3438,6 +3457,7 @@ async function persistCharacterSnapshot(
 
             throw error;
         }
+      });
     });
 }
 
@@ -3646,7 +3666,27 @@ function filterMarketListing(listing: MarketListingSummary, browseOptions: Marke
     }
 
     const itemName = objectData?.name?.toLowerCase() ?? "";
-    return itemName.includes(normalizedSearch);
+    return itemMatchesSearch(objectData?.name ?? itemName, normalizedSearch);
+}
+
+async function removePersistedFloorItem(dropId: string): Promise<void> {
+    for (;;) {
+        try {
+            const result = await funct.fetchUrl(`/internal/floor-items/${dropId}`, {method:"DELETE",headers:{Authorization:vars.tokenAuth}});
+            if (result?.ok !== true) throw new Error('Missing ground cleanup acknowledgement');
+            return;
+        } catch {
+            console.warn('[Security] Ground cleanup unresolved; retaining tile reservation and retrying.');
+            await new Promise<void>(resolve => setTimeout(resolve,5000));
+        }
+    }
+}
+
+async function persistCharacterPatch(user: RuntimeCharacter, patch: Record<string, unknown>): Promise<void> {
+    if (!user._id || user.pvpChar) return;
+    const operationId = randomUUID();
+    const payload = JSON.stringify({ ...patch, operationId });
+    await queueCharacterPersistence(user._id, () => characterRecovery.persist({ operationId, endpoint: `/character_save/${user._id}`, payload }));
 }
 
 async function persistCharacterSpells(user: GameCharacter): Promise<void> {
@@ -3654,16 +3694,7 @@ async function persistCharacterSpells(user: GameCharacter): Promise<void> {
         return;
     }
 
-    await funct.fetchUrl(`/character_save/${user._id}/spells`, {
-        method: "PUT",
-        body: JSON.stringify({
-            spells: serializeSpells(user.spells),
-        }),
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: vars.tokenAuth,
-        },
-    });
+    await persistCharacterPatch(user, { spells: serializeSpells(user.spells) });
 }
 
 function logCharacterActivity(
@@ -4261,29 +4292,9 @@ function Game(this: GameApi) {
                             idSpell: obj.spellIndex,
                         };
 
-                        const tmpSpells: Array<{
-                            idPos: string;
-                            idSpell: number;
-                        }> = [];
-                        Object.keys(user.spells).map((idPos: string) => {
-                            tmpSpells.push({
-                                idPos: idPos,
-                                idSpell: user.spells[idPos].idSpell,
-                            });
-                        });
-
-                        const bodyPersonaje = {
-                            spells: tmpSpells,
-                        };
-
-                        await funct.fetchUrl(`/character_save/${user._id}/spells`, {
-                            method: "PUT",
-                            body: JSON.stringify(bodyPersonaje),
-                            headers: {
-                                "Content-Type": "application/json",
-                                Authorization: vars.tokenAuth,
-                            },
-                        });
+                        // Consume the scroll and persist both collections in one transaction.
+                        game.quitarUserInvItem(clientId, idPos, 1);
+                        await persistCharacterPatch(user, { spells: serializeSpells(user.spells), items: serializeInventory(user.inv) });
 
                         const learnedSpell = vars.datSpell[obj.spellIndex] as { name?: string } | undefined;
                         logCharacterActivity(user, {
@@ -4301,8 +4312,6 @@ function Game(this: GameApi) {
                         });
 
                         handleProtocol.aprenderSpell(clientId, idPosFinal);
-                        game.quitarUserInvItem(clientId, idPos, 1);
-                        await persistCharacterItems(user);
                     }
 
                     break;
@@ -4461,6 +4470,7 @@ function Game(this: GameApi) {
                 return;
             }
 
+            if (pendingFloorDrops.has(getFloorItemRegistryKey(user.map, user.pos))) return;
             if (game.hayObj(user.map, user.pos)) {
                 const item = game.objMap(user.map, user.pos)!;
                 const datObj = vars.datObj[item.objIndex];
@@ -4496,11 +4506,10 @@ function Game(this: GameApi) {
                     handleProtocol.deleteItem(user.map, user.pos, vars.clients[target.id]);
                 });
 
-                if (datObj.objType == vars.objType.dinero) {
-                    await persistCharacterGold(user);
-                } else {
-                    await persistCharacterItems(user);
-                }
+                await persistCharacterPatch(user, {
+                    ...(datObj.objType == vars.objType.dinero ? {gold:user.gold} : {items:serializeInventory(user.inv)}),
+                    ...(item.dropId ? {floorChanges:[{action:"take",dropId:item.dropId}]} : {}),
+                });
             }
         } catch (err) {
             funct.dumpError(err);
@@ -4522,7 +4531,7 @@ function Game(this: GameApi) {
                 return;
             }
 
-            if (!Number.isFinite(cant) || cant < 1) {
+            if (!Number.isSafeInteger(cant) || cant < 1) {
                 return;
             }
 
@@ -4559,16 +4568,19 @@ function Game(this: GameApi) {
         }
     };
 
-    this.placeDroppedFloorItem = function (idMap: number, pos: Position, idItem: number, amount: number) {
+    this.placeDroppedFloorItem = function (idMap: number, pos: Position, idItem: number, amount: number, dropId?: string) {
         const tile = vars.mapa[idMap]?.[pos.y]?.[pos.x];
 
         if (!tile) {
             return;
         }
 
+        // Volatile world spawns must never overwrite a durable or pending transfer.
+        if (!dropId && (tile.objInfo?.dropId || pendingFloorDrops.has(getFloorItemRegistryKey(idMap,pos)))) return;
         tile.objInfo = {
             objIndex: idItem,
             amount,
+            ...(dropId ? { dropId } : {}),
             cleanupSource: FLOOR_ITEM_CLEANUP_SOURCE,
             cleanupRegisteredAt: Date.now(),
         };
@@ -4580,6 +4592,35 @@ function Game(this: GameApi) {
                 y: pos.y,
             },
         };
+    };
+
+    this.spawnDroppedFloorItem = async function (map: number, pos: Position, itemId: number, amount: number) {
+        if (!Number.isSafeInteger(amount) || amount < 1 || !vars.datObj[itemId]) return;
+        const tile = vars.mapa[map]?.[pos.y]?.[pos.x];
+        const key = getFloorItemRegistryKey(map,pos);
+        if (!tile || tile.objInfo?.objIndex || pendingFloorDrops.has(key)) return;
+        const location = {...pos};
+        if (mapInstanceManager.isInstanceMap(map)) {
+            game.placeDroppedFloorItem(map,location,itemId,amount);
+            game.renderDroppedFloorItem(map,location,itemId);
+            return;
+        }
+        pendingFloorDrops.add(key);
+        const operationId = randomUUID();
+        try {
+            await worldRecovery.persist({operationId,endpoint:'/internal/floor-spawns',payload:JSON.stringify({operationId,map,x:location.x,y:location.y,itemId,amount})});
+            game.placeDroppedFloorItem(map,location,itemId,amount,operationId);
+            game.renderDroppedFloorItem(map,location,itemId);
+        } finally { pendingFloorDrops.delete(key); }
+    };
+
+    this.restoreDroppedFloorItems = async function () {
+        const result = await funct.fetchUrl('/internal/floor-items', {headers:{Authorization:vars.tokenAuth}}) as {items:Array<{dropId:string;map:number;x:number;y:number;itemId:number;amount:number}>};
+        for (const item of result.items) {
+            const tile = vars.mapa[item.map]?.[item.y]?.[item.x];
+            if (!tile || !vars.datObj[item.itemId]) throw new Error('Persisted ground item cannot be restored safely');
+            game.placeDroppedFloorItem(item.map,{x:item.x,y:item.y},item.itemId,item.amount,item.dropId);
+        }
     };
 
     this.renderDroppedFloorItem = function (idMap: number, pos: Position, idItem: number) {
@@ -4597,6 +4638,7 @@ function Game(this: GameApi) {
 
         for (let index = 0; index < entries.length; index++) {
             const [registryKey, entry] = entries[index];
+            if (pendingFloorDrops.has(registryKey)) continue;
             const tile = vars.mapa[entry.mapId]?.[entry.pos.y]?.[entry.pos.x];
 
             if (!isDroppedFloorItem(tile?.objInfo)) {
@@ -4604,6 +4646,11 @@ function Game(this: GameApi) {
                 continue;
             }
 
+            if (tile.objInfo?.dropId) {
+                pendingFloorDrops.add(registryKey);
+                await removePersistedFloorItem(tile.objInfo.dropId);
+                pendingFloorDrops.delete(registryKey);
+            }
             delete tile.objInfo;
             delete registry[registryKey];
             removed++;
@@ -4631,6 +4678,7 @@ function Game(this: GameApi) {
 
         for (let index = 0; index < entries.length; index++) {
             const [registryKey, entry] = entries[index];
+            if (pendingFloorDrops.has(registryKey)) continue;
 
             if (entry.mapId !== idMap) {
                 continue;
@@ -4643,6 +4691,11 @@ function Game(this: GameApi) {
                 continue;
             }
 
+            if (tile.objInfo?.dropId) {
+                pendingFloorDrops.add(registryKey);
+                await removePersistedFloorItem(tile.objInfo.dropId);
+                pendingFloorDrops.delete(registryKey);
+            }
             delete tile.objInfo;
             delete registry[registryKey];
             removed++;
@@ -4672,6 +4725,10 @@ function Game(this: GameApi) {
 
         await persistCharacterItems(user);
     };
+    this.persistCharacterEconomyById = async function (idUser: EntityId) {
+        const user = getCharacterById(idUser);
+        if (user) await persistCharacterEconomyState(user);
+    };
 
     /**
      * [tirarItem Acción de tirar item]
@@ -4700,7 +4757,7 @@ function Game(this: GameApi) {
 
             const item = user.inv[idPos];
 
-            if (cant < 1) {
+            if (!Number.isSafeInteger(cant) || cant < 1) {
                 return;
             }
 
@@ -4739,14 +4796,17 @@ function Game(this: GameApi) {
             });
 
             if (!tmpPos) {
-                console.log("<<<>>> NO HAY LUGAR EN EL PISO MAPA:" + user.map);
+                console.log("<<<>>> NO SPACE ON MAP FLOOR:" + user.map);
                 handleProtocol.console("No hay lugar en el piso.", "white", 0, 0, ws);
                 return;
             }
 
+            const dropKey = getFloorItemRegistryKey(user.map, tmpPos);
+            pendingFloorDrops.add(dropKey);
             game.quitarUserInvItem(clientId, idPos, cant);
 
-            game.placeDroppedFloorItem(user.map, tmpPos, idItem, cant);
+            const dropId = !user.pvpChar && !mapInstanceManager.isInstanceMap(user.map) ? randomUUID() : undefined;
+            game.placeDroppedFloorItem(user.map, tmpPos, idItem, cant, dropId);
 
             game.loopAreaPos(user.map, tmpPos, function (target: GameCharacter) {
                 withUserClient(target.id, (targetClient) => {
@@ -4754,7 +4814,8 @@ function Game(this: GameApi) {
                 });
             });
 
-            await persistCharacterItems(user);
+            await persistCharacterPatch(user, { items: serializeInventory(user.inv), floorChanges: dropId ? [{action: "put",dropId,map:user.map,x:tmpPos.x,y:tmpPos.y,itemId:idItem,amount:cant}] : [] });
+            pendingFloorDrops.delete(dropKey);
         } catch (err) {
             funct.dumpError(err);
         }
@@ -5539,17 +5600,17 @@ function Game(this: GameApi) {
                     if (vars.personajes[ws.id]) {
                         return true;
                     } else {
-                        console.log("ID desconectada: " + ws.id);
+                        console.log("Disconnected ID: " + ws.id);
                         socket.close(ws);
                         return false;
                     }
                 } else {
-                    console.log("WS desconectado");
+                    console.log("WebSocket disconnected");
                     socket.close(ws);
                     return false;
                 }
             } else {
-                console.log("WS desconectado por diferente state");
+                console.log("WebSocket disconnected due to a different state");
                 socket.close(ws);
                 return false;
             }
@@ -5578,7 +5639,7 @@ function Game(this: GameApi) {
                     savedCharacters++;
                 } catch (err) {
                     failedCharacters++;
-                    console.log(`[WORLDSAVE] Fallo al guardar ${user.name ?? user._id}. Se continua con el resto.`);
+                    console.log(`[WORLDSAVE] Failed to save ${user.name ?? user._id}. Continuing with remaining characters.`);
                     funct.dumpError(err);
                 }
             }
@@ -5588,13 +5649,13 @@ function Game(this: GameApi) {
 
         if (failedCharacters > 0) {
             console.log(
-                `[WORLDSAVE] Guardados ${savedCharacters} personajes en ${durationMs}ms con ${failedCharacters} fallos.`,
+                `[WORLDSAVE] Saved ${savedCharacters} characters in ${durationMs}ms with ${failedCharacters} failures.`,
             );
             callback({ ok: false, durationMs, savedCharacters });
             return;
         }
 
-        console.log(`[WORLDSAVE] Guardados ${savedCharacters} personajes en ${durationMs}ms.`);
+        console.log(`[WORLDSAVE] Saved ${savedCharacters} characters in ${durationMs}ms.`);
         callback({ ok: true, durationMs, savedCharacters });
     };
 
@@ -5637,12 +5698,12 @@ function Game(this: GameApi) {
                     const fallbackMatch = tierraInvalida ? null : findRespawnPosition(map, !aguaValida, true);
 
                     if (fallbackMatch) {
-                        console.log(`<<<>>> NPC respawn fallback en mapa ${map}: aguaValida=${aguaValida ? 1 : 0}`);
+                        console.log(`<<<>>> NPC respawn fallback on map ${map}: validWater=${aguaValida ? 1 : 0}`);
 
                         return fallbackMatch;
                     }
 
-                    console.log("<<<>>> EXPLOTO UN NPC EN EL MAPA " + map);
+                    console.log("[NPC] Could not place NPC on map " + map);
 
                     return {
                         posNewX: 50,
@@ -6000,7 +6061,7 @@ function Game(this: GameApi) {
             return fallbackDestination;
         }
 
-        console.log(`[tileExit] Ningun destino valido para ${source}.`);
+        console.log(`[tileExit] No valid destination for ${source}.`);
         return undefined;
     };
 
@@ -6023,13 +6084,13 @@ function Game(this: GameApi) {
 
             if (!hasCurrentCell) {
                 console.log(
-                    `[telep] Usuario ${user.nameCharacter} con posicion invalida ${user.map}@${user.pos.x},${user.pos.y} antes de ${source}`,
+                    `[teleport] User ${user.nameCharacter} has invalid position ${user.map}@${user.pos.x},${user.pos.y} before ${source}`,
                 );
             }
 
             if (!hasMapCell(numMap, posX, posY)) {
                 console.log(
-                    `[telep] Destino invalido ${numMap}@${posX},${posY} (${source}) para ${user.nameCharacter}`,
+                    `[teleport] Invalid destination ${numMap}@${posX},${posY} (${source}) for ${user.nameCharacter}`,
                 );
                 return;
             }
@@ -6146,17 +6207,17 @@ function Game(this: GameApi) {
 
             if (!tmpPos) {
                 console.log(
-                    "CIERRO A USUARIO " +
+                    "[teleport] No free destination for user " +
                         user.nameCharacter +
-                        " ESTÁ EXPLOTANDO TODO MAPA " +
+                        " on map " +
                         numMap +
-                        " DESTINO " +
+                        " destination " +
                         posX +
                         "," +
                         posY +
-                        " ORIGEN " +
+                        " source " +
                         source +
-                        " NAVEGANDO " +
+                        " sailing " +
                         user.navegando,
                 );
 
@@ -6247,17 +6308,17 @@ function Game(this: GameApi) {
 
             if (!tmpPos) {
                 console.log(
-                    "CIERRO A USUARIO " +
+                    "[teleport] Disconnecting user " +
                         user.nameCharacter +
-                        " ESTÁ EXPLOTANDO TODO MAPA " +
+                        ": no free destination on map " +
                         numMap +
-                        " DESTINO " +
+                        " destination " +
                         posX +
                         "," +
                         posY +
-                        " ORIGEN " +
+                        " source " +
                         source +
-                        " NAVEGANDO " +
+                        " sailing " +
                         user.navegando,
                 );
 
@@ -6749,7 +6810,7 @@ function Game(this: GameApi) {
 
             if (user.navegando && !reviveOnWater) {
                 console.log(
-                    `[revivirUsuario] Limpio navegando de ${user.nameCharacter} en ${user.map}@${user.pos.x},${user.pos.y}`,
+                    `[revive] Clearing sailing state for ${user.nameCharacter} at ${user.map}@${user.pos.x},${user.pos.y}`,
                 );
                 user.navegando = 0;
             }
@@ -7125,7 +7186,7 @@ function Game(this: GameApi) {
                     "red",
                     1,
                     0,
-                    userClient,
+                    userClient, undefined, undefined, npc.nameCharacter,
                 );
             });
 
@@ -7136,7 +7197,7 @@ function Game(this: GameApi) {
                         "red",
                         1,
                         0,
-                        userClient,
+                        userClient, undefined, undefined, npc.nameCharacter,
                     );
                 });
 
@@ -7158,7 +7219,7 @@ function Game(this: GameApi) {
                         "red",
                         1,
                         0,
-                        userClient,
+                        userClient, undefined, undefined, npc.nameCharacter,
                     );
                 });
             }
@@ -7668,7 +7729,7 @@ function Game(this: GameApi) {
                             "red",
                             1,
                             0,
-                            userClient,
+                            userClient, undefined, undefined, npc.nameCharacter,
                         );
                     });
 
@@ -7703,7 +7764,7 @@ function Game(this: GameApi) {
                             "red",
                             1,
                             0,
-                            userClient,
+                            userClient, undefined, undefined, npc.nameCharacter,
                         );
                     });
                 } else {
@@ -7714,7 +7775,7 @@ function Game(this: GameApi) {
                             "red",
                             1,
                             0,
-                            userClient,
+                            userClient, undefined, undefined, npc.nameCharacter,
                         );
                     });
                 }
@@ -8640,18 +8701,21 @@ function Game(this: GameApi) {
      * @param  {[type]} idUser [description]
      * @return {[type]}        [description]
      */
-    this.tirarItemsUser = async function (idUser: EntityId) {
+    this.tirarItemsUser = async function (idUser: EntityId, dropOrigin?: { map: number; pos: Position }) {
         try {
             const user = vars.personajes[idUser] as GameCharacter | undefined;
             const reservedDropPositions = new Set<string>();
             const initialDropRadius = 3;
             const maxExpandedDropRadius = 5;
             let droppedItemsCount = 0;
+            const floorChanges: Record<string,unknown>[] = [];
 
             if (!user) {
                 return;
             }
 
+            const dropMap = dropOrigin?.map ?? user.map;
+            const dropPos = dropOrigin?.pos ?? { ...user.pos };
             for (let idPos in user.inv) {
                 const item = user.inv[idPos];
 
@@ -8671,13 +8735,13 @@ function Game(this: GameApi) {
                     let tmpPos: Position | undefined;
 
                     for (let radius = initialDropRadius; !tmpPos && radius <= maxExpandedDropRadius; radius++) {
-                        tmpPos = game.findDropPosition(user.map, user.pos, idUser, {
+                        tmpPos = game.findDropPosition(dropMap, dropPos, idUser, {
                             maxRadius: radius,
                             excludedPositions: reservedDropPositions,
                         });
 
                         if (!tmpPos) {
-                            tmpPos = game.findDropPosition(user.map, user.pos, idUser, {
+                            tmpPos = game.findDropPosition(dropMap, dropPos, idUser, {
                                 maxRadius: radius,
                                 allowWater: true,
                                 excludedPositions: reservedDropPositions,
@@ -8685,7 +8749,7 @@ function Game(this: GameApi) {
                         }
 
                         if (!tmpPos) {
-                            tmpPos = game.findDropPosition(user.map, user.pos, idUser, {
+                            tmpPos = game.findDropPosition(dropMap, dropPos, idUser, {
                                 maxRadius: radius,
                                 allowReplacingDroppedFloorItem: true,
                                 excludedPositions: reservedDropPositions,
@@ -8693,7 +8757,7 @@ function Game(this: GameApi) {
                         }
 
                         if (!tmpPos) {
-                            tmpPos = game.findDropPosition(user.map, user.pos, idUser, {
+                            tmpPos = game.findDropPosition(dropMap, dropPos, idUser, {
                                 maxRadius: radius,
                                 allowWater: true,
                                 allowReplacingDroppedFloorItem: true,
@@ -8703,16 +8767,19 @@ function Game(this: GameApi) {
                     }
 
                     if (!tmpPos) {
-                        console.log("<<<>>> NO HAY LUGAR EN EL PISO MAPA:" + user.map);
-                        return;
+                        console.log("<<<>>> NO SPACE ON MAP FLOOR:" + dropMap);
+                        break;
                     }
 
-                    reservedDropPositions.add(getFloorItemRegistryKey(user.map, tmpPos));
+                    reservedDropPositions.add(getFloorItemRegistryKey(dropMap, tmpPos));
+                    pendingFloorDrops.add(getFloorItemRegistryKey(dropMap, tmpPos));
 
                     game.quitarUserInvItem(idUser, idPos, cant);
 
-                    game.placeDroppedFloorItem(user.map, tmpPos, idItem, cant);
-                    game.renderDroppedFloorItem(user.map, tmpPos, idItem);
+                    const dropId = !user.pvpChar && !mapInstanceManager.isInstanceMap(dropMap) ? randomUUID() : undefined;
+                    game.placeDroppedFloorItem(dropMap, tmpPos, idItem, cant, dropId);
+                    if (dropId) floorChanges.push({action:"put",dropId,map:dropMap,x:tmpPos.x,y:tmpPos.y,itemId:idItem,amount:cant});
+                    game.renderDroppedFloorItem(dropMap, tmpPos, idItem);
                     droppedItemsCount++;
 
                     if (droppedItemsCount % DROP_RENDER_BATCH_SIZE === 0) {
@@ -8721,7 +8788,8 @@ function Game(this: GameApi) {
                 }
             }
 
-            await persistCharacterItems(user);
+            await persistCharacterPatch(user, { items: serializeInventory(user.inv), floorChanges });
+            for (const key of reservedDropPositions) pendingFloorDrops.delete(key);
         } catch (err) {
             funct.dumpError(err);
             return;
@@ -9071,7 +9139,7 @@ function Game(this: GameApi) {
                 return;
             }
 
-            if (cant < 1) {
+            if (!Number.isSafeInteger(cant) || cant < 1) {
                 return;
             }
 
@@ -9418,6 +9486,7 @@ function Game(this: GameApi) {
         }
     };
 
+    this.persistCharacterPatch = persistCharacterPatch;
     this.persistCharacterSnapshot = async function (
         user: RuntimeCharacter,
         options?: CharacterSnapshotPersistOptions,
@@ -9522,11 +9591,7 @@ function Game(this: GameApi) {
             }
 
             recipients.forEach((recipient) => {
-                recipient.gold = balance.clampGold(recipient.gold + share);
-                withUserClient(recipient.id, (recipientClient) => {
-                    handleProtocol.console("¡Has ganado " + share + " monedas de oro!", "red", 1, 0, recipientClient);
-                    handleProtocol.actGold(recipient.gold, recipientClient);
-                });
+                pendingGoldRewards.credit(recipient.id, recipient, share);
             });
         } catch (err) {
             funct.dumpError(err);
@@ -9832,6 +9897,9 @@ function Game(this: GameApi) {
     };
 
     this.claimFactionRewards = function (idUser: EntityId) {
+        if (bankOperations.isBusy(idUser)) {
+            return { ok: false, message: "An inventory operation is still pending. Please wait.", rank: 0, grantedItems: [] };
+        }
         const user = getCharacterById(idUser);
 
         if (!user) {
@@ -9971,4 +10039,51 @@ function Game(this: GameApi) {
     this.logCharacterActivity = logCharacterActivity;
 }
 
+// Guard the complete read/mutate/persist/rollback action, not just the HTTP save.
+const rawBuyItem = game.buyItem.bind(game);
+const rawSellItem = game.sellItem.bind(game);
+const rawReorderBankItem = game.reorderBankItem.bind(game);
+const rawDepositBankGold = game.depositBankGold.bind(game);
+const rawWithdrawBankGold = game.withdrawBankGold.bind(game);
+const rawOpenBankTrade = game.openBankTrade.bind(game);
+const rawChangeBankTab = game.changeBankTab.bind(game);
+const rawCloseTradeSession = game.closeTradeSession.bind(game);
+const rawDeathDrop = game.tirarItemsUser.bind(game) as (id: EntityId, origin: {map: number; pos: Position}) => Promise<void>;
+const pendingGoldRewards = new PendingGoldRewards<GameCharacter>(bankOperations, (recipient, amount) => {
+    if (getCharacterById(recipient.id) !== recipient) return;
+    recipient.gold = balance.clampGold(recipient.gold + amount);
+    withUserClient(recipient.id, client => {
+        handleProtocol.console("¡Has ganado " + amount + " monedas de oro!", "red", 1, 0, client);
+        handleProtocol.actGold(recipient.gold, client);
+    });
+});
+game.tirarItemsUser = id => {
+    const user = getCharacterById(id);
+    if (!user) return Promise.resolve();
+    const origin = {map: user.map, pos: {...user.pos}};
+    return bankOperations.runAfter(id, 'death-drop', async () => {
+        if (getCharacterById(id) === user) await rawDeathDrop(id, origin);
+    });
+};
+game.buyItem = (id, slot, quantity) => bankOperations.run(id, () => rawBuyItem(id, slot, quantity), undefined);
+game.sellItem = (id, slot, quantity) => bankOperations.run(id, () => rawSellItem(id, slot, quantity), undefined);
+game.reorderBankItem = (id, source, target) => bankOperations.run(id, () => rawReorderBankItem(id, source, target), undefined);
+game.depositBankGold = (id, amount) => bankOperations.run(id, () => rawDepositBankGold(id, amount), undefined);
+game.withdrawBankGold = (id, amount) => bankOperations.run(id, () => rawWithdrawBankGold(id, amount), undefined);
+game.openBankTrade = (id, npc, tab) => bankOperations.run(id, () => rawOpenBankTrade(id, npc, tab), false);
+game.changeBankTab = (id, tab) => bankOperations.run(id, () => rawChangeBankTab(id, tab), false);
+game.closeTradeSession = id => bankOperations.after(id, () => rawCloseTradeSession(id), error => funct.dumpError(error));
+
 module.exports = game;
+
+const rawUseItem = game.useItem.bind(game);
+const rawReorderSpell = game.reorderSpell.bind(game);
+game.useItem = (ws, slot) => bankOperations.run(ws.id!, () => rawUseItem(ws, slot), undefined);
+game.reorderSpell = (id, source, target) => bankOperations.run(id, () => rawReorderSpell(id, source, target), undefined);
+
+const rawDropItem = game.tirarItem.bind(game);
+const rawPickupItem = game.agarrarItem.bind(game);
+const rawReorderInventory = game.reorderInventoryItem.bind(game);
+game.tirarItem = (ws, slot, amount) => bankOperations.run(ws.id!, () => rawDropItem(ws, slot, amount), undefined);
+game.agarrarItem = ws => bankOperations.run(ws.id!, () => rawPickupItem(ws), undefined);
+game.reorderInventoryItem = (id, source, target) => bankOperations.run(id, () => rawReorderInventory(id, source, target), undefined);

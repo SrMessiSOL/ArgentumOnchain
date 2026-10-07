@@ -112,7 +112,7 @@ function createEmptyWikiResponse(): PublicWikiResponse {
     };
 }
 
-export const getWikiData = unstable_cache(
+const getCachedWikiData = unstable_cache(
     async (): Promise<PublicWikiResponse> => {
         for (const apiBaseUrl of getApiBaseUrlCandidates()) {
             try {
@@ -127,15 +127,20 @@ export const getWikiData = unstable_cache(
                 return normalizeWikiResponse(await response.json());
             } catch (error) {
                 console.error(
-                    `No se pudo cargar la wiki desde ${apiBaseUrl}:`,
+                    `Could not load wiki from ${apiBaseUrl}:`,
                     error,
                 );
             }
         }
 
-        console.error("No se pudo cargar la wiki desde ningun origen.");
-        return createEmptyWikiResponse();
+        throw new Error("Wiki data is temporarily unavailable");
     },
-    ["public-wiki"],
+    ["public-wiki-v3-appearance"],
     { revalidate: WIKI_REVALIDATE_SECONDS },
 );
+
+// A temporary API outage must not cache an empty wiki for a month.
+export async function getWikiData(): Promise<PublicWikiResponse> {
+    try { return await getCachedWikiData(); }
+    catch { return createEmptyWikiResponse(); }
+}

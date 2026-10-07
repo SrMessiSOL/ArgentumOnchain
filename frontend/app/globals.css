@@ -70,3 +70,27 @@ html.game-targeting body *::after {
         -webkit-overflow-scrolling: touch;
     }
 }
+/* Keep game dialogs inside the visible viewport, including short/zoomed screens. */
+.game-modal-backdrop {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow: hidden;
+}
+.game-modal-panel {
+    display: block;
+    min-width: 0;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+.game-modal-panel > :first-child {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #18110c;
+}
+@media (max-width: 480px) {
+    .game-modal-panel { border-radius: 18px; }
+}

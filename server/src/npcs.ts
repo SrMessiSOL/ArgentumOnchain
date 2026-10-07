@@ -520,7 +520,7 @@ function handleNpcSpellKillUser(npc: NpcCharacter, user: PlayerCharacter) {
     });
 
     withUserClient(user.id, (userClient) => {
-        handleProtocol.console(`${npc.nameCharacter} te ha matado.`, "red", 1, 0, userClient);
+        handleProtocol.console(`${npc.nameCharacter} te ha matado.`, "red", 1, 0, userClient, undefined, undefined, npc.nameCharacter);
         handleProtocol.console("En 15 segundos entraras al mundo de los muertos.", "gray", 1, 0, userClient);
     });
 
@@ -593,7 +593,7 @@ function tryNpcCastSpell(
 
             withUserClient(target.id, (targetClient) => {
                 handleProtocol.inmo(target.id, 2, targetClient);
-                handleProtocol.console(`${npc.nameCharacter} te ha paralizado.`, "red", 1, 0, targetClient);
+                handleProtocol.console(`${npc.nameCharacter} te ha paralizado.`, "red", 1, 0, targetClient, undefined, undefined, npc.nameCharacter);
             });
             broadcastCharacterSnapshot(target);
 
@@ -606,7 +606,7 @@ function tryNpcCastSpell(
 
             withUserClient(target.id, (targetClient) => {
                 handleProtocol.inmo(target.id, 1, targetClient);
-                handleProtocol.console(`${npc.nameCharacter} te ha inmovilizado.`, "red", 1, 0, targetClient);
+                handleProtocol.console(`${npc.nameCharacter} te ha inmovilizado.`, "red", 1, 0, targetClient, undefined, undefined, npc.nameCharacter);
             });
             broadcastCharacterSnapshot(target);
 
@@ -631,7 +631,7 @@ function tryNpcCastSpell(
                     "red",
                     1,
                     0,
-                    targetClient,
+                    targetClient, undefined, undefined, npc.nameCharacter,
                 );
             });
 
@@ -2556,7 +2556,7 @@ function Npcs(this: NpcsApi) {
                                     "red",
                                     1,
                                     0,
-                                    userClient,
+                                    userClient, undefined, undefined, npc.nameCharacter,
                                 );
                             });
                             break;
@@ -2567,7 +2567,7 @@ function Npcs(this: NpcsApi) {
                                     "red",
                                     1,
                                     0,
-                                    userClient,
+                                    userClient, undefined, undefined, npc.nameCharacter,
                                 );
                             });
                             break;
@@ -2578,7 +2578,7 @@ function Npcs(this: NpcsApi) {
                                     "red",
                                     1,
                                     0,
-                                    userClient,
+                                    userClient, undefined, undefined, npc.nameCharacter,
                                 );
                             });
                             break;
@@ -2589,7 +2589,7 @@ function Npcs(this: NpcsApi) {
                                     "red",
                                     1,
                                     0,
-                                    userClient,
+                                    userClient, undefined, undefined, npc.nameCharacter,
                                 );
                             });
                             break;
@@ -2600,7 +2600,7 @@ function Npcs(this: NpcsApi) {
                                     "red",
                                     1,
                                     0,
-                                    userClient,
+                                    userClient, undefined, undefined, npc.nameCharacter,
                                 );
                             });
                             break;
@@ -2611,7 +2611,7 @@ function Npcs(this: NpcsApi) {
                                     "red",
                                     1,
                                     0,
-                                    userClient,
+                                    userClient, undefined, undefined, npc.nameCharacter,
                                 );
                             });
                             break;
@@ -2641,7 +2641,7 @@ function Npcs(this: NpcsApi) {
                         });
 
                         withUserClient(idUser, (userClient) => {
-                            handleProtocol.console(`${npc.nameCharacter} te ha matado.`, "red", 1, 0, userClient);
+                            handleProtocol.console(`${npc.nameCharacter} te ha matado.`, "red", 1, 0, userClient, undefined, undefined, npc.nameCharacter);
                             handleProtocol.console(
                                 "En 15 segundos entraras al mundo de los muertos.",
                                 "gray",
@@ -2693,7 +2693,7 @@ function Npcs(this: NpcsApi) {
                                 "red",
                                 1,
                                 0,
-                                userClient,
+                                userClient, undefined, undefined, npc.nameCharacter,
                             );
                         });
                     }
@@ -3108,14 +3108,13 @@ function Npcs(this: NpcsApi) {
             }
 
             if (!tmpPos) {
-                console.log("<<<>>> NO HAY LUGAR EN EL PISO MAPA:" + idMap);
+                console.log("<<<>>> NO SPACE ON MAP FLOOR:" + idMap);
                 return;
             }
 
             excludedPositions?.add(`${idMap}:${tmpPos.x}:${tmpPos.y}`);
 
-            game.placeDroppedFloorItem(idMap, tmpPos, idItem, cant);
-            game.renderDroppedFloorItem(idMap, tmpPos, idItem);
+            void game.spawnDroppedFloorItem(idMap, tmpPos, idItem, cant).catch((error: unknown) => funct.dumpError(error));
         } catch (err) {
             funct.dumpError(err);
         }

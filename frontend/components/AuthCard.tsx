@@ -1,5 +1,9 @@
 "use client";
+import { useI18n } from "@/components/I18nProvider";
 
+import {uxEnglish,uxSpanish} from "@/lib/ux-copy";
+import PortalModal from './PortalModal';
+import {Eye,EyeOff} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -27,12 +31,16 @@ const initialRegisterForm = {
 };
 
 export default function AuthCard({ mode }: AuthCardProps) {
+    const { locale, t: localizeKey, text: localizeText } = useI18n();
+
+    const copy=locale === "es" ? uxSpanish : uxEnglish;
+    const [showPassword,setShowPassword]=useState(false);
     const router = useRouter();
     const [loginForm, setLoginForm] = useState(initialLoginForm);
     const [registerForm, setRegisterForm] = useState(initialRegisterForm);
     const [pending, setPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [redirectPath, setRedirectPath] = useState("/");
+    const [redirectPath, setRedirectPath] = useState("/characters");
 
     useEffect(() => {
         if (typeof window === "undefined") {
@@ -42,7 +50,7 @@ export default function AuthCard({ mode }: AuthCardProps) {
         const nextRedirect =
             new URLSearchParams(window.location.search)
                 .get("redirect")
-                ?.trim() || "/";
+                ?.trim() || "/characters";
         setRedirectPath(nextRedirect);
     }, []);
 
@@ -87,7 +95,7 @@ export default function AuthCard({ mode }: AuthCardProps) {
                 throw new Error(
                     "error" in result && result.error
                         ? result.error
-                        : "No se pudo completar la operacion",
+                        : localizeKey("auth.failed"),
                 );
             }
 
@@ -97,7 +105,7 @@ export default function AuthCard({ mode }: AuthCardProps) {
             setError(
                 submitError instanceof Error
                     ? submitError.message
-                    : "Ocurrio un error inesperado",
+                    : localizeKey("auth.unexpected"),
             );
         } finally {
             setPending(false);
@@ -105,110 +113,26 @@ export default function AuthCard({ mode }: AuthCardProps) {
     };
 
     return (
-        <div className="mx-auto w-full max-w-md overflow-hidden rounded-[32px] border border-stone-700/70 bg-stone-950/88 text-stone-100 shadow-2xl backdrop-blur-md">
+        <div className="realm-auth-card mx-auto w-full max-w-md overflow-hidden rounded-[32px] border border-stone-700/70 bg-stone-950/88 text-stone-100 shadow-2xl backdrop-blur-md">
             <div className="border-b border-white/8 bg-[radial-gradient(circle_at_top,#f59e0b33,transparent_55%),linear-gradient(135deg,#1c1917,#0f172a)] px-6 py-6">
                 <p className="text-[11px] uppercase tracking-[0.34em] text-amber-200/75">
-                    AOWeb
+                    AOCHAIN
                 </p>
                 <h1 className="mt-2 text-3xl font-semibold text-stone-50">
-                    {mode === "login" ? "Iniciar sesion" : "Crear cuenta"}
+                    {mode === "login" ? localizeKey("auth.login") : localizeKey("auth.create")}
                 </h1>
                 {mode === "register" ? (
-                    <p className="mt-2 text-sm text-stone-300/80">
-                        Tu nombre de usuario sera el nombre visible por defecto
-                        en Arenas.
-                    </p>
+                    <p className="mt-2 text-sm text-stone-300/80">{localizeKey("auth.usernameHelp")}</p>
                 ) : null}
             </div>
 
             <div className="p-6">
-                <form className="space-y-3" onSubmit={submit}>
-                    {mode === "register" ? (
-                        <>
-                            <input
-                                value={registerForm.name}
-                                onChange={(event) =>
-                                    setRegisterForm((current) => ({
-                                        ...current,
-                                        name: event.target.value,
-                                    }))
-                                }
-                                className="w-full rounded-2xl border border-stone-700 bg-stone-900/90 px-4 py-3 text-sm outline-none transition focus:border-amber-400"
-                                placeholder="Nombre de usuario"
-                                maxLength={DISPLAY_NAME_MAX_LENGTH}
-                                required
-                            />
-                        </>
-                    ) : null}
-
-                    <input
-                        value={
-                            mode === "login"
-                                ? loginForm.identifier
-                                : registerForm.email
-                        }
-                        onChange={(event) =>
-                            mode === "login"
-                                ? setLoginForm((current) => ({
-                                      ...current,
-                                      identifier: event.target.value,
-                                  }))
-                                : setRegisterForm((current) => ({
-                                      ...current,
-                                      email: event.target.value,
-                                  }))
-                        }
-                        className="w-full rounded-2xl border border-stone-700 bg-stone-900/90 px-4 py-3 text-sm outline-none transition focus:border-amber-400"
-                        placeholder={
-                            mode === "login"
-                                ? "Email o nombre de usuario"
-                                : "Email"
-                        }
-                        type={mode === "login" ? "text" : "email"}
-                        autoComplete={mode === "login" ? "username" : "email"}
-                        required
-                    />
-
-                    <input
-                        value={
-                            mode === "login"
-                                ? loginForm.password
-                                : registerForm.password
-                        }
-                        onChange={(event) =>
-                            mode === "login"
-                                ? setLoginForm((current) => ({
-                                      ...current,
-                                      password: event.target.value,
-                                  }))
-                                : setRegisterForm((current) => ({
-                                      ...current,
-                                      password: event.target.value,
-                                  }))
-                        }
-                        className="w-full rounded-2xl border border-stone-700 bg-stone-900/90 px-4 py-3 text-sm outline-none transition focus:border-amber-400"
-                        placeholder="Contraseña"
-                        type="password"
-                        minLength={mode === "register" ? 8 : undefined}
-                        required
-                    />
-
-                    {mode === "register" ? (
-                        <input
-                            value={registerForm.confirmPassword}
-                            onChange={(event) =>
-                                setRegisterForm((current) => ({
-                                    ...current,
-                                    confirmPassword: event.target.value,
-                                }))
-                            }
-                            className="w-full rounded-2xl border border-stone-700 bg-stone-900/90 px-4 py-3 text-sm outline-none transition focus:border-amber-400"
-                            placeholder="Confirmar password"
-                            type="password"
-                            minLength={8}
-                            required
-                        />
-                    ) : null}
+                <form aria-busy={pending} className="space-y-3" onSubmit={submit}>
+                    {mode === "register" && <label className="realm-field"><span>{copy.usernameLabel}</span><input value={registerForm.name} onChange={e=>setRegisterForm(v=>({...v,name:e.target.value}))} autoComplete="username" maxLength={DISPLAY_NAME_MAX_LENGTH} required disabled={pending}/></label>}
+                    <label className="realm-field"><span>{mode === "login" ? copy.identifier : copy.email}</span><input value={mode === "login" ? loginForm.identifier : registerForm.email} onChange={e=>mode === "login" ? setLoginForm(v=>({...v,identifier:e.target.value})) : setRegisterForm(v=>({...v,email:e.target.value}))} type={mode === "login" ? "text" : "email"} autoComplete={mode === "login" ? "username" : "email"} required disabled={pending}/></label>
+                    <label className="realm-field"><span>{copy.password}</span><input value={mode === "login" ? loginForm.password : registerForm.password} onChange={e=>mode === "login" ? setLoginForm(v=>({...v,password:e.target.value})) : setRegisterForm(v=>({...v,password:e.target.value}))} type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={mode === "register" ? 8 : undefined} required disabled={pending}/></label>
+                    {mode === "register" && <label className="realm-field"><span>{copy.confirm}</span><input value={registerForm.confirmPassword} onChange={e=>setRegisterForm(v=>({...v,confirmPassword:e.target.value}))} type={showPassword ? "text" : "password"} autoComplete="new-password" minLength={8} required disabled={pending}/></label>}
+                    <button type="button" className="realm-password-toggle" aria-pressed={showPassword} onClick={()=>setShowPassword(v=>!v)}>{showPassword ? <EyeOff size={16}/> : <Eye size={16}/>} {showPassword ? copy.hidePassword : copy.showPassword}</button>
 
                     <button
                         type="submit"
@@ -216,24 +140,22 @@ export default function AuthCard({ mode }: AuthCardProps) {
                         className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-stone-700 disabled:text-stone-400"
                     >
                         {pending
-                            ? "Procesando..."
+                            ? localizeKey("auth.pending")
                             : mode === "login"
-                              ? "Entrar"
-                              : "Crear cuenta"}
+                              ? localizeKey("auth.enter")
+                              : localizeKey("auth.create")}
                     </button>
                 </form>
 
                 {error ? (
-                    <div className="mt-4 rounded-2xl bg-rose-500/12 px-4 py-3 text-sm text-rose-200">
-                        {error}
-                    </div>
+                    <PortalModal title={locale==='es'?'Revisá tus datos':'Check your details'} onClose={()=>setError(null)}><p role="alert">{localizeText(error)}</p></PortalModal>
                 ) : null}
 
                 <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/8 pt-4 text-sm text-stone-400">
                     <span>
                         {mode === "login"
-                            ? "No tenes cuenta?"
-                            : "Ya tenes una cuenta?"}
+                            ? localizeKey("auth.noAccount")
+                            : localizeKey("auth.hasAccount")}
                     </span>
                     <div className="flex items-center gap-4">
                         {mode === "login" ? (
@@ -241,9 +163,7 @@ export default function AuthCard({ mode }: AuthCardProps) {
                                 href="/forgot-password"
                                 prefetch={false}
                                 className="font-medium text-amber-200 transition hover:text-amber-100"
-                            >
-                                Olvide mi contraseña
-                            </Link>
+                            >{localizeKey("auth.forgot")}</Link>
                         ) : null}
                         <Link
                             href={
@@ -254,7 +174,7 @@ export default function AuthCard({ mode }: AuthCardProps) {
                             prefetch={false}
                             className="font-medium text-cyan-300 transition hover:text-cyan-200"
                         >
-                            {mode === "login" ? "Registrate" : "Iniciar sesión"}
+                            {mode === "login" ? localizeKey("auth.register") : localizeKey("auth.loginAccent")}
                         </Link>
                     </div>
                 </div>

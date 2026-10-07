@@ -1,0 +1,57 @@
+{
+  "network": "devnet",
+  "method": "Dedicated local test keys signing real devnet transactions; Phantom approval UI not exercised",
+  "mint": "8ZRpbVW8oJCnZpqjEyQEbFky53CoHqoiPVj7HJy8eo5k",
+  "steps": [
+    {
+      "step": "Snapshot complete persisted character bundle before listing",
+      "hash": "e1426be4d7d945422508c113e275eb82cb45ae88f1403ed1e3d06716d51b4788",
+      "counts": {
+        "character_items": 9,
+        "character_bank_items": 0,
+        "character_spells": 0,
+        "character_achievements": 0,
+        "character_titles": 0,
+        "character_settings": 0
+      }
+    },
+    {
+      "step": "Submitted purchase",
+      "intentId": "1cc36cf4-7967-478e-9ad0-e6ccd5c6e529",
+      "signature": "bT3NTruZ6G7ByPyqNbrBnkLm11UZhTqmRow715jdrW13jZRT9rBECyPrfpjqihNMs9zQMqGCUGK2NFiHdgfqChk"
+    },
+    {
+      "step": "Buyer owns the identical complete persisted bundle",
+      "signature": "bT3NTruZ6G7ByPyqNbrBnkLm11UZhTqmRow715jdrW13jZRT9rBECyPrfpjqihNMs9zQMqGCUGK2NFiHdgfqChk",
+      "hash": "e1426be4d7d945422508c113e275eb82cb45ae88f1403ed1e3d06716d51b4788",
+      "counts": {
+        "character_items": 9,
+        "character_bank_items": 0,
+        "character_spells": 0,
+        "character_achievements": 0,
+        "character_titles": 0,
+        "character_settings": 0
+      }
+    },
+    {
+      "step": "Submitted purchase",
+      "intentId": "646b0ba0-1acf-4e29-a7ba-f621fa0a02c4",
+      "signature": "tdHwWYhcFPx5NZknXJnMpZo3dpqyDcmuXk5BXWaXcNrAekSZRpFvVg8by4AShFLbFhgWcRnNTjpyYEqQQF8avcM"
+    },
+    {
+      "step": "Original owner restored with identical complete bundle",
+      "signature": "tdHwWYhcFPx5NZknXJnMpZo3dpqyDcmuXk5BXWaXcNrAekSZRpFvVg8by4AShFLbFhgWcRnNTjpyYEqQQF8avcM",
+      "hash": "e1426be4d7d945422508c113e275eb82cb45ae88f1403ed1e3d06716d51b4788",
+      "counts": {
+        "character_items": 9,
+        "character_bank_items": 0,
+        "character_spells": 0,
+        "character_achievements": 0,
+        "character_titles": 0,
+        "character_settings": 0
+      }
+    }
+  ],
+  "complete": true,
+  "finishedAt": "2026-10-06T01:21:34.074Z"
+}

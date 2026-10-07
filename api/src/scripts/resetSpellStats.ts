@@ -11,7 +11,7 @@ async function main() {
     `,
   );
 
-  console.log(`Spell stats reseteados: ${result.rowCount ?? 0}`);
+  console.log(`Spell stats reset: ${result.rowCount ?? 0}`);
 }
 
 main()

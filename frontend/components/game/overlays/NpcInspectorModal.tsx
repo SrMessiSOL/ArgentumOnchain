@@ -1,3 +1,4 @@
+import { LocalizedText } from '@/components/LocalizedText';
 import type { ReactNode } from "react";
 
 type InspectableNpcDrop = {
@@ -40,7 +41,7 @@ function NpcDetailRow({ label, value }: { label: string; value: ReactNode }) {
     return (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-cyan-200/10 bg-black/20 px-3 py-2 text-xs text-stone-200">
             <span className="uppercase tracking-[0.18em] text-stone-400">
-                {label}
+                <LocalizedText source={label} />
             </span>
             <span className="text-right font-medium text-stone-100">
                 {value}
@@ -77,15 +78,13 @@ export function NpcInspectorModal({
             >
                 <div className="flex items-start justify-between gap-4 border-b border-cyan-200/10 px-6 py-5">
                     <div>
-                        <p className="text-[10px] uppercase tracking-[0.28em] text-cyan-200/60">
-                            Inspeccion NPC
-                        </p>
+                        <p className="text-[10px] uppercase tracking-[0.28em] text-cyan-200/60"><LocalizedText source={"Inspeccion NPC "} /></p>
                         <h2 className="mt-2 text-2xl font-semibold text-white">
-                            {npc.name}
+                            <LocalizedText source={npc.name} />
                         </h2>
                         {npc.desc ? (
                             <p className="mt-2 max-w-xl text-sm leading-6 text-stone-300">
-                                {npc.desc}
+                                <LocalizedText source={npc.desc} />
                             </p>
                         ) : null}
                     </div>
@@ -93,9 +92,7 @@ export function NpcInspectorModal({
                         type="button"
                         onClick={onClose}
                         className="rounded-full border border-cyan-200/15 px-3 py-1 text-xs uppercase tracking-[0.18em] text-stone-300 transition hover:border-cyan-200/30 hover:text-white"
-                    >
-                        Cerrar
-                    </button>
+                    ><LocalizedText source={"Cerrar "} /></button>
                 </div>
                 {isAdmin ? (
                     <div className="flex flex-wrap justify-end gap-3 border-b border-cyan-200/10 px-6 pb-4">
@@ -105,9 +102,9 @@ export function NpcInspectorModal({
                             onClick={() => onRemoveNpc(npc)}
                             className="rounded-xl border border-rose-300/25 bg-rose-400/10 px-4 py-2 text-sm font-medium text-rose-100 transition hover:bg-rose-400/15 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {removingNpcEntityId === npc.entityId
+                            <LocalizedText source={removingNpcEntityId === npc.entityId
                                 ? "Quitando..."
-                                : "Quitar del mapa"}
+                                : "Quitar del mapa"} />
                         </button>
                         <button
                             type="button"
@@ -115,9 +112,9 @@ export function NpcInspectorModal({
                             onClick={() => onRemoveNpcPermanently(npc)}
                             className="rounded-xl border border-rose-300/25 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-100 transition hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {removingNpcEntityId === npc.entityId
+                            <LocalizedText source={removingNpcEntityId === npc.entityId
                                 ? "Quitando..."
-                                : "Quitar permanente"}
+                                : "Quitar permanente"} />
                         </button>
                     </div>
                 ) : null}
@@ -208,10 +205,9 @@ export function NpcInspectorModal({
                                         )}
                                         <div className="min-w-0 flex-1">
                                             <div className="truncate text-sm font-medium text-stone-100">
-                                                {drop.name}
+                                                <LocalizedText source={drop.name} />
                                             </div>
-                                            <div className="mt-1 text-xs text-stone-400">
-                                                Cantidad:{" "}
+                                            <div className="mt-1 text-xs text-stone-400"><LocalizedText source={"Cantidad:"} />{" "}
                                                 {formatNumber(drop.quantity)}
                                             </div>
                                         </div>

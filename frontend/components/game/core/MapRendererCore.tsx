@@ -1,7 +1,9 @@
-/* eslint-disable react-hooks/immutability */
 "use client";
+import { LocalizedText } from '@/components/LocalizedText';
+/* eslint-disable react-hooks/immutability */
 
 import React, { useEffect, useRef } from "react";
+import {verifiedCosmetic, type VerifiedCosmetic} from '../../../lib/cosmetic-display';
 import {
     Container,
     Text,
@@ -59,6 +61,7 @@ import {
 } from "../rendering/textureCaches";
 import { useOutgoingRequests } from "../session/useOutgoingRequests";
 import { useGameSession } from "../session/useGameSession";
+import { useI18n } from "@/components/I18nProvider";
 import { handleIncomingGamePacket } from "../session/handleIncomingGamePacket";
 import { useRendererBootstrap } from "./useRendererBootstrap";
 import { useAssetPipeline } from "./useAssetPipeline";
@@ -245,6 +248,7 @@ interface ConsoleMessage {
     speakerType?: "npc" | "user";
     channel?: ChatChannel;
     senderName?: string;
+    npcName?: string;
 }
 
 type ActiveDialogMessage = {
@@ -307,7 +311,7 @@ const isCombatDialogMessage = (text: string, color?: string): boolean => {
         return true;
     }
 
-    return /^.?fallas.?$/i.test(normalized);
+    return /^.?(?:fallas|you miss).?$/i.test(normalized);
 };
 
 const getGraphicImagePaths = (imageFile: string | number): string[] => [
@@ -696,10 +700,42 @@ export default function MapRenderer({
     onCharacterStatsSnapshot,
     onPerformanceSample,
 }: MapRendererProps) {
+    const {text: localizeNpcText} = useI18n();
+    const npcTextRef = useRef(localizeNpcText);
+    npcTextRef.current = localizeNpcText;
     const canvasRef = useRef<HTMLDivElement>(null);
     const rendererRootRef = useRef<HTMLDivElement>(null);
     const [isDeadWorldActive, setIsDeadWorldActive] = React.useState(false);
     const engineRef = useRef<Engine | null>(null);
+    useEffect(() => {
+        let stopped = false;
+        let current: VerifiedCosmetic | null = null;
+        let request: AbortController | null = null;
+        const sync = () => { if (engineRef.current) engineRef.current.verifiedCosmetic = current; };
+        const refresh = async () => {
+            request?.abort();
+            const controller = new AbortController();
+            request = controller;
+            const timeout = window.setTimeout(() => controller.abort(), 8_000);
+            try {
+                const response = await fetch('/api/cosmetics', {cache:'no-store', signal:controller.signal});
+                const value = response.ok ? verifiedCosmetic(await response.json(), Date.now()) : null;
+                if (!stopped && request === controller) {current = value; sync();}
+            } catch {
+                if (!stopped && request === controller) {current = null; sync();}
+            } finally {window.clearTimeout(timeout);}
+        };
+        void refresh();
+        const poll = window.setInterval(() => void refresh(), 15_000);
+        const attach = window.setInterval(sync, 1_000);
+        window.addEventListener('aoweb:cosmetic-changed', refresh);
+        return () => {
+            stopped = true; request?.abort();
+            window.clearInterval(poll); window.clearInterval(attach);
+            window.removeEventListener('aoweb:cosmetic-changed', refresh);
+            if (engineRef.current) engineRef.current.verifiedCosmetic = null;
+        };
+    }, []);
     const websocketRef = useRef<WebSocket | null>(null);
     const npcContextMenuRef = useRef<HTMLDivElement>(null);
     const pingIntervalRef = useRef<number | null>(null);
@@ -1470,7 +1506,7 @@ export default function MapRenderer({
                 loadTextures,
                 createCastBar,
                 createDialogBubble,
-                createFloatingCombatText,
+                createFloatingCombatText: (text, color) => createFloatingCombatText(npcTextRef.current(text), color),
                 isCombatDialogMessage,
                 getDialogMessageDuration,
                 getEntityContainer,
@@ -1830,6 +1866,7 @@ export default function MapRenderer({
                 upsertSpell,
                 clearTargetingMode,
                 showDialogBubble,
+                localizeNpcDialog: (text: string) => npcTextRef.current(text),
                 onGlobalNotice,
                 renderEntityFX,
                 renderSpellProjectileVisual,
@@ -1978,7 +2015,7 @@ export default function MapRenderer({
             <div className={rendererContainerClassName}>
                 <div className="text-red-400 text-center">
                     <p className="mb-2">Error loading map:</p>
-                    <p className="text-sm">{error}</p>
+                    <p className="text-sm"><LocalizedText source={error} /></p>
                 </div>
             </div>
         );

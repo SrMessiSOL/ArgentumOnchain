@@ -351,13 +351,15 @@ function relocateToJailIfNeeded(character: StoredCharacter) {
     character.pos = { x: JAIL_X, y: JAIL_Y };
 }
 
-async function claimPersistedCharacterConnection(characterId: string): Promise<boolean> {
+async function claimPersistedCharacterConnection(characterId: string,accountId:string): Promise<boolean> {
     try {
         await funct.fetchUrl(`/internal/characters/${encodeURIComponent(characterId)}/connect`, {
             method: "POST",
             headers: {
                 Authorization: vars.tokenAuth,
+                "Content-Type":"application/json",
             },
+            body:JSON.stringify({accountId}),
         });
 
         return true;
@@ -506,7 +508,7 @@ function Login(this: LoginApi) {
                 }
 
                 await login.disconnectAllCharacters(account);
-                const claimedConnection = await claimPersistedCharacterConnection(character._id);
+                const claimedConnection = await claimPersistedCharacterConnection(character._id,account._id);
 
                 if (!claimedConnection) {
                     handleProtocol.error("Tu personaje ya se está conectando o ya está conectado.", ws);
@@ -604,7 +606,7 @@ function Login(this: LoginApi) {
                     personaje.idShield = 0;
                 } else if (!personaje.navegando && isWaterSpawn) {
                     console.log(
-                        `[login] Usuario en agua sin navegar: ${personaje.nameCharacter} en ${personaje.map}@${personaje.pos.x},${personaje.pos.y}`,
+                        `[login] User in water without sailing: ${personaje.nameCharacter} at ${personaje.map}@${personaje.pos.x},${personaje.pos.y}`,
                     );
                 }
 
@@ -829,27 +831,7 @@ function Login(this: LoginApi) {
 
                 personaje.ip = socket.getIp(ws);
 
-                const bodyPersonaje = {
-                    ip: personaje.ip,
-                    connected: true,
-                    ...(classCannotUseMagic
-                        ? {
-                              mana: 0,
-                              maxMana: 0,
-                              spells: [],
-                          }
-                        : {}),
-                    updatedAt: new Date(),
-                };
-
-                await funct.fetchUrl(`/character_save/${personaje._id}`, {
-                    method: "PUT",
-                    body: JSON.stringify(bodyPersonaje),
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: vars.tokenAuth,
-                    },
-                });
+                await game.persistCharacterSnapshot(personaje, { connected: true });
 
                 const personajeWS = vars.personajes[ws.id];
 
@@ -887,12 +869,12 @@ function Login(this: LoginApi) {
                 });
 
                 funct.sendTelegramMessage(
-                    `[Servidor] Usuario ${personajeWS.nameCharacter} conectado en mapa ${vars.personajes[ws.id].map}.`,
+                    `[Server] User ${personajeWS.nameCharacter} connected on map ${vars.personajes[ws.id].map}.`,
                 );
 
                 vars.usuariosOnline++;
 
-                funct.sendTelegramMessage(`[Servidor] Usuarios online: ${vars.usuariosOnline}`);
+                funct.sendTelegramMessage(`[Server] Users online: ${vars.usuariosOnline}`);
 
                 funct.logOnlineRecord();
 
@@ -1183,12 +1165,12 @@ function Login(this: LoginApi) {
 
         if (!isSyntheticBot) {
             funct.sendTelegramMessage(
-                `[Servidor-PVP] Usuario ${newCharacter.nameCharacter} conectado en mapa ${vars.personajes[ws.id].map}.`,
+                `[Server-PVP] User ${newCharacter.nameCharacter} connected on map ${vars.personajes[ws.id].map}.`,
             );
 
             vars.usuariosOnlinePvP++;
 
-            funct.sendTelegramMessage(`[Servidor-PVP] Usuarios online: ${vars.usuariosOnlinePvP}`);
+            funct.sendTelegramMessage(`[Server-PVP] Users online: ${vars.usuariosOnlinePvP}`);
         }
 
         if (arenaRoomId) {

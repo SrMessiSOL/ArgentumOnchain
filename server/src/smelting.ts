@@ -1,5 +1,6 @@
 import type { DataObject, EntityId, Position, RuntimeCharacter, RuntimeClient, SmeltingState } from "./types/runtime";
 import type { HandleProtocolApi } from "./handleProtocol";
+import { bankOperations } from './bankOperationGuard';
 import { getCharacterById, getClientById } from "./runtimeRegistry";
 import { getSmeltingRecipesByMineral } from "./smeltingRecipes";
 
@@ -184,6 +185,7 @@ const smelting: SmeltingApi = {
         for (const idUser in vars.personajes) {
             const user = getUser(idUser);
             const state = user?.smelting;
+            if (user && bankOperations.isBusy(user.id)) continue;
 
             if (!user || !state?.active || !state.itemId || !state.target || !state.origin || !state.nextTickAt) {
                 continue;
@@ -234,16 +236,16 @@ const smelting: SmeltingApi = {
                 persistCharacterItemsById: (idUser: EntityId) => Promise<void>;
             };
 
-            game.quitarUserInvItem(user.id, slotKey, requiredMinerals);
-            addIngotsToInventory(user, config.ingotItemId, ingotAmount);
-            void game.persistCharacterItemsById(user.id).catch((error: unknown) => {
-                console.error(error);
-            });
-
-            withUserClient(idUser, (userClient) => {
-                const ingotName = vars.datObj[config.ingotItemId]?.name ?? "lingotes";
-                handleProtocol.console(`Has fundido ${ingotAmount} ${ingotName}.`, "#86efac", 0, 0, userClient);
-            });
+            void bankOperations.run(user.id, async () => {
+                if (getUser(idUser) !== user || user.dead || user.smelting !== state) return;
+                game.quitarUserInvItem(user.id, slotKey, requiredMinerals);
+                addIngotsToInventory(user, config.ingotItemId, ingotAmount);
+                await game.persistCharacterItemsById(user.id);
+                withUserClient(idUser, (userClient) => {
+                    const ingotName = vars.datObj[config.ingotItemId]?.name ?? "lingotes";
+                    handleProtocol.console(`Has fundido ${ingotAmount} ${ingotName}.`, "#86efac", 0, 0, userClient);
+                });
+            }, undefined).catch((error: unknown) => console.error(error));
         }
     },
 

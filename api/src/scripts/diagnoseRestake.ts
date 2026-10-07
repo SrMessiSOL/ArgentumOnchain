@@ -1,0 +1,5 @@
+import pool from '../db';
+import {economyConnection} from '../economy-chain';
+import {prepareAssetTransaction} from '../game-asset-chain';
+import {VersionedTransaction} from '@solana/web3.js';
+async function main(){try{const rows=(await pool.query("SELECT a.*,w.address AS wallet,c.name FROM game_assets a JOIN characters c ON c.id=a.character_id JOIN account_wallets w ON w.account_id=c.account_id WHERE c.chain_state='unstaked' AND c.economy_lock IS NULL AND c.name IN ('Testing','OneMore')")).rows;for(const row of rows){const p=await prepareAssetTransaction('stake','diagnostic-only',row,row.wallet,row.name);const result=await economyConnection.simulateTransaction(VersionedTransaction.deserialize(Buffer.from(p.transaction_bytes,'base64')),{sigVerify:false,replaceRecentBlockhash:true});console.log(JSON.stringify({character:row.name,error:result.value.err,units:result.value.unitsConsumed,logs:result.value.logs}));}}finally{await pool.end();}}main().catch(e=>{console.error(e.message);process.exit(1);});

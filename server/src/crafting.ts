@@ -1,5 +1,6 @@
 import type { DataObject, EntityId, Position, RuntimeCharacter, RuntimeClient } from "./types/runtime";
 import type { GameApi } from "./game";
+import { bankOperations } from './bankOperationGuard';
 import type { HandleProtocolApi } from "./handleProtocol";
 import { getCharacterById } from "./runtimeRegistry";
 import { getCraftingRecipes, type CraftingProfession, type CraftingRecipe } from "./craftingRecipes";
@@ -451,4 +452,9 @@ const crafting: CraftingApi = {
     },
 };
 
+const rawCraftRequest = crafting.handleCraftRequest.bind(crafting);
+crafting.handleCraftRequest = (ws, profession, itemId, amount) => {
+    if (!ws.id || !Number.isSafeInteger(amount) || amount < 1 || amount > 9999) return Promise.resolve();
+    return bankOperations.run(ws.id, () => rawCraftRequest(ws, profession, itemId, amount), undefined);
+};
 module.exports = crafting;

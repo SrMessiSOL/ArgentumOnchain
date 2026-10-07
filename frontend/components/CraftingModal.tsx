@@ -1,4 +1,7 @@
 "use client";
+import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
+import { localizeItemDetails } from "../lib/game-i18n";
+import { useI18n } from "@/components/I18nProvider";
 
 import React from "react";
 import type { CraftingRecipe, InventoryItem } from "../lib/aowProtocol";
@@ -31,7 +34,7 @@ function ItemGraphic({
 
     return (
         <div className="relative h-12 w-12 overflow-hidden rounded-sm">
-            <div
+            <LocalizedLabel><div
                 aria-label={name}
                 className="absolute left-1/2 top-1/2 bg-no-repeat"
                 style={{
@@ -42,7 +45,7 @@ function ItemGraphic({
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: "center",
                 }}
-            />
+            /></LocalizedLabel>
         </div>
     );
 }
@@ -54,6 +57,8 @@ export default function CraftingModal({
     onClose,
     onCraftRequest,
 }: CraftingModalProps) {
+    const { t: localizeKey, text: localizeText, locale } = useI18n();
+
     const [graphicsDB, setGraphicsDB] = React.useState<Record<
         string,
         GraphicData
@@ -136,16 +141,14 @@ export default function CraftingModal({
         });
 
     return (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-sm">
-            <div className="w-full max-w-5xl overflow-hidden rounded-[28px] border border-[#5f4630] bg-[linear-gradient(180deg,#2b1d13_0%,#18110c_100%)] text-stone-100 shadow-[0_32px_120px_rgba(0,0,0,0.55)]">
+        <div className="game-modal-backdrop fixed inset-0 z-[90] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-sm">
+            <div className="game-modal-panel w-full max-w-5xl overflow-hidden rounded-[28px] border border-[#5f4630] bg-[linear-gradient(180deg,#2b1d13_0%,#18110c_100%)] text-stone-100 shadow-[0_32px_120px_rgba(0,0,0,0.55)]">
                 <div className="border-b border-[#6a4f39] bg-[#120d09]/85 px-5 py-4">
                     <div className="flex items-center justify-between gap-4">
                         <div>
-                            <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75">
-                                Profesión
-                            </p>
+                            <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75"><LocalizedText source={"ProfesiÃ³n "} /></p>
                             <h2 className="mt-1 text-xl font-semibold text-[#f3e7c8]">
-                                {title}
+                                <LocalizedText source={title} />
                             </h2>
                         </div>
 
@@ -153,21 +156,16 @@ export default function CraftingModal({
                             type="button"
                             onClick={onClose}
                             className="rounded-full border border-stone-500/40 px-3 py-1 text-xs uppercase tracking-[0.22em] text-stone-300 transition hover:border-amber-300/60 hover:text-amber-100"
-                        >
-                            Cerrar
-                        </button>
+                        >{localizeKey("common.close")}</button>
                     </div>
                 </div>
 
                 <div className="grid gap-4 p-4 md:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.9fr)] md:p-5">
                     <div className="rounded-3xl border border-[#5a412d] bg-black/15 p-3">
                         <div className="mb-3 flex items-center justify-between">
-                            <p className="text-xs uppercase tracking-[0.24em] text-stone-300/75">
-                                Recetas
-                            </p>
+                            <p className="text-xs uppercase tracking-[0.24em] text-stone-300/75"><LocalizedText source={"Recetas "} /></p>
                             <p className="text-xs text-stone-400">
-                                {recipes.length} disponibles
-                            </p>
+                                {recipes.length}<LocalizedText source={" disponibles "} /></p>
                         </div>
 
                         <div className="grid max-h-[55vh] gap-2 overflow-y-auto pr-1">
@@ -201,10 +199,10 @@ export default function CraftingModal({
 
                                         <div className="min-w-0">
                                             <div className="truncate text-sm font-medium text-stone-100">
-                                                {recipe.name}
+                                                <LocalizedText source={recipe.name} />
                                             </div>
                                             <div className="mt-1 text-xs text-stone-400">
-                                                {recipe.category} · Skill{" "}
+                                                <LocalizedText source={recipe.category} /> Â· Skill{" "}
                                                 {recipe.skill}
                                             </div>
                                         </div>
@@ -233,14 +231,13 @@ export default function CraftingModal({
 
                                     <div className="min-w-0">
                                         <p className="text-[11px] uppercase tracking-[0.24em] text-amber-200/75">
-                                            {selectedRecipe.category}
+                                            <LocalizedText source={selectedRecipe.category} />
                                         </p>
                                         <h3 className="mt-1 text-lg font-semibold text-[#f3e7c8]">
-                                            {selectedRecipe.name}
+                                            <LocalizedText source={selectedRecipe.name} />
                                         </h3>
                                         <p className="mt-2 text-sm text-stone-300">
-                                            {selectedRecipe.details ||
-                                                "Sin descripción adicional."}
+                                            <LocalizedText source={selectedRecipe.details || "Sin descripciÃ³n adicional."} />
                                         </p>
                                     </div>
                                 </div>
@@ -252,16 +249,14 @@ export default function CraftingModal({
                                                 Stats
                                             </p>
                                             <div className="mt-3 rounded-2xl border border-[#5a412d] bg-[#120d09] px-3 py-3 text-sm text-stone-200">
-                                                {selectedRecipe.stats}
+                                                {localizeItemDetails(selectedRecipe.stats, locale)}
                                             </div>
                                         </>
                                     ) : null}
                                 </div>
 
                                 <div className="mt-5">
-                                    <p className="text-xs uppercase tracking-[0.24em] text-stone-300/75">
-                                        Materiales
-                                    </p>
+                                    <p className="text-xs uppercase tracking-[0.24em] text-stone-300/75"><LocalizedText source={"Materiales "} /></p>
                                     <div className="mt-3 space-y-2">
                                         {selectedRecipe.materials.map(
                                             (material) => {
@@ -285,7 +280,7 @@ export default function CraftingModal({
                                                         }`}
                                                     >
                                                         <span>
-                                                            {material.name}
+                                                            <LocalizedText source={material.name} />
                                                         </span>
                                                         <span
                                                             className={
@@ -305,9 +300,7 @@ export default function CraftingModal({
 
                                 <div className="mt-5 flex items-end gap-3">
                                     <label className="min-w-0 flex-1">
-                                        <span className="text-xs uppercase tracking-[0.24em] text-stone-300/75">
-                                            Cantidad
-                                        </span>
+                                        <span className="text-xs uppercase tracking-[0.24em] text-stone-300/75">{localizeKey("hud.amount")}</span>
                                         <input
                                             value={amountText}
                                             onChange={(event) =>
@@ -333,15 +326,11 @@ export default function CraftingModal({
                                         }
                                         disabled={!canCraft}
                                         className="rounded-2xl border border-amber-300/35 bg-amber-300/15 px-5 py-3 text-sm font-medium text-amber-100 transition hover:border-amber-300/60 hover:bg-amber-300/20 disabled:cursor-not-allowed disabled:border-stone-600/40 disabled:bg-stone-800/40 disabled:text-stone-500"
-                                    >
-                                        Craftear
-                                    </button>
+                                    ><LocalizedText source={"Craftear "} /></button>
                                 </div>
                             </>
                         ) : (
-                            <div className="flex min-h-[240px] items-center justify-center text-sm text-stone-400">
-                                No hay recetas disponibles.
-                            </div>
+                            <div className="flex min-h-[240px] items-center justify-center text-sm text-stone-400"><LocalizedText source={"No hay recetas disponibles. "} /></div>
                         )}
                     </div>
                 </div>

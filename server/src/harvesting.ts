@@ -11,6 +11,7 @@ import type { HandleProtocolApi } from "./handleProtocol";
 import type { SocketApi } from "./socket";
 import { getCharacterById, getClientById } from "./runtimeRegistry";
 import * as safeZone from "./safeZone";
+import { bankOperations } from './bankOperationGuard';
 
 export {};
 
@@ -430,6 +431,7 @@ const harvesting: HarvestingApi = {
         for (const idUser in vars.personajes) {
             const user = getUser(idUser);
             const state = user?.harvesting;
+            if (user && bankOperations.isBusy(user.id)) continue;
 
             if (!user || !state?.active || !state.skill || !state.nextTickAt || now < state.nextTickAt) {
                 continue;
