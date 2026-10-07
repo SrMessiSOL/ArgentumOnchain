@@ -5,6 +5,7 @@ Start with the [project README](../README.md). These guides describe the current
 | Topic | Guide |
 | --- | --- |
 | Running, monitoring and recovering the realm | [Operations](OPERATIONS.md) |
+| Preparing the Windows hosting desktop | [Windows handoff](WINDOWS-HOST-HANDOFF.md) |
 | Community testing release requirements | [Release gate](COMMUNITY-TESTING-GATE.md) |
 | Security changes, validation and remaining work | [Security remediation](SECURITY-REMEDIATION.md) |
 | Character ownership, staking and item exports | [Character assets](CHARACTER-ASSETS-PLAN.md) |
