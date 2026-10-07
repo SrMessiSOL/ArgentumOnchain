@@ -51,3 +51,9 @@ Validation: English regression suite and production TypeScript/build passed (aoc
 Item listings now offer a review modal with game artwork, quantity, seller, selected receiving character and total SOL price before invoking the existing purchase flow. Reserved and own listings remain inspectable with purchase disabled. Recipient eligibility is explained above item browsing. English and Spanish copy retained. Dismissing an initial marketplace error no longer removes its retry state and returns to an endless spinner; successful refresh clears the loading error.
 
 Validation: English regressions, production build and TypeScript passed (aochain-ui-20261007-v71). Real reserved Wolf pelt listing inspected on desktop and at 320x568; dialog bounds y=12..556, no horizontal overflow, reserved action disabled, Escape returned focus to Review purchase. No browser errors observed. No purchase was signed. Initial failure/retry behavior reviewed in code; a live network failure was not induced. Website service activated without restarting gameplay.
+
+## 2026-10-07 gold management clarity
+
+Replaced the native gold character dropdown with shared character cards. Added an explicit source-to-destination indicator for deposit and withdrawal, labeled wallet gold, and a full-width action with directional icon. Refined shared modal quantity fields and action spacing.
+
+Validation: English regression suite and TypeScript/production build passed (aochain-ui-20261007-v72). Browser checked deposit and withdrawal directions on the live profile, selected Wayfarer, wallet-not-linked and zero-gold disabled actions, and 390x844 controls with no horizontal overflow. No browser errors captured; no transfer signed. Website-only activation preserved gameplay uptime.
