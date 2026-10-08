@@ -10,21 +10,21 @@ export type AssetRecord={id:string;kind:'character'|'item';asset_address:string;
 export type AssetAction='mint'|'stake'|'unstake'|'item-export'|'item-import';
 export type Settlement={version:number;hash:string};
 export function assetReady(){return Boolean((process.env.AOWEB_GOLD_AUTHORITY_FILE||(isolatedSignerConfigured()&&process.env.AOWEB_GOLD_AUTHORITY_PUBLIC_KEY))&&process.env.AOWEB_DEVNET_METADATA_URL);}
-function context(wallet:string){
+function context(wallet:string,authority?:Keypair){
  const umi=createUmi(process.env.AOWEB_DEVNET_RPC||'https://api.devnet.solana.com').use(mplCore());
- if(isolatedSignerConfigured()){
+ if(!authority&&isolatedSignerConfigured()){
   const issuer={publicKey:new PublicKey(process.env.AOWEB_GOLD_AUTHORITY_PUBLIC_KEY!)};
   const signer=createNoopSigner(publicKey(issuer.publicKey.toBase58()));
   umi.use(signerIdentity(signer,false));umi.payer=createNoopSigner(publicKey(wallet));
   return {umi,issuer,signer};
  }
- const issuer=economyAuthority();
+ const issuer=authority??economyAuthority();
  const key=umi.eddsa.createKeypairFromSecretKey(issuer.secretKey);
  umi.use(keypairIdentity(key,false));umi.payer=createNoopSigner(publicKey(wallet));
  return {umi,issuer,signer:createSignerFromKeypair(umi,key)};
 }
-export function assetIdentity(id:string){
- const issuer=economyAuthority();
+export function assetIdentity(id:string,authority?:Keypair){
+ const issuer=authority??economyAuthority();
  const key=Keypair.fromSeed(createHmac('sha256',issuer.secretKey).update(`aochain:game-asset:v1:${id}`).digest());
  return {key,address:key.publicKey.toBase58(),issuer:issuer.publicKey.toBase58()};
 }
@@ -67,14 +67,15 @@ export async function verifyPlayableAsset(address:string,wallet:string){
 function append(tx:ReturnType<typeof createEconomyTransaction>,builder:TransactionBuilder){
  for(const instruction of builder.getInstructions())tx.add(new TransactionInstruction({programId:new PublicKey(instruction.programId),keys:instruction.keys.map(k=>({pubkey:new PublicKey(k.pubkey),isSigner:k.isSigner,isWritable:k.isWritable})),data:Buffer.from(instruction.data)}));
 }
-export async function prepareAssetTransaction(action:AssetAction,operation:string,record:AssetRecord,wallet:string,name:string,settlement?:Settlement,fixedBlockhash?:string){
+export async function prepareAssetTransaction(action:AssetAction,operation:string,record:AssetRecord,wallet:string,name:string,settlement?:Settlement,fixedBlockhash?:string,authority?:Keypair){
  const conn=await checkedChain();const {blockhash,lastValidBlockHeight}=fixedBlockhash?{blockhash:fixedBlockhash,lastValidBlockHeight:0}:await conn.getLatestBlockhash('finalized');
- const {umi,issuer,signer}=context(wallet);const tx=createEconomyTransaction(new PublicKey(wallet),blockhash);
+ const {umi,issuer,signer}=context(wallet,authority);const tx=createEconomyTransaction(new PublicKey(wallet),blockhash);
  if(action==='mint'||action==='item-export'){
   if(await fetchGameAsset(record.asset_address))throw Error('assets.alreadyMinted');
-  const derived=isolatedSignerConfigured()?await isolatedAssetIdentity(record.id):assetIdentity(record.id);
+  const remote=!authority&&isolatedSignerConfigured();
+  const derived=remote?await isolatedAssetIdentity(record.id):assetIdentity(record.id,authority);
   if(derived.address!==record.asset_address||derived.issuer!==record.issuer_address)throw Error('assets.invalidAsset');
-  const assetSigner=isolatedSignerConfigured()?createNoopSigner(publicKey(derived.address)):createSignerFromKeypair(umi,umi.eddsa.createKeypairFromSecretKey(assetIdentity(record.id).key.secretKey));
+  const assetSigner=remote?createNoopSigner(publicKey(derived.address)):createSignerFromKeypair(umi,umi.eddsa.createKeypairFromSecretKey(assetIdentity(record.id,authority).key.secretKey));
   append(tx,create(umi,{asset:assetSigner,owner:publicKey(wallet),updateAuthority:signer.publicKey,name,uri:record.metadata_uri,plugins:[
    {type:'Attributes',attributeList:attributes(record,settlement)},
    ...(action==='mint'?[{type:'FreezeDelegate' as const,frozen:true,authority:{type:'Address' as const,address:signer.publicKey}},{type:'TransferDelegate' as const,authority:{type:'Address' as const,address:signer.publicKey}}]:[])
@@ -111,12 +112,12 @@ export async function prepareCharacterPurchase(operation:string,record:AssetReco
  return {transaction_bytes:tx.serialize({requireAllSignatures:false}).toString('base64'),message_bytes:tx.serializeMessage().toString('base64'),last_valid_height:lastValidBlockHeight};
 }
 
-export function signAssetSubmission(raw:string,message:string,wallet:string,action:AssetAction|'purchase',record:AssetRecord){
- const issuer=economyAuthority();
+export function signAssetSubmission(raw:string,message:string,wallet:string,action:AssetAction|'purchase',record:AssetRecord,authority?:Keypair){
+ const issuer=authority??economyAuthority();
  if(issuer.publicKey.toBase58()!==record.issuer_address)throw Error('assets.invalidAsset');
  const signers=[issuer];
  if(action==='mint'||action==='item-export'){
-  const key=assetIdentity(record.id).key;
+  const key=assetIdentity(record.id,issuer).key;
   if(key.publicKey.toBase58()!==record.asset_address)throw Error('assets.invalidAsset');
   signers.push(key);
  }

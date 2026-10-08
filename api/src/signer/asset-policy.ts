@@ -40,9 +40,9 @@ export async function signCommittedAssetOperation(pool:Pool,id:string,raw:string
  const walletTx=Transaction.from(Buffer.from(raw,'base64'));
  const name=row.kind==='item-export'?`AOCHAIN Item ${row.record.item_id} × ${row.record.quantity}`:`AOCHAIN · ${row.name}`;
  const settlement=row.snapshot_version&&row.snapshot_hash?{version:row.snapshot_version,hash:row.snapshot_hash}:undefined;
- const expected=await prepareAssetTransaction(row.kind,id,row.record,row.wallet,name,settlement,walletTx.recentBlockhash);
+ const expected=await prepareAssetTransaction(row.kind,id,row.record,row.wallet,name,settlement,walletTx.recentBlockhash,issuer);
  if(expected.message_bytes!==row.message_bytes)throw Error('signer.denied');
- const resultSigned=signAssetSubmission(raw,row.message_bytes,row.wallet,row.kind,row.record);
+ const resultSigned=signAssetSubmission(raw,row.message_bytes,row.wallet,row.kind,row.record,issuer);
  if(row.signature&&row.signature!==resultSigned.signature)throw Error('signer.denied');
  reserveIssuance(budget,id,row.message_bytes,{gold:0,assets:['mint','item-export'].includes(row.kind)?1:0,cosmetics:0});
  return recordSignedReceipt(journal,{id,message:row.message_bytes,...resultSigned});

@@ -5,11 +5,17 @@ const bs58=require('bs58').default;
 const {checkAssetApproval}=require('../dist/signer/asset-policy');
 const {checkCosmeticApproval,cosmeticIdentity}=require('../dist/signer/cosmetic-policy');
 const {deriveAssetIdentity}=require('../dist/signer/asset-identity');
+const {assetIdentity}=require('../dist/game-asset-chain');
 const {reserveIssuance}=require('../dist/signer/budget');
 const {isolatedSubmission,isolatedAssetIdentity}=require('../dist/signer-client');
 const {COSMETIC_SEASON,HUNT_SEASON}=require('../dist/cosmetic-policy');
 const issuer=Keypair.generate(),wallet=Keypair.generate(),id=randomUUID(),character=randomUUID(),account=randomUUID();
 const derived=deriveAssetIdentity(issuer,character);
+// A resident custody key must work without a private authority-file configuration.
+const savedAuthorityFile=process.env.AOWEB_GOLD_AUTHORITY_FILE;
+delete process.env.AOWEB_GOLD_AUTHORITY_FILE;
+try{assert.equal(assetIdentity(character,issuer).address,derived.address);}
+finally{if(savedAuthorityFile===undefined)delete process.env.AOWEB_GOLD_AUTHORITY_FILE;else process.env.AOWEB_GOLD_AUTHORITY_FILE=savedAuthorityFile;}
 const asset={id,kind:'mint',state:'prepared',account_id:account,character_id:character,wallet:wallet.publicKey.toBase58(),linked_wallet:wallet.publicKey.toBase58(),owner_id:account,economy_lock:id,connected:false,deleted_at:null,chain_state:'offchain',chain_required:true,character_asset:null,name:'Fixture',snapshot_version:1,snapshot_hash:'a'.repeat(64),record:{id:character,kind:'character',character_id:character,asset_address:derived.address,issuer_address:derived.issuer,metadata_uri:'https://fixture.invalid/api/game-assets/metadata?id='+character,state:'reserved'}};
 checkAssetApproval(asset,derived.issuer,'https://fixture.invalid');
 assert.equal(deriveAssetIdentity(issuer,character).address,derived.address);
