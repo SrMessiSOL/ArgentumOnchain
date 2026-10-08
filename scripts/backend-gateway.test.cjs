@@ -3,6 +3,19 @@ const assert=require('node:assert/strict');
 const http=require('node:http');
 const net=require('node:net');
 const {playerRoute,validateConfig,createGateway}=require('./backend-gateway.cjs');
+test('signed closed diagnostic returns only booleans and cannot open player routes',async t=>{
+ const {createHmac,randomBytes}=require('node:crypto'),{canonical}=require('./backend-proxy-proof.cjs');
+ const key='ab'.repeat(32),gateway=createGateway(()=>({enabled:false,backendOrigin:'https://backend.example',siteOrigin:'https://site.example',proxyHmacKey:key}),{api:1,game:1});
+ await new Promise(resolve=>gateway.listen(0,'127.0.0.1',resolve));
+ t.after(()=>{gateway.closeAllConnections();gateway.close();});
+ const request=(path,headers={})=>new Promise((resolve,reject)=>{http.get({host:'127.0.0.1',port:gateway.address().port,path,headers:{host:'backend.example',...headers}},res=>{let body='';res.on('data',chunk=>body+=chunk);res.on('end',()=>resolve({status:res.statusCode,body}));}).on('error',reject);});
+ const path='/player-api/proxy-health',ip='203.0.113.4',time=String(Date.now()),nonce=randomBytes(16).toString('hex');
+ const signed={'x-aochain-proxy-ip':ip,'x-aochain-proxy-time':time,'x-aochain-proxy-nonce':nonce,'x-aochain-proxy-proof':createHmac('sha256',key).update(canonical('GET',path,ip,time,nonce,'')).digest('hex')};
+ assert.equal((await request(path)).status,403);
+ const valid=await request(path,signed);assert.equal(valid.status,200);assert.deepEqual(JSON.parse(valid.body),{proxyVerified:true,gatewayClosed:true});
+ assert.equal((await request(path,signed)).status,403);
+ for(const blocked of ['/player-api/auth/session','/player-api/internal/save','/player-api/proxy-health?extra=1'])assert.equal((await request(blocked,signed)).status,503);
+});
 test('configured gateway requires signed identity for auth and removes proof headers',async t=>{
   const {createHmac}=require('node:crypto'),{canonical}=require('./backend-proxy-proof.cjs');
   const received=[],key='ab'.repeat(32);

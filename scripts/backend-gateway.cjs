@@ -50,6 +50,18 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
     return result;
   }
   const server = http.createServer((req,res) => {
+    // A fixed, authenticated diagnostic can establish Vercel key matching while
+    // every player/internal route stays disabled. It never contacts the API.
+    if(req.method==='GET'&&req.url==='/player-api/proxy-health'){
+      try{
+        const cfg=validateConfig(readConfig());
+        if(req.headers.host!==new URL(cfg.backendOrigin).host){res.writeHead(503);return res.end();}
+        if(req.headers.origin&&req.headers.origin!==cfg.siteOrigin){res.writeHead(403);return res.end();}
+        if(!verifyProxy(req,cfg.proxyHmacKey)){res.writeHead(403);return res.end();}
+        res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
+        return res.end(JSON.stringify({proxyVerified:true,gatewayClosed:cfg.enabled!==true}));
+      }catch{res.writeHead(503);return res.end();}
+    }
     const cfg = getConfig(req);
     if (!cfg) { res.writeHead(503); return res.end('Realm access disabled.'); }
     const rawPath = req.url.split('?')[0];
