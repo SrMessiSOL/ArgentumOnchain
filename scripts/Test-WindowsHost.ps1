@@ -78,6 +78,7 @@ try {
  Run-Check 'Signer isolation and lifetime budgets' (Join-Path $repo 'api') @('scripts/signer-isolation.test.cjs')
  Run-Check 'Signer HTTP protocol isolation' (Join-Path $repo 'api') @('scripts/signer-http.test.cjs')
  Run-Check 'Signer database reader isolation' (Join-Path $repo 'api') @('scripts/signer-reader.test.cjs')
+ Run-Check 'Loopback RPC outage transport' (Join-Path $repo 'api') @('scripts/rpc-outage-rehearsal.cjs')
  Run-Check 'Backup authenticated encryption' $repo @('scripts/realm-backup-crypto.test.cjs')
  Run-Check 'Encrypted pending journal recovery fixture' (Join-Path $repo 'server') @('tests/backup-pending-recovery.test.cjs')
  Run-Check 'Bounded API read transport recovery' (Join-Path $repo 'server') @('tests/api-request.test.cjs')
