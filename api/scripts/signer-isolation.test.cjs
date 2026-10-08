@@ -24,10 +24,14 @@ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'aochain-budget-fixture-'))
 try{
  const budget={directory,maximumGold:10,maximumAssets:1,maximumCosmetics:1};
  reserveIssuance(budget,id,'fixture',{gold:10,assets:1,cosmetics:1});reserveIssuance(budget,id,'fixture',{gold:10,assets:1,cosmetics:1});
+ assert.throws(()=>reserveIssuance({...budget,maximumGold:9},id,'fixture',{gold:10,assets:1,cosmetics:1}));
  assert.throws(()=>reserveIssuance(budget,randomUUID(),'other',{gold:1,assets:0,cosmetics:0}));
  assert.throws(()=>reserveIssuance(budget,id,'different',{gold:10,assets:1,cosmetics:1}));
  fs.writeFileSync(path.join(directory,'budget.lock'),'crash fixture');assert.throws(()=>reserveIssuance(budget,randomUUID(),'other',{gold:0,assets:0,cosmetics:0}));fs.unlinkSync(path.join(directory,'budget.lock'));
- fs.writeFileSync(path.join(directory,randomUUID()+'.json'),'{');assert.throws(()=>reserveIssuance(budget,randomUUID(),'other',{gold:0,assets:0,cosmetics:0}));
+ const corruptId='ffffffff-ffff-ffff-ffff-ffffffffffff';
+ fs.writeFileSync(path.join(directory,corruptId+'.json'),'{');assert.throws(()=>reserveIssuance(budget,randomUUID(),'other',{gold:0,assets:0,cosmetics:0}));
+ // The matching reservation precedes the corrupt file: retries must still scan it.
+ assert.throws(()=>reserveIssuance(budget,id,'fixture',{gold:10,assets:1,cosmetics:1}));
 }finally{fs.rmSync(directory,{recursive:true,force:true});}
 (async()=>{
  const tx=new Transaction({feePayer:wallet.publicKey,recentBlockhash:Keypair.generate().publicKey.toBase58()}).add(SystemProgram.transfer({fromPubkey:wallet.publicKey,toPubkey:issuer.publicKey,lamports:1}));tx.sign(wallet);
