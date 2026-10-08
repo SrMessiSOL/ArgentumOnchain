@@ -1,6 +1,9 @@
 const assert=require('node:assert/strict'),http=require('node:http');
 const {randomUUID}=require('node:crypto');
 const {signerHttpHandler}=require('../dist/signer/http');
+const {createCustodyHandlers}=require('../dist/signer/handlers');
+const {Keypair}=require('@solana/web3.js');
+const path=require('node:path'),os=require('node:os');
 const token='f'.repeat(64),id=randomUUID();
 async function fixture(enabled,run){
  let calls=0;
@@ -13,6 +16,18 @@ async function fixture(enabled,run){
  try{await run(request,()=>calls,url);}finally{server.closeAllConnections();await new Promise(r=>server.close(r));}
 }
 (async()=>{
+ const issuer=Keypair.generate();let queries=0;
+ const options={issuer,pool:{query:async()=>{queries++;return {rows:[]};}},journal:path.join(os.tmpdir(),'fixture-journal'),budget:{directory:path.join(os.tmpdir(),'fixture-budget'),maximumGold:10,maximumAssets:1,maximumCosmetics:1},metadataOrigin:'https://fixture.invalid',mint:Keypair.generate().publicKey.toBase58(),maximumGold:10,maximumLamports:100};
+ const bound=createCustodyHandlers(options);
+ const publicIdentity=await bound.identity(id);
+ assert.deepEqual(Object.keys(publicIdentity).sort(),['address','issuer']);
+ assert.equal(publicIdentity.issuer,issuer.publicKey.toBase58());
+ await assert.rejects(()=>bound.identity('../escape'));
+ await assert.rejects(()=>bound.economy(id,'fixture'));
+ await assert.rejects(()=>bound.asset(id,'fixture'));
+ assert.equal(queries,2); // Missing committed state is denied before RPC or signing.
+ assert.throws(()=>createCustodyHandlers({...options,metadataOrigin:'http://fixture.invalid'}));
+ assert.throws(()=>createCustodyHandlers({...options,maximumGold:Infinity}));
  await fixture(false,async(request,calls,url)=>{
   assert.equal((await request('/economy-submit',{id,transaction:'fixture'})).status,503);
   assert.equal((await request('/economy-submit',{id},token)).status,401);
