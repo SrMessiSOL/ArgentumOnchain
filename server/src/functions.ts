@@ -1,4 +1,5 @@
 export {};
+import {apiRequest} from './apiRequest';
 const config = require("./config");
 const API_REQUEST_TIMEOUT_MS = 8000;
 
@@ -107,38 +108,7 @@ function Funct(this: any) {
     };
 
     this.fetchUrl = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
-
-        let response: Response;
-
-        try {
-            response = await fetch(config.apiBaseUrl + url, {
-                ...options,
-                signal: controller.signal,
-            });
-        } catch (error) {
-            if (error instanceof Error && error.name === "AbortError") {
-                throw new Error(`API request timed out after ${API_REQUEST_TIMEOUT_MS}ms`);
-            }
-
-            throw error;
-        } finally {
-            clearTimeout(timeoutId);
-        }
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            const message =
-                typeof result === "object" && result && "error" in result && typeof result.error === "string"
-                    ? result.error
-                    : `Request failed with status ${response.status}`;
-
-            throw new Error(message);
-        }
-
-        return result as T;
+        return apiRequest<T>(config.apiBaseUrl + url,options,API_REQUEST_TIMEOUT_MS);
     };
 }
 

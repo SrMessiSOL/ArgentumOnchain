@@ -3,7 +3,8 @@ param(
  [Parameter(Mandatory=$true)][string]$PnpmCjs,
  [Parameter(Mandatory=$true)][string]$PgBin,
  [Parameter(Mandatory=$true)][string]$TestRoot,
- [ValidateRange(1024,65535)][int]$Port=55433
+ [ValidateRange(1024,65535)][int]$Port=55433,
+ [switch]$GameplayOnly
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
@@ -64,6 +65,7 @@ try {
  # These endpoint tests mock signing/RPC and need to exercise unpaused paths.
  # The actual realm's protected environment remains paused and is never loaded.
  $env:AOWEB_SETTLEMENT_PAUSED='0'
+ if(!$GameplayOnly){
  foreach($package in @('api','server','frontend')){
   Run-Check "$package frozen install" (Join-Path $repo $package) @($PnpmCjs,'install','--frozen-lockfile')
  }
@@ -78,6 +80,7 @@ try {
  Run-Check 'Signer database reader isolation' (Join-Path $repo 'api') @('scripts/signer-reader.test.cjs')
  Run-Check 'Backup authenticated encryption' $repo @('scripts/realm-backup-crypto.test.cjs')
  Run-Check 'Encrypted pending journal recovery fixture' (Join-Path $repo 'server') @('tests/backup-pending-recovery.test.cjs')
+ Run-Check 'Bounded API read transport recovery' (Join-Path $repo 'server') @('tests/api-request.test.cjs')
  $env:GAME_SERVICE_TOKEN='test-only-game-'+[Guid]::NewGuid().ToString('N')
  Run-Check 'API isolated security suite' (Join-Path $repo 'api') @('scripts/security-regressions.cjs')
  Run-Check 'Server security suite' (Join-Path $repo 'server') @($PnpmCjs,'run','test:security')
@@ -89,6 +92,12 @@ try {
  Run-Check 'English regressions' (Join-Path $repo 'frontend') @('scripts/test-english.mjs')
  $env:NODE_ENV='production'
  Run-Check 'Frontend production build' (Join-Path $repo 'frontend') @('node_modules/next/dist/bin/next','build')
+ } else {
+  if($Port -ne 55433){throw 'Gameplay fixture requires the disposable port 55433'}
+  Run-Check 'Bounded API read transport recovery' (Join-Path $repo 'server') @('tests/api-request.test.cjs')
+  $fixtureWorkspace=[IO.Directory]::GetParent([IO.Directory]::GetParent($repo).FullName).FullName
+  Run-Check 'Two-player isolated gameplay and restart' $repo @('server/scripts/gameplay-rehearsal.cjs',$root,(Join-Path $fixtureWorkspace 'outputs/New-realm-seed.sql'),$PgBin)
+ }
  $receipt.passed=$true
 } catch {
  # Do not include connection strings or exception dumps in the public receipt.

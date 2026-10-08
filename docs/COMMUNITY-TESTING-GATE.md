@@ -59,3 +59,27 @@ Production /api/backend-health returned HTTP 200 with proxyVerified=true and gat
 
 The disposable server regression encrypts and restores eight durable operations across vault, character save, floor spawn and market journals. It verifies lost replies after commit, API outage before commit, replay after restart, preservation of later state and retention without an acknowledged receipt. Server TypeScript compilation and this regression passed. Receipts are simulated; this does not close the live PostgreSQL pending-operation, gameplay-concurrency or blockchain-finality gates. The host regression runner now includes this check.
 
+
+## Complete intended-host regression receipt (2026-10-08)
+
+Receipt host-regressions-20261008-045857 records all 17 checks passed and disposable PostgreSQL stopped. Coverage includes signer policy/HTTP/database-role isolation fixtures, encrypted pending-journal recovery, API security (43 unit tests plus database regressions), server protocol/journal/connection controls, English regressions and the production frontend build. Local ranking retrieval used an unavailable Docker fallback and rendered its unavailable state; this was not a build failure and does not establish live rankings. Native bigint acceleration was unavailable; pure JavaScript fallback was used. Signer activation, real gameplay concurrency, live pending-operation recovery and devnet transactions remain unverified. Public gameplay remains closed.
+
+
+## Two-client gameplay rehearsal preparation
+
+A disposable real API/game harness is prepared on loopback ports 3121/7786 with a separate PostgreSQL cluster on 55433. It imports the digest-checked fresh content seed, creates only fixture accounts, verifies concurrent login, protocol responses, inventory reorder persistence, world save, game-process restart and reconnection. Runtime source files are copied into a protected test directory; protected live configuration and authority files are not loaded. Syntax validation passed; elevated execution is pending. This is not combat/NPC load, WAN or blockchain lifecycle evidence.
+
+
+Gameplay rehearsal attempts 105247 and 105907 did not pass. The second receipt identifies game startup exit; its game log records fetch ECONNRESET after static/NPC loading. A bounded transport change now retries GET-without-body once for connection-reset/socket errors, retains the shared eight-second response-body deadline, rejects redirects and never automatically retries writes or HTTP failure statuses. TypeScript and focused transport regression passed. Real startup retry and gameplay verification remain pending; the live service code was not updated.
+
+
+Gameplay attempt 110711 reached ready=true on the real fixture game after the bounded read-reset change. Registration then failed because the harness generated a 16-character account name against the API's 15-character limit. Fixture names were corrected to 15 characters and the wrapper now validates names/classes/race/gender/appearance before database creation. Two-player gameplay remains unverified.
+
+
+Attempt 111824 created a character but selection correctly required mint/stake. The gameplay fixture now explicitly simulates ownership through a harness-only bootstrap restricted to NODE_ENV=test, paused settlement, generated database names on 55433, API port 3121 and protected fixture paths. Only fixture accounts with no asset and legacy off-chain characters are accepted; the fresh disposable database's character default is set to legacy off-chain before creation. Live startup, asset policy and database triggers are unchanged. Boundary tests reject production/live database/ports/path and authority files. This fixture cannot verify devnet ownership or wallet lifecycle.
+
+
+## Passed two-player fixture receipt (2026-10-08)
+
+Receipt host-regressions-gameplay-20261008-112357 passed: two authenticated concurrent clients, decoded ping/authoritative position frames, inventory reordering without duplicate source, world save with both connected, fixture game restart, reconnection and persisted position/inventory checks. The disposable cluster stopped. NFT ownership was explicitly simulated in the guarded harness; no mint/stake/RPC occurred. This is two-client loopback evidence, not WAN, combat/NPC activity, provider outage, concurrent snapshot latency or larger capacity evidence. Production gameplay remains closed and the live game has not received the transport change.
+
