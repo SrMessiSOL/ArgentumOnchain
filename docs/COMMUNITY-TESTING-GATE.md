@@ -49,3 +49,13 @@ Still required: verified ESU or supported OS, authenticated client identity forw
 The owner subsequently ran the private host check elevated: service, HTTP, loopback-listener and storage checks passed (21.6 GiB free). ESU and gameplay capacity remain unverified. Gold signer policy/journal preparation compiles and passes offline tampering/retry tests; its service rejects activation and has no signing HTTP route. It is not installed, connected to the API or custody-approved. See [signer isolation preparation](SIGNER-ISOLATION.md).
 
 Further preparation adds public-key-only NFT construction, optional isolated API submission, asset/cosmetic policy checks and signer-owned lifetime issuance budgets. Their offline and real loopback-client regressions pass. None is activated on the live host; signer HTTP issuance, tokenized-sale/cosmetic integration and production custody verification remain open. Encrypted backup/isolated restore tools are prepared, the first attempt stopped safely, and the retry created an authenticated encrypted local backup with services recovered; no database restore or off-host copy is verified yet. The owner has no cloud backup account yet. See [private recovery](PRIVATE-REALM-RECOVERY.md). Do not enable testing from another computer on the basis of these preparation tests.
+
+## Closed remote proxy verification (2026-10-08)
+
+Production /api/backend-health returned HTTP 200 with proxyVerified=true and gatewayClosed=true. This verifies the Vercel server-side HMAC credential matches the protected host gateway over the stable HTTPS tunnel. Player/internal routes remain closed. It does not verify gameplay concurrency, signer activation, devnet asset lifecycle or public release readiness.
+
+
+## Pending-journal encrypted fixture (2026-10-08)
+
+The disposable server regression encrypts and restores eight durable operations across vault, character save, floor spawn and market journals. It verifies lost replies after commit, API outage before commit, replay after restart, preservation of later state and retention without an acknowledged receipt. Server TypeScript compilation and this regression passed. Receipts are simulated; this does not close the live PostgreSQL pending-operation, gameplay-concurrency or blockchain-finality gates. The host regression runner now includes this check.
+

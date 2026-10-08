@@ -77,6 +77,7 @@ try {
  Run-Check 'Signer HTTP protocol isolation' (Join-Path $repo 'api') @('scripts/signer-http.test.cjs')
  Run-Check 'Signer database reader isolation' (Join-Path $repo 'api') @('scripts/signer-reader.test.cjs')
  Run-Check 'Backup authenticated encryption' $repo @('scripts/realm-backup-crypto.test.cjs')
+ Run-Check 'Encrypted pending journal recovery fixture' (Join-Path $repo 'server') @('tests/backup-pending-recovery.test.cjs')
  $env:GAME_SERVICE_TOKEN='test-only-game-'+[Guid]::NewGuid().ToString('N')
  Run-Check 'API isolated security suite' (Join-Path $repo 'api') @('scripts/security-regressions.cjs')
  Run-Check 'Server security suite' (Join-Path $repo 'server') @($PnpmCjs,'run','test:security')
