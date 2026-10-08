@@ -1,5 +1,6 @@
 const http = require('node:http');
 const fs = require('node:fs');
+const {fields:proxyFields,createVerifier}=require('./backend-proxy-proof.cjs');
 
 const routes = {
   GET: [
@@ -22,6 +23,7 @@ function playerRoute(method, path) {
 }
 
 function validateConfig(cfg) {
+  if(cfg.proxyHmacKey!==undefined&&!/^[a-f0-9]{64}$/i.test(cfg.proxyHmacKey))throw Error('Invalid separate proxy credential');
   for (const field of ['backendOrigin', 'siteOrigin']) {
     const url = new URL(cfg[field]);
     if (url.protocol !== 'https:' || url.origin !== cfg[field]) throw Error('Expected exact HTTPS origins');
@@ -30,16 +32,18 @@ function validateConfig(cfg) {
 }
 
 function createGateway(readConfig, ports = {api:3101, game:7766}) {
+  const verifyProxy=createVerifier();
   function getConfig(req) {
     try {
       const cfg = validateConfig(readConfig());
       return cfg.enabled === true && req.headers.host === new URL(cfg.backendOrigin).host ? cfg : null;
     } catch { return null; }
   }
-  function headers(req, cfg) {
+  function headers(req, cfg,verifiedIp) {
     const result = {...req.headers};
-    for (const name of ['x-forwarded-for','x-real-ip','x-aochain-client-ip','cf-connecting-ip','x-game-data-admin-token','cookie']) delete result[name];
-    // Authentication budgets use the actual gateway peer until authenticated IP forwarding is implemented.
+    for (const name of [...proxyFields,'x-forwarded-for','x-real-ip','x-aochain-client-ip','cf-connecting-ip','x-game-data-admin-token','cookie']) delete result[name];
+    if(verifiedIp)result['x-aochain-client-ip']=verifiedIp;
+    // Only the verified Vercel proof may supply an API budget identity.
     result.host = '127.0.0.1';
     result['x-forwarded-proto'] = 'https';
     result['x-forwarded-host'] = new URL(cfg.backendOrigin).host;
@@ -52,8 +56,10 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
     const target = playerRoute(req.method, rawPath);
     if (!target) { res.writeHead(404); return res.end(); }
     if (req.headers.origin && req.headers.origin !== cfg.siteOrigin) { res.writeHead(403); return res.end(); }
+    const verifiedIp=cfg.proxyHmacKey?verifyProxy(req,cfg.proxyHmacKey):null;
+    if(cfg.proxyHmacKey&&target.startsWith('/auth/')&&!verifiedIp){res.writeHead(403);return res.end();}
     const upstream = http.request({hostname:'127.0.0.1',port:ports.api,
-      method:req.method,path:target + req.url.slice(rawPath.length),headers:headers(req,cfg)}, reply => {
+      method:req.method,path:target + req.url.slice(rawPath.length),headers:headers(req,cfg,verifiedIp)}, reply => {
       res.writeHead(reply.statusCode,{...reply.headers,'cache-control':'no-store'}); reply.pipe(res);
     });
     upstream.on('error',()=>{if(!res.headersSent)res.writeHead(502);res.end('Backend unavailable.');});

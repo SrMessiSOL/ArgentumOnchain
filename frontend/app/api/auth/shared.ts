@@ -5,6 +5,7 @@ import type { AuthErrorResponse, AuthSession } from "../../../lib/auth";
 import { normalizeErrorPayload } from "../../../lib/api-errors";
 import { AUTH_COOKIE_NAME } from "../../../lib/auth-session";
 import { getApiBaseUrl } from "../../../lib/api-base-url";
+import {backendProxyHeaders} from '../../../lib/backend-proxy-proof';
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 const API_REQUEST_TIMEOUT_MS = 8000;
@@ -27,8 +28,11 @@ export async function fetchApi(
     );
 
     try {
-        return await fetch(`${getApiBaseUrl()}${path}`, {
+        const url=`${getApiBaseUrl()}${path}`;
+        return await fetch(url, {
             ...init,
+            headers:await backendProxyHeaders(url,init),
+            redirect:'error',
             signal: controller.signal,
         });
     } catch (error) {

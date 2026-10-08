@@ -3,6 +3,22 @@ const assert=require('node:assert/strict');
 const http=require('node:http');
 const net=require('node:net');
 const {playerRoute,validateConfig,createGateway}=require('./backend-gateway.cjs');
+test('configured gateway requires signed identity for auth and removes proof headers',async t=>{
+  const {createHmac}=require('node:crypto'),{canonical}=require('./backend-proxy-proof.cjs');
+  const received=[],key='ab'.repeat(32);
+  const api=http.createServer((req,res)=>{received.push(req.headers);res.end('ok');});
+  await new Promise(resolve=>api.listen(0,'127.0.0.1',resolve));
+  const gateway=createGateway(()=>({enabled:true,backendOrigin:'https://backend.example',siteOrigin:'https://site.example',proxyHmacKey:key}),{api:api.address().port,game:1});
+  await new Promise(resolve=>gateway.listen(0,'127.0.0.1',resolve));
+  t.after(()=>{gateway.closeAllConnections();gateway.close();api.closeAllConnections();api.close();});
+  const path='/player-api/auth/session',ip='203.0.113.4',time=String(Date.now()),nonce='cd'.repeat(16),authorization='Bearer fixture';
+  const proof=createHmac('sha256',key).update(canonical('GET',path,ip,time,nonce,authorization)).digest('hex');
+  const request=headers=>new Promise((resolve,reject)=>{http.get({hostname:'127.0.0.1',port:gateway.address().port,path,headers:{host:'backend.example',authorization,...headers}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));}).on('error',reject);});
+  assert.equal(await request({'x-aochain-client-ip':ip}),403);
+  const signed={'x-aochain-proxy-ip':ip,'x-aochain-proxy-time':time,'x-aochain-proxy-nonce':nonce,'x-aochain-proxy-proof':proof};
+  assert.equal(await request(signed),200);assert.equal(await request(signed),403);
+  assert.equal(received.length,1);assert.equal(received[0]['x-aochain-client-ip'],ip);assert.equal(received[0]['x-aochain-proxy-proof'],undefined);
+});
 test('routes deny internal, administrative, encoded and unknown paths',()=>{
   for(const path of ['/internal/runtime-config','/admin/game-data/objects','/runtime-config/admin','/auth/new-route','/auth/game-ticket/consume','/auth/../internal','/auth/%2e%2e/internal','/auth\\login']) {
     for(const method of ['GET','POST','PUT','DELETE'])assert.equal(playerRoute(method,'/player-api'+path),null);

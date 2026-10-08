@@ -2,6 +2,10 @@
 
 Status on 2026-10-07: **not approved for public testing yet**. Mainnet remains a later release. Passing local checks is evidence for those checks only.
 
+2026-10-08 backup follow-up: encrypted Drive upload and complete downloaded SHA-256 verification passed on the intended host. Online single-volume snapshot, archive authentication, file manifest verification and isolated physical PostgreSQL WAL recovery also passed; fixture stopped and live game uptime preserved. This test had zero players. Automatic creation task is prepared but not installed; gameplay latency, pending-operation recovery, scheduled-identity execution and alerts remain open checks. See [online realm backups](ONLINE-REALM-BACKUPS.md). This does not open public testing.
+
+Later 2026-10-08 receipt: six-hour online creation task installed under SYSTEM; a complete automatic cycle passed, including authenticated snapshot handoff and matching restricted-service Drive upload/download SHA-256, while live game uptime remained continuous. This supersedes the earlier task-not-installed state. Initial cloud quota/throttle failure did not recur on retry; root cause is not established. Gameplay concurrency, journal recovery scenarios, alerts and local retention remain unfinished. No player access was opened.
+
 | Area | Current evidence | Required before opening testing |
 | --- | --- | --- |
 | Settlement integrity | Exact-message wallet signatures, issuer approval before broadcast, durable signed bytes, finalized reconciliation, replay tests | Real-wallet mint/stake/withdraw/restake, item export/import, gold and sale lifecycle; lost-response/restart rehearsal |
