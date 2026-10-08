@@ -1,0 +1,64 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {randomUUID}=require('node:crypto');
+const {Keypair,PublicKey,Transaction,SystemProgram}=require('@solana/web3.js');
+const core=require('@metaplex-foundation/mpl-core');
+let onchainAsset;
+// Only the account decoder is mocked. Real Core builders/message/signatures run.
+require.cache[require.resolve('@metaplex-foundation/mpl-core')].exports=new Proxy(core,{get:(target,key)=>key==='deserializeAssetV1'?()=>onchainAsset:target[key]});
+const chain=require('../dist/economy-chain');
+let broadcasts=0;
+chain.checkedChain=async()=>({getBlockHeight:async()=>10,getAccountInfo:async()=>({owner:new PublicKey(core.MPL_CORE_PROGRAM_ID),lamports:1,executable:false,rentEpoch:0,data:Buffer.alloc(0)}),sendRawTransaction:async()=>{broadcasts++;throw Error('Signing cores must never broadcast');}});
+const {prepareCharacterPurchase}=require('../dist/game-asset-chain');
+const {checkCharacterPurchaseApproval,signCommittedCharacterPurchase}=require('../dist/signer/market-policy');
+const {prepareCosmeticTransaction}=require('../dist/cosmetic-transaction');
+const {cosmeticIdentity,approveCosmeticSubmission,signCommittedCosmeticOperation}=require('../dist/signer/cosmetic-policy');
+const {COSMETIC_SEASON,HUNT_SEASON}=require('../dist/cosmetic-policy');
+const {encrypt,decrypt}=require('../../scripts/realm-backup-crypto.cjs');
+const issuer=Keypair.generate(),buyer=Keypair.generate(),seller=Keypair.generate(),account=randomUUID(),character=randomUUID(),id=randomUUID(),listing=randomUUID(),sellerAccount=randomUUID();
+const origin='https://fixture.invalid',policy={mint:Keypair.generate().publicKey.toBase58(),maximumGold:100,maximumLamports:1000000};
+const directory=fs.mkdtempSync(path.join(os.tmpdir(),'aochain-custody-lifecycle-'));
+const budget={directory:path.join(directory,'budget'),maximumGold:100,maximumAssets:10,maximumCosmetics:2};
+fs.mkdirSync(budget.directory);
+const journal=path.join(directory,'journal');fs.mkdirSync(journal);
+(async()=>{
+ const asset={id:character,kind:'character',state:'active',character_id:character,asset_address:Keypair.generate().publicKey.toBase58(),issuer_address:issuer.publicKey.toBase58(),metadata_uri:origin+'/api/game-assets/metadata?id='+character};
+ onchainAsset={publicKey:asset.asset_address,owner:seller.publicKey.toBase58(),updateAuthority:{type:'Address',address:issuer.publicKey.toBase58()},uri:asset.metadata_uri,attributes:{attributeList:[{key:'aochain_kind',value:'character'},{key:'aochain_id',value:character}]},freezeDelegate:{frozen:false},transferDelegate:{authority:{type:'Address',address:issuer.publicKey.toBase58()}}};
+ const prepared=await prepareCharacterPurchase(id,asset,buyer.publicKey.toBase58(),seller.publicKey.toBase58(),1000000,Keypair.generate().publicKey.toBase58(),issuer);
+ const tx=Transaction.from(Buffer.from(prepared.transaction_bytes,'base64'));assert.ok(tx.signatures.every(s=>s.signature===null));tx.partialSign(buyer);
+ const raw=tx.serialize({requireAllSignatures:false}).toString('base64');
+ const row={id,kind:'purchase',state:'prepared',wallet:buyer.publicKey.toBase58(),amount:'1000000',message_bytes:prepared.message_bytes,signature:null,account_id:account,character_id:character,linked_wallet:buyer.publicKey.toBase58(),owner_id:sellerAccount,economy_lock:listing,connected:false,deleted_at:null,listing_id:listing,item_listing_id:null,seller_id:sellerAccount,seller_wallet:seller.publicKey.toBase58(),listing_state:'reserved',listing_intent:id,buyer_id:account,price:'1000000',seller_linked_wallet:seller.publicKey.toBase58(),tokenized:true,chain_state:'unstaked',character_asset:asset.asset_address,record:asset};
+ checkCharacterPurchaseApproval(row,issuer.publicKey.toBase58(),origin,policy);
+ for(const change of [{connected:true},{state:'complete'},{amount:'1000001'},{price:'1'},{listing_intent:randomUUID()},{buyer_id:sellerAccount},{owner_id:account},{seller_id:account},{seller_linked_wallet:buyer.publicKey.toBase58()},{economy_lock:null},{chain_state:'staked'},{character_asset:null},{record:{...asset,state:'reserved'}},{record:{...asset,metadata_uri:'https://other.invalid/asset'}},{record:{...asset,issuer_address:buyer.publicKey.toBase58()}}])assert.throws(()=>checkCharacterPurchaseApproval({...row,...change},issuer.publicKey.toBase58(),origin,policy));
+ const signed=await signCommittedCharacterPurchase(row,raw,issuer,origin,policy,journal,budget);
+ await assert.rejects(()=>signCommittedCharacterPurchase(row,prepared.transaction_bytes,issuer,origin,policy,journal,budget));
+ assert.ok(Transaction.from(Buffer.from(signed.bytes,'base64')).verifySignatures());
+ assert.deepEqual(await signCommittedCharacterPurchase(row,raw,issuer,origin,policy,journal,budget),signed);
+ const changed=Transaction.from(Buffer.from(raw,'base64'));changed.add(SystemProgram.transfer({fromPubkey:buyer.publicKey,toPubkey:issuer.publicKey,lamports:1}));changed.partialSign(buyer);
+ await assert.rejects(()=>signCommittedCharacterPurchase({...row,message_bytes:changed.serializeMessage().toString('base64')},changed.serialize({requireAllSignatures:false}).toString('base64'),issuer,origin,policy,journal,budget));
+ onchainAsset.freezeDelegate.frozen=true;await assert.rejects(()=>signCommittedCharacterPurchase(row,raw,issuer,origin,policy,journal,budget));onchainAsset.freezeDelegate.frozen=false;
+ onchainAsset.transferDelegate.authority.address=buyer.publicKey.toBase58();await assert.rejects(()=>signCommittedCharacterPurchase(row,raw,issuer,origin,policy,journal,budget));onchainAsset.transferDelegate.authority.address=issuer.publicKey.toBase58();
+ onchainAsset.owner=buyer.publicKey.toBase58();await assert.rejects(()=>signCommittedCharacterPurchase(row,raw,issuer,origin,policy,journal,budget));
+ const cosmeticId=randomUUID(),identity=cosmeticIdentity(issuer,account,COSMETIC_SEASON),metadata=origin+'/api/cosmetics/metadata';
+ const cosmetic=prepareCosmeticTransaction(cosmeticId,COSMETIC_SEASON,identity.publicKey.toBase58(),buyer.publicKey.toBase58(),issuer.publicKey.toBase58(),metadata,Keypair.generate().publicKey.toBase58());
+ assert.ok(Transaction.from(Buffer.from(cosmetic.transaction_bytes,'base64')).signatures.every(s=>s.signature===null));
+ const claim={operation_id:cosmeticId,account_id:account,season:COSMETIC_SEASON,state:'prepared',asset_address:identity.publicKey.toBase58(),wallet_address:buyer.publicKey.toBase58(),issuer_address:issuer.publicKey.toBase58(),metadata_uri:metadata,linked_wallet:buyer.publicKey.toBase58(),eligible:true,hunt_eligible:false,supply_reserved:false,reserved_count:0,message_bytes:cosmetic.message_bytes,last_valid_height:'100',signature:null};
+ const receipt=approveCosmeticSubmission(claim,cosmetic.transaction_bytes,issuer,metadata);
+ assert.ok(Transaction.from(Buffer.from(receipt.bytes,'base64')).verifySignatures());
+ for(const change of [{eligible:false},{state:'confirmed'},{signature:'conflict'},{metadata_uri:'https://other.invalid'},{wallet_address:seller.publicKey.toBase58()},{operation_id:randomUUID()},{message_bytes:'changed'}])assert.throws(()=>approveCosmeticSubmission({...claim,...change},cosmetic.transaction_bytes,issuer,metadata));
+ const mockPool={query:async()=>({rows:[claim]})};
+ const durable=await signCommittedCosmeticOperation(mockPool,cosmeticId,cosmetic.transaction_bytes,issuer,metadata,journal,budget);
+ assert.deepEqual(await signCommittedCosmeticOperation(mockPool,cosmeticId,cosmetic.transaction_bytes,issuer,metadata,journal,budget),durable);
+ await assert.rejects(()=>signCommittedCosmeticOperation({query:async()=>({rows:[{...claim,last_valid_height:'1'}]})},cosmeticId,cosmetic.transaction_bytes,issuer,metadata,journal,budget),/expired/);
+ const hunt={...claim,season:HUNT_SEASON,hunt_eligible:true,supply_reserved:true,reserved_count:101};
+ assert.throws(()=>approveCosmeticSubmission(hunt,cosmetic.transaction_bytes,issuer,metadata));
+ const bundle={journal:Object.fromEntries(fs.readdirSync(journal).map(name=>[name,fs.readFileSync(path.join(journal,name),'base64')])),budget:Object.fromEntries(fs.readdirSync(budget.directory).map(name=>[name,fs.readFileSync(path.join(budget.directory,name),'base64')]))};
+ const plain=path.join(directory,'custody.json'),key=path.join(directory,'recovery-fixture.key'),cipher=path.join(directory,'custody.aobak'),decrypted=path.join(directory,'decrypted.json');
+ fs.writeFileSync(plain,JSON.stringify(bundle));fs.writeFileSync(key,require('node:crypto').randomBytes(32));await encrypt(plain,cipher,key);await decrypt(cipher,decrypted,key);assert.equal(fs.readFileSync(plain).equals(fs.readFileSync(decrypted)),true);
+ const restored=JSON.parse(fs.readFileSync(decrypted,'utf8')),restoreJournal=path.join(directory,'restored-journal'),restoreBudget=path.join(directory,'restored-budget');fs.mkdirSync(restoreJournal);fs.mkdirSync(restoreBudget);
+ for(const [name,bytes] of Object.entries(restored.journal)){assert.match(name,/^[0-9a-f-]{36}\.json$/);fs.writeFileSync(path.join(restoreJournal,name),Buffer.from(bytes,'base64'));}
+ for(const [name,bytes] of Object.entries(restored.budget)){assert.match(name,/^[0-9a-f-]{36}\.json$/);fs.writeFileSync(path.join(restoreBudget,name),Buffer.from(bytes,'base64'));}
+ assert.deepEqual(await signCommittedCosmeticOperation(mockPool,cosmeticId,cosmetic.transaction_bytes,issuer,metadata,restoreJournal,{...budget,directory:restoreBudget}),durable);
+ assert.equal(fs.readdirSync(restoreBudget).length,Object.keys(bundle.budget).length); // Restored retry does not issue a second reservation.
+ assert.equal(broadcasts,0);
+ console.log('Offline real-SDK custody lifecycle passed: atomic NFT payment/delivery, wallet/delegate/message guards, cosmetic approval, durable retries and encrypted journal/budget restore without duplicate issuance. No live RPC or broadcast.');
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>fs.rmSync(directory,{recursive:true,force:true}));

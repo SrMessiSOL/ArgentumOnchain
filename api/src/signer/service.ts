@@ -7,6 +7,7 @@ import {checkedChain} from '../economy-chain';
 import {approveEconomySubmission,type EconomyApproval} from './economy-policy';
 import {recordSignedReceipt} from './journal';
 import {reserveIssuance,type IssuanceBudget} from './budget';
+import {signCommittedCharacterPurchase,type CharacterPurchaseApproval} from './market-policy';
 
 export function validateSignerEnvironment(env:NodeJS.ProcessEnv){
  const deny=()=>{throw Error('Signer startup policy failed');};
@@ -48,17 +49,22 @@ export async function startSigner(){
 }
 
 /** Reviewed signing core, not exposed by the preparation service. No broadcast. */
-export async function signCommittedEconomyOperation(pool:Pool,id:string,raw:string,issuer:Keypair,policy:{mint:string;maximumGold:number;maximumLamports:number},journal:string,budget:IssuanceBudget){
- const result=await pool.query<EconomyApproval>(`SELECT i.*,w.address AS linked_wallet,c.account_id AS owner_id,c.economy_lock,c.connected,c.deleted_at,
+export async function signCommittedEconomyOperation(pool:Pool,id:string,raw:string,issuer:Keypair,policy:{mint:string;maximumGold:number;maximumLamports:number},journal:string,budget:IssuanceBudget,metadataOrigin?:string){
+ const result=await pool.query<CharacterPurchaseApproval>(`SELECT i.*,w.address AS linked_wallet,c.account_id AS owner_id,c.economy_lock,c.connected,c.deleted_at,c.chain_state,c.asset_address AS character_asset,to_jsonb(a) AS record,
  COALESCE(s.seller_id,t.seller_id) AS seller_id,COALESCE(s.seller_wallet,t.seller_wallet) AS seller_wallet,COALESCE(s.state,t.state) AS listing_state,
  COALESCE(s.intent_id,t.intent_id) AS listing_intent,COALESCE(s.buyer_id,t.buyer_id) AS buyer_id,
  COALESCE(s.price,t.price)::text AS price,sw.address AS seller_linked_wallet,(c.asset_address IS NOT NULL AND i.kind='purchase') AS tokenized
  FROM economy_intents i JOIN characters c ON c.id=i.character_id JOIN account_wallets w ON w.account_id=i.account_id
  LEFT JOIN character_sales s ON s.id=i.listing_id LEFT JOIN item_sales t ON t.id=i.item_listing_id
+ LEFT JOIN game_assets a ON a.asset_address=c.asset_address
  LEFT JOIN account_wallets sw ON sw.account_id=COALESCE(s.seller_id,t.seller_id) WHERE i.id=$1`,[id]);
  const row=result.rows[0];if(!row)throw Error('signer.denied');
  const chain=await checkedChain();
  if((await chain.getBlockHeight('finalized'))>Number(row.last_valid_height))throw Error('signer.expired');
+ if(row.tokenized){
+  if(!metadataOrigin)throw Error('signer.denied');
+  return signCommittedCharacterPurchase(row,raw,issuer,metadataOrigin,policy,journal,budget);
+ }
  const receipt=approveEconomySubmission(row,raw,issuer,policy);
  reserveIssuance(budget,id,row.message_bytes,{gold:row.kind==='withdraw'?Number(row.amount):0,assets:0,cosmetics:0});
  return recordSignedReceipt(journal,{id,message:row.message_bytes,...receipt});

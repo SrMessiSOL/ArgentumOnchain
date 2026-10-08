@@ -77,6 +77,8 @@ try {
  Run-Check 'Offline signer policy and journal' (Join-Path $repo 'api') @('scripts/signer-policy.test.cjs')
  Run-Check 'Signer isolation and lifetime budgets' (Join-Path $repo 'api') @('scripts/signer-isolation.test.cjs')
  Run-Check 'Signer HTTP protocol isolation' (Join-Path $repo 'api') @('scripts/signer-http.test.cjs')
+ Run-Check 'Signer cosmetic and character marketplace lifecycle' (Join-Path $repo 'api') @('scripts/signer-lifecycle.test.cjs')
+ Run-Check 'Cosmetic signed-byte persistence and recovery' (Join-Path $repo 'api') @('scripts/cosmetic-recovery.test.cjs')
  Run-Check 'Signer database reader isolation' (Join-Path $repo 'api') @('scripts/signer-reader.test.cjs')
  Run-Check 'Loopback RPC outage transport' (Join-Path $repo 'api') @('scripts/rpc-outage-rehearsal.cjs')
  Run-Check 'Backup authenticated encryption' $repo @('scripts/realm-backup-crypto.test.cjs')

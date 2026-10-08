@@ -5,9 +5,10 @@ const {createCustodyHandlers}=require('../dist/signer/handlers');
 const {Keypair}=require('@solana/web3.js');
 const path=require('node:path'),os=require('node:os');
 const token='f'.repeat(64),id=randomUUID();
-async function fixture(enabled,run){
+async function fixture(enabled,run,cosmetics=false){
  let calls=0;
  const handlers={identity:async()=>{calls++;return {address:'public-asset',issuer:'public-issuer',secret:'must-not-leave'};},economy:async()=>{calls++;return {id,message:'message',bytes:'bytes',signature:'signature',secret:'must-not-leave'};},asset:async()=>{throw Error('private diagnostics');}};
+ if(cosmetics){handlers.cosmeticIdentity=handlers.identity;handlers.cosmetic=handlers.economy;}
  const server=http.createServer(signerHttpHandler(token,enabled,handlers));
  server.requestTimeout=1000;server.headersTimeout=1000;
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
@@ -44,6 +45,15 @@ async function fixture(enabled,run){
   assert.deepEqual(await (await request('/economy-submit',{id,transaction:'fixture'})).json(),{id,message:'message',bytes:'bytes',signature:'signature'});
   assert.deepEqual(await (await request('/asset-submit',{id,transaction:'fixture'})).json(),{error:'signer.denied'});
   assert.equal(calls(),2);
+  assert.equal((await request('/cosmetic-submit',{id,transaction:'fixture'})).status,503);
  });
+ const {COSMETIC_SEASON}=require('../dist/cosmetic-policy');
+ await fixture(true,async(request,calls)=>{
+  assert.deepEqual(await(await request('/cosmetic-identity',{account:id,season:COSMETIC_SEASON})).json(),{address:'public-asset',issuer:'public-issuer'});
+  assert.equal((await request('/cosmetic-identity',{account:id,season:'mainnet'})).status,400);
+  assert.equal((await request('/cosmetic-identity',{account:id,season:COSMETIC_SEASON,secret:'extra'})).status,400);
+  assert.deepEqual(await(await request('/cosmetic-submit',{id,transaction:'fixture'})).json(),{id,message:'message',bytes:'bytes',signature:'signature'});
+  assert.equal(calls(),2);
+ },true);
  console.log('Signer HTTP authentication, disabled mode, fixed routes, body limits and public-only responses passed; fixture hooks only.');
 })().catch(()=>{console.error('Signer HTTP regression failed');process.exitCode=1;});

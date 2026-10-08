@@ -8,13 +8,14 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{Client}=requir
   assert.equal((await admin.query("SELECT count(*)::int n FROM pg_roles WHERE rolname='aoweb_signer_reader'")).rows[0].n,0,'Do not reuse an existing role');
   await admin.query('CREATE DATABASE "'+name+'"');databaseCreated=true;
   const target=new URL(base);target.pathname='/'+name;client=new Client({connectionString:target.toString()});await client.connect();
-  for(const file of ['schema.sql','wallet-schema.sql','economy-schema.sql','game-assets-schema.sql'])await client.query(fs.readFileSync(file,'utf8'));
+  for(const file of ['schema.sql','wallet-schema.sql','economy-schema.sql','game-assets-schema.sql','cosmetics-schema.sql'])await client.query(fs.readFileSync(file,'utf8'));
   const sql=fs.readFileSync('signer-reader-schema.sql','utf8').replace('GRANT CONNECT ON DATABASE aochain_fresh','GRANT CONNECT ON DATABASE '+name);
   await client.query(sql);roleCreated=true;await client.query(sql);
   await client.query('SET ROLE aoweb_signer_reader');
   await client.query('SELECT * FROM economy_intents');await client.query('SELECT id,account_id,chain_state,chain_required,name FROM characters');
   await client.query('SELECT * FROM game_asset_operations');await client.query('SELECT character_id,version,hash,settled FROM character_snapshots');
-  for(const sql of ['UPDATE economy_intents SET state=state','DELETE FROM game_assets','SELECT bundle FROM character_snapshots','SELECT * FROM auth_sessions','CREATE TABLE signer_forbidden(id int)','UPDATE account_wallets SET address=address'])await assert.rejects(()=>client.query(sql),{code:'42501'});
+  await client.query('SELECT * FROM cosmetic_claims');await client.query('SELECT * FROM cosmetic_supply_reservations');await client.query('SELECT level,npc_matados FROM characters');
+  for(const sql of ['UPDATE economy_intents SET state=state','DELETE FROM game_assets','UPDATE cosmetic_claims SET signature=signature','DELETE FROM cosmetic_supply_reservations','UPDATE characters SET level=level','SELECT bundle FROM character_snapshots','SELECT * FROM auth_sessions','CREATE TABLE signer_forbidden(id int)','UPDATE account_wallets SET address=address'])await assert.rejects(()=>client.query(sql),{code:'42501'});
   await client.query('RESET ROLE');
   const props=(await client.query("SELECT rolsuper,rolcreatedb,rolcreaterole,rolreplication,rolbypassrls,rolcanlogin FROM pg_roles WHERE rolname='aoweb_signer_reader'")).rows[0];assert.equal(Object.values(props).some(Boolean),false);
   await client.query('ALTER ROLE aoweb_signer_reader BYPASSRLS');

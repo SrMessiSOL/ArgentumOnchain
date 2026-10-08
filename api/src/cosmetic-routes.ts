@@ -48,7 +48,7 @@ export function installCosmeticRoutes(app:Express) {
         if(!existing&&count>=HUNT_SUPPLY){res.status(409).json({error:'cosmetic.soldOut'});return;}
       }
       const chain=await cosmeticChain();
-      const address=(hunt?chain.derive(p.id,season):chain.derive(p.id)).publicKey.toString();
+      const address=(await (hunt?chain.derive(p.id,season):chain.derive(p.id))).publicKey.toString();
       const metadata=new URL(process.env.AOWEB_DEVNET_METADATA_URL!);
       if(hunt)metadata.searchParams.set('kind','first-hunt');
       const uri=metadata.toString();

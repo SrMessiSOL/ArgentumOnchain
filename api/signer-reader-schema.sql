@@ -17,6 +17,8 @@ GRANT SELECT(id,account_id,economy_lock,connected,deleted_at,asset_address,name,
 GRANT SELECT(account_id,address) ON account_wallets TO aoweb_signer_reader;
 GRANT SELECT(id,seller_id,seller_wallet,state,intent_id,buyer_id,price) ON character_sales,item_sales TO aoweb_signer_reader;
 GRANT SELECT ON game_asset_operations,game_assets TO aoweb_signer_reader;
+GRANT SELECT ON cosmetic_claims,cosmetic_supply_reservations TO aoweb_signer_reader;
+GRANT SELECT(level,npc_matados) ON characters TO aoweb_signer_reader;
 GRANT SELECT(character_id,version,hash,settled) ON character_snapshots TO aoweb_signer_reader;
 ALTER ROLE aoweb_signer_reader SET default_transaction_read_only=on;
 ALTER ROLE aoweb_signer_reader SET statement_timeout='3s';

@@ -102,10 +102,10 @@ export async function prepareAssetTransaction(action:AssetAction,operation:strin
  return {transaction_bytes:tx.serialize({requireAllSignatures:false}).toString('base64'),message_bytes:tx.serializeMessage().toString('base64'),last_valid_height:lastValidBlockHeight};
 }
 /** Payment and NFT delivery occur in the same Solana transaction. */
-export async function prepareCharacterPurchase(operation:string,record:AssetRecord,buyer:string,seller:string,amount:number){
+export async function prepareCharacterPurchase(operation:string,record:AssetRecord,buyer:string,seller:string,amount:number,fixedBlockhash?:string,authority?:Keypair){
  const asset=await verifiedAsset(record,seller);
  if(asset.freezeDelegate?.frozen||asset.transferDelegate?.authority.type!=='Address'||asset.transferDelegate.authority.address!==record.issuer_address)throw Error('assets.unstakeFirst');
- const {umi,issuer,signer}=context(buyer);const {blockhash,lastValidBlockHeight}=await (await checkedChain()).getLatestBlockhash('finalized');
+ const {umi,issuer,signer}=context(buyer,authority);const {blockhash,lastValidBlockHeight}=fixedBlockhash?{blockhash:fixedBlockhash,lastValidBlockHeight:0}:await (await checkedChain()).getLatestBlockhash('finalized');
  const tx=createEconomyTransaction(new PublicKey(buyer),blockhash).add(SystemProgram.transfer({fromPubkey:new PublicKey(buyer),toPubkey:new PublicKey(seller),lamports:amount}));
  append(tx,transfer(umi,{asset,newOwner:publicKey(buyer),authority:signer}));
  tx.add(new TransactionInstruction({programId:new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),keys:[],data:Buffer.from(`aochain:character-sale:v1:${operation}:${record.asset_address}`)}));
