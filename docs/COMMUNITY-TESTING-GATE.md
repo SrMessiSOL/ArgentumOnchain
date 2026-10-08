@@ -88,3 +88,14 @@ Receipt host-regressions-gameplay-20261008-112357 passed: two authenticated conc
 
 Receipt host-regressions-gameplay-20261008-112824 passed real melee packets from both authenticated clients against two controlled stationary 1-HP NPCs. Each character recorded one NPC kill, 30 gold and 250 experience under the fixture's balance settings. World save, game restart and reconnect preserved these rewards without duplication and retained reordered inventory and saved positions. Disposable PostgreSQL stopped. This is functional combat coverage, not representative NPC difficulty, sustained gameplay load or actual NFT ownership; chain ownership remains simulated and public gameplay closed.
 
+
+API outage extension prepared: stop only the disposable API process while two real game clients remain connected, submit inventory moves, verify durable character journals and unchanged database inventory during outage, restart fixture API, verify single committed item quantity/slot and journal completion, save and restart fixture game again to verify recovery persistence. Syntax check passed; elevated execution pending. This does not stop the live API/game or exercise actual Solana provider failure.
+
+
+API-outage attempt 113515 verified two durable character journals and unchanged database inventory. It stopped waiting for a gameplay-protocol ping that the pending bank-operation guard intentionally blocks. The harness now checks WebSocket control ping/pong without changing that guard. Outage behavior is connected transport with guarded gameplay actions, not uninterrupted play. Recovery completion remains pending.
+
+
+## Real fixture API-outage recovery passed (2026-10-08)
+
+Receipt host-regressions-gameplay-20261008-113750 passed: stopping the disposable API left both game transports connected with WebSocket heartbeats, guarded gameplay actions, two durable pending character journals and unchanged database inventory. Restarting the API committed each inventory move once, removed acknowledged journals and allowed world save. A further game restart/reconnect retained exact item quantities/slots without duplication. Combat and reward persistence checks also passed; disposable PostgreSQL stopped. NFT ownership remains simulated. Online snapshot concurrency, sustained load, RPC throttling, external alerts and real chain lifecycle remain open; public gameplay remains closed.
+

@@ -60,7 +60,7 @@ async function main(){
  const apiEnv={...base,PORT:'3121',DATABASE_URL:url.toString(),TOKEN_AUTH:crypto.randomBytes(32).toString('hex'),GAME_SERVICE_TOKEN:token,AOWEB_RUN_MIGRATIONS:'0',AOWEB_SETTLEMENT_PAUSED:'1'};
  const gameEnv={...base,PORT:'7786',API_BASE_URL:api,TOKEN_AUTH:token,AOWEB_TEST_MODE:'true',RESET_CONNECTED_CHARACTERS_ON_STARTUP:'true',AOWEB_NPC_RESPAWN_FILE:path.join(dir,'respawns.json'),AOWEB_MAP_NPC_STATE_DIR:path.join(dir,'npc-state'),AOWEB_VAULT_JOURNAL_DIR:path.join(dir,'vault'),AOWEB_CHARACTER_JOURNAL_DIR:path.join(dir,'character'),AOWEB_WORLD_JOURNAL_DIR:path.join(dir,'world'),AOWEB_MARKET_JOURNAL_DIR:path.join(dir,'market')};
  stage='API startup';
- launch('api',apiEnv);await until(async()=>{const r=await fetch(api+'/ranking',{signal:AbortSignal.timeout(2000)});return r.ok;});
+ let apiProcess=launch('api',apiEnv);await until(async()=>{const r=await fetch(api+'/ranking',{signal:AbortSignal.timeout(2000)});return r.ok;});
  check(true,'fixture API startup');
  stage='game startup';
  let server=launch('server',gameEnv);await until(()=>health(server),180000);
@@ -98,6 +98,33 @@ async function main(){
  const after=await fixture.query('SELECT id,map_id,pos_x,pos_y FROM characters ORDER BY id');check(JSON.stringify(before.rows)===JSON.stringify(after.rows),'saved positions survive restart');check(reconnected.every(c=>c.decodeErrors===0),'reconnect snapshots decode');
  const combatReload=(await fixture.query('SELECT id,npc_matados,gold,exp FROM characters ORDER BY id')).rows;check(JSON.stringify(combatReload)===JSON.stringify(combatAfter),'NPC rewards survive game restart without duplication');
  for(const [i,c] of reconnected.entries())check(c.character.inventory.some(item=>item.slot===21&&item.idItem===originals[i].id_item&&item.amount===originals[i].cant),'reconnected inventory reflects persisted reorder');
+ stage='API outage with pending inventory operations';
+ await stop(apiProcess);
+ for(const c of reconnected)c.ws.send(p.createReorderInventoryItemPacket(21,20));
+ const journalDirectory=path.join(dir,'character');
+ await until(()=>fs.existsSync(journalDirectory)&&fs.readdirSync(journalDirectory).filter(name=>name.endsWith('.json')).length>=2,15000);
+ check(true,'both inventory operations are durably journaled while API is down');
+ for(const a of accounts){const stored=await fixture.query('SELECT id_pos FROM character_items WHERE character_id=$1 AND id_item=$2',[a.id,originals[accounts.indexOf(a)].id_item]);check(stored.rows.some(row=>row.id_pos===21)&&!stored.rows.some(row=>row.id_pos===20),'unacknowledged inventory change has not reached the database');}
+ // Gameplay packets are deliberately paused by the pending-operation guard.
+ // WebSocket control ping/pong tests transport liveness without bypassing it.
+ await Promise.all(reconnected.map(c=>new Promise((resolve,reject)=>{
+  const data=crypto.randomBytes(12);
+  const timer=setTimeout(()=>{c.ws.off('pong',received);reject(Error('WebSocket control heartbeat timed out'));},5000);
+  function received(payload){if(!payload.equals(data))return;clearTimeout(timer);c.ws.off('pong',received);resolve();}
+  c.ws.on('pong',received);c.ws.ping(data);
+ })));
+ check(true,'transport heartbeat succeeds while gameplay actions are guarded');
+ check(reconnected.every(c=>c.ws.readyState===WebSocket.OPEN),'both game sockets stay connected during API outage');
+ // Repeated action packets must not enqueue duplicate inventory changes.
+ for(const c of reconnected)for(let repeat=0;repeat<3;repeat++)c.ws.send(p.createReorderInventoryItemPacket(21,20));
+ stage='API recovery and journal completion';
+ apiProcess=launch('api',apiEnv);await until(async()=>{const r=await fetch(api+'/ranking',{signal:AbortSignal.timeout(2000)});return r.ok;});
+ await until(async()=>{for(const [i,a] of accounts.entries()){const items=await fixture.query('SELECT id_pos,id_item,cant FROM character_items WHERE character_id=$1 AND id_item=$2',[a.id,originals[i].id_item]);if(items.rows.length!==1||items.rows[0].id_pos!==20||items.rows[0].cant!==originals[i].cant)return false;}return fs.readdirSync(journalDirectory).filter(name=>name.endsWith('.json')).length===0;},30000);
+ check(true,'API recovery commits each pending inventory change once and clears journals');
+ const outageSave=await fetch(game+'/internal/save',{method:'POST',headers:{authorization:token},signal:AbortSignal.timeout(60000)});check(outageSave.ok&&(await outageSave.json()).ok===true,'world save succeeds after API recovery');
+ stage='restart after recovered outage';await stop(server);await until(()=>reconnected.every(c=>c.ws.readyState===WebSocket.CLOSED),15000);server=launch('server',gameEnv);await until(()=>health(server),180000);
+ const finalClients=await Promise.all(accounts.map(connect));
+ for(const [i,c] of finalClients.entries())check(c.character.inventory.filter(item=>item.idItem===originals[i].id_item).length===1&&c.character.inventory.some(item=>item.slot===20&&item.idItem===originals[i].id_item&&item.amount===originals[i].cant),'recovered inventory survives another restart without duplication');
  report.passed=true;
 }
-main().catch(error=>{report.failure='Disposable gameplay rehearsal failed; inspect protected fixture logs locally.';report.failureStage=stage;report.failureCategory=error.name;fs.writeFileSync(path.join(root,'gameplay-error.log'),error.stack||String(error));process.exitCode=1;}).finally(async()=>{for(const ws of sockets)ws.terminate();for(const child of children.reverse())await stop(child).catch(()=>{report.passed=false;});if(fixtureConnected)await fixture.end();await admin.end().catch(()=>{});report.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(root,'gameplay-receipt.json'),JSON.stringify(report,null,2));console.log(report.passed?'Two-player loopback combat/inventory/save/restart rehearsal passed. Sustained load, provider outages and chain lifecycle remain unverified.':'Gameplay fixture stopped at '+stage+'; inspect its protected receipt.');});
+main().catch(error=>{report.failure='Disposable gameplay rehearsal failed; inspect protected fixture logs locally.';report.failureStage=stage;report.failureCategory=error.name;fs.writeFileSync(path.join(root,'gameplay-error.log'),error.stack||String(error));process.exitCode=1;}).finally(async()=>{for(const ws of sockets)ws.terminate();for(const child of children.reverse())await stop(child).catch(()=>{report.passed=false;});if(fixtureConnected)await fixture.end();await admin.end().catch(()=>{});report.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(root,'gameplay-receipt.json'),JSON.stringify(report,null,2));console.log(report.passed?'Two-player combat/inventory/API-outage/restart rehearsal passed. Online backup concurrency, sustained load, RPC throttling and chain lifecycle remain unverified.':'Gameplay fixture stopped at '+stage+'; inspect its protected receipt.');});
