@@ -99,3 +99,11 @@ API-outage attempt 113515 verified two durable character journals and unchanged 
 
 Receipt host-regressions-gameplay-20261008-113750 passed: stopping the disposable API left both game transports connected with WebSocket heartbeats, guarded gameplay actions, two durable pending character journals and unchanged database inventory. Restarting the API committed each inventory move once, removed acknowledged journals and allowed world save. A further game restart/reconnect retained exact item quantities/slots without duplication. Combat and reward persistence checks also passed; disposable PostgreSQL stopped. NFT ownership remains simulated. Online snapshot concurrency, sustained load, RPC throttling, external alerts and real chain lifecycle remain open; public gameplay remains closed.
 
+
+Connected-game backup extension prepared: pg_dump of the disposable fixture while both players send movement/ping packets, authenticated encryption/decryption with an ephemeral fixture key, restore into a second disposable database, exact inventory/reward verification and connected-client/game-uptime checks. This is a logical backup concurrency rehearsal; it does not establish concurrent VSS physical-snapshot consistency or latency. Syntax checked; elevated execution pending.
+
+
+## Connected logical backup and restore passed (2026-10-08)
+
+Receipt host-regressions-gameplay-20261008-114216 passed encrypted logical pg_dump authentication and restore into a separate disposable database, preserving exact inventory and NPC rewards while both clients exchanged gameplay packets and remained connected. The fixture game uptime did not reset; disposable PostgreSQL stopped. Combat and API-outage recovery checks also passed. This validates logical backup concurrency only: physical VSS snapshot concurrency/latency, sustained gameplay load, Solana RPC throttling and real NFT/token lifecycle remain open. No live credentials, authority keys or public gameplay access were involved.
+

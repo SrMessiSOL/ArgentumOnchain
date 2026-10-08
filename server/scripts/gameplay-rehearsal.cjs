@@ -10,6 +10,7 @@ const protocolFile=path.join(repo,'frontend/lib/aowProtocol.ts');
 const protocol=new Module(protocolFile);protocol.filename=protocolFile;protocol.paths=module.paths;
 protocol._compile(ts.transpileModule(fs.readFileSync(protocolFile,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,protocolFile);
 const p=protocol.exports;
+const {encrypt,decrypt}=require(path.join(repo,'scripts/realm-backup-crypto.cjs'));
 const [rootArg,seed,pgBin]=process.argv.slice(2);
 const root=path.resolve(rootArg||'');
 const adminURL=new URL(process.env.AOCHAIN_SECURITY_ADMIN_DATABASE_URL||'');
@@ -125,6 +126,35 @@ async function main(){
  stage='restart after recovered outage';await stop(server);await until(()=>reconnected.every(c=>c.ws.readyState===WebSocket.CLOSED),15000);server=launch('server',gameEnv);await until(()=>health(server),180000);
  const finalClients=await Promise.all(accounts.map(connect));
  for(const [i,c] of finalClients.entries())check(c.character.inventory.filter(item=>item.idItem===originals[i].id_item).length===1&&c.character.inventory.some(item=>item.slot===20&&item.idItem===originals[i].id_item&&item.amount===originals[i].cant),'recovered inventory survives another restart without duplication');
+ stage='encrypted logical backup during connected gameplay';
+ const backupDir=path.join(dir,'backup');fs.mkdirSync(backupDir);
+ async function pgTool(program,args){
+  const log=fs.openSync(path.join(backupDir,program+'.log'),'a');
+  const child=spawn(path.join(pgBin,program+'.exe'),['-h','127.0.0.1','-p','55433','-U',decodeURIComponent(url.username),...args],{env:{...base,PGPASSWORD:decodeURIComponent(url.password)},windowsHide:true,stdio:['ignore',log,log]});fs.closeSync(log);children.push(child);
+  await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>{child.kill();reject(Error('Disposable backup tool timed out'));},120000);child.once('error',error=>{clearTimeout(timeout);reject(error);});child.once('exit',code=>{clearTimeout(timeout);code===0?resolve():reject(Error('Disposable backup tool failed'));});});
+ }
+ const itemSql='SELECT character_id,id_pos,id_item,cant,equipped FROM character_items ORDER BY character_id,id_pos';
+ const rewardSql='SELECT id,npc_matados,gold,exp FROM characters ORDER BY id';
+ const expectedItems=(await fixture.query(itemSql)).rows,expectedRewards=(await fixture.query(rewardSql)).rows;
+ const uptimeBefore=(await(await fetch(game+'/health')).json()).uptimeSeconds;
+ const pingsBefore=finalClients.map(c=>c.pongs);
+ let heartbeatTick=1000;
+ const activity=setInterval(()=>{for(const c of finalClients)if(c.ws.readyState===WebSocket.OPEN){c.ws.send(p.createPingPacket(heartbeatTick++));c.ws.send(p.createPositionPacket((heartbeatTick%4)+1,heartbeatTick));}},250);
+ let restoredClient;
+ try{
+  const dump=path.join(backupDir,'fixture.dump');await pgTool('pg_dump',['-d',db,'--format=custom','--file',dump]);
+  const key=path.join(backupDir,'fixture.key'),cipher=path.join(backupDir,'fixture.aobak'),plain=path.join(backupDir,'restored.dump');fs.writeFileSync(key,crypto.randomBytes(32),{flag:'wx',mode:0o600});
+  await encrypt(dump,cipher,key);await decrypt(cipher,plain,key);
+  const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');check(hash(dump)===hash(plain),'connected-game backup encryption and authenticated round trip');
+  const restoreDb='aoweb_gameplay_restore_'+Date.now();await admin.query('CREATE DATABASE "'+restoreDb+'"');await pgTool('pg_restore',['-d',restoreDb,'--exit-on-error','--no-owner',plain]);
+  const restoreUrl=new URL(url);restoreUrl.pathname='/'+restoreDb;restoredClient=new Client({connectionString:restoreUrl.toString(),options:'-c default_transaction_read_only=on'});await restoredClient.connect();
+  check(JSON.stringify((await restoredClient.query(itemSql)).rows)===JSON.stringify(expectedItems),'isolated logical restore preserves exact inventory');
+  check(JSON.stringify((await restoredClient.query(rewardSql)).rows)===JSON.stringify(expectedRewards),'isolated logical restore preserves NPC rewards');
+  await until(()=>finalClients.every((c,i)=>c.pongs>pingsBefore[i]),5000);
+  check(finalClients.every(c=>c.ws.readyState===WebSocket.OPEN)&&(await(await fetch(game+'/health')).json()).players===2,'both players stay connected and exchange gameplay pings during backup/restore');
+  check((await(await fetch(game+'/health')).json()).uptimeSeconds>=uptimeBefore,'game process was not restarted during backup/restore');
+  report.connectedBackup={format:'logical pg_dump; not VSS physical snapshot',encrypted:true,restored:true,players:2,cipherSha256:hash(cipher)};
+ }finally{clearInterval(activity);if(restoredClient)await restoredClient.end();}
  report.passed=true;
 }
-main().catch(error=>{report.failure='Disposable gameplay rehearsal failed; inspect protected fixture logs locally.';report.failureStage=stage;report.failureCategory=error.name;fs.writeFileSync(path.join(root,'gameplay-error.log'),error.stack||String(error));process.exitCode=1;}).finally(async()=>{for(const ws of sockets)ws.terminate();for(const child of children.reverse())await stop(child).catch(()=>{report.passed=false;});if(fixtureConnected)await fixture.end();await admin.end().catch(()=>{});report.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(root,'gameplay-receipt.json'),JSON.stringify(report,null,2));console.log(report.passed?'Two-player combat/inventory/API-outage/restart rehearsal passed. Online backup concurrency, sustained load, RPC throttling and chain lifecycle remain unverified.':'Gameplay fixture stopped at '+stage+'; inspect its protected receipt.');});
+main().catch(error=>{report.failure='Disposable gameplay rehearsal failed; inspect protected fixture logs locally.';report.failureStage=stage;report.failureCategory=error.name;fs.writeFileSync(path.join(root,'gameplay-error.log'),error.stack||String(error));process.exitCode=1;}).finally(async()=>{for(const ws of sockets)ws.terminate();for(const child of children.reverse())await stop(child).catch(()=>{report.passed=false;});if(fixtureConnected)await fixture.end();await admin.end().catch(()=>{});report.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(root,'gameplay-receipt.json'),JSON.stringify(report,null,2));console.log(report.passed?'Two-player combat/API-outage and encrypted logical backup/restore rehearsal passed. Physical VSS concurrency, sustained load, RPC throttling and chain lifecycle remain unverified.':'Gameplay fixture stopped at '+stage+'; inspect its protected receipt.');});
