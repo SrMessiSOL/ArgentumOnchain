@@ -21,13 +21,18 @@ export function validateSignerEnvironment(env:NodeJS.ProcessEnv){
  new PublicKey(env.AOWEB_GOLD_MINT!);
 }
 
+export function validateSignerDatabaseRole(row:Record<string,unknown>|undefined){
+ const attributes=['rolsuper','rolcreatedb','rolcreaterole','rolreplication','rolbypassrls'];
+ if(!row||attributes.some(key=>row[key]!==false))throw Error('Signer database role is privileged');
+}
+
 // Preparation-only service: disabled is deliberately the only accepted startup mode.
 // Activation requires the custody/privilege/restore/lifecycle review in the release gate.
 export async function startSigner(){
  validateSignerEnvironment(process.env);
  const pool=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:3000,query_timeout:3000,options:'-c default_transaction_read_only=on -c statement_timeout=3000'});
- const privileges=await pool.query("SELECT rolsuper,rolcreatedb,rolcreaterole,rolreplication FROM pg_roles WHERE rolname=current_user");
- if(!privileges.rows[0]||Object.values(privileges.rows[0]).some(Boolean))throw Error('Signer database role is privileged');
+ const privileges=await pool.query("SELECT rolsuper,rolcreatedb,rolcreaterole,rolreplication,rolbypassrls FROM pg_roles WHERE rolname=current_user");
+ validateSignerDatabaseRole(privileges.rows[0]);
  const forbidden=await pool.query(`SELECT has_schema_privilege(current_user,'public','CREATE') AS schema_create,
  has_database_privilege(current_user,current_database(),'CREATE') AS database_create,
  EXISTS(SELECT 1 FROM pg_auth_members WHERE member=(SELECT oid FROM pg_roles WHERE rolname=current_user)) AS memberships,

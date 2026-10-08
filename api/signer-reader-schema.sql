@@ -3,9 +3,9 @@
 -- Never grant the API or game membership in this role.
 DO $$ BEGIN
  IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='aoweb_signer_reader') THEN
-  CREATE ROLE aoweb_signer_reader NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION;
+  CREATE ROLE aoweb_signer_reader NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
  END IF;
- IF EXISTS(SELECT 1 FROM pg_roles WHERE rolname='aoweb_signer_reader' AND (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication))
+ IF EXISTS(SELECT 1 FROM pg_roles WHERE rolname='aoweb_signer_reader' AND (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls))
  OR EXISTS(SELECT 1 FROM pg_auth_members WHERE member=(SELECT oid FROM pg_roles WHERE rolname='aoweb_signer_reader')) THEN
   RAISE EXCEPTION 'Existing signer reader role is privileged; refused to repurpose it';
  END IF;

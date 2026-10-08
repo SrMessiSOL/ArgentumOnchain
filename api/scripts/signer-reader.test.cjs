@@ -16,7 +16,10 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),{Client}=requir
   await client.query('SELECT * FROM game_asset_operations');await client.query('SELECT character_id,version,hash,settled FROM character_snapshots');
   for(const sql of ['UPDATE economy_intents SET state=state','DELETE FROM game_assets','SELECT bundle FROM character_snapshots','SELECT * FROM auth_sessions','CREATE TABLE signer_forbidden(id int)','UPDATE account_wallets SET address=address'])await assert.rejects(()=>client.query(sql),{code:'42501'});
   await client.query('RESET ROLE');
-  const props=(await client.query("SELECT rolsuper,rolcreatedb,rolcreaterole,rolreplication,rolcanlogin FROM pg_roles WHERE rolname='aoweb_signer_reader'")).rows[0];assert.equal(Object.values(props).some(Boolean),false);
+  const props=(await client.query("SELECT rolsuper,rolcreatedb,rolcreaterole,rolreplication,rolbypassrls,rolcanlogin FROM pg_roles WHERE rolname='aoweb_signer_reader'")).rows[0];assert.equal(Object.values(props).some(Boolean),false);
+  await client.query('ALTER ROLE aoweb_signer_reader BYPASSRLS');
+  await assert.rejects(()=>client.query(sql));
+  await client.query('ALTER ROLE aoweb_signer_reader NOBYPASSRLS');
   console.log('Disposable signer reader SQL passed: permitted reads, forbidden writes/private columns and NOLOGIN privilege checks.');
  }finally{
   if(client)await client.end();
