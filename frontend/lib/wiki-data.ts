@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { getApiBaseUrlCandidates } from "@/lib/api-base-url";
 import type { PublicWikiResponse } from "@/lib/wiki";
+import wikiSnapshot from "./wiki-snapshot.json";
 
 export const WIKI_REVALIDATE_SECONDS = 60 * 60 * 24 * 30;
 
@@ -141,6 +142,8 @@ const getCachedWikiData = unstable_cache(
 
 // A temporary API outage must not cache an empty wiki for a month.
 export async function getWikiData(): Promise<PublicWikiResponse> {
+    // The public reference manual remains available while realm access is closed.
+    if (process.env.VERCEL) return normalizeWikiResponse(wikiSnapshot);
     try { return await getCachedWikiData(); }
-    catch { return createEmptyWikiResponse(); }
+    catch { return normalizeWikiResponse(wikiSnapshot); }
 }
