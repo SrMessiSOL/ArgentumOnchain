@@ -83,3 +83,8 @@ Attempt 111824 created a character but selection correctly required mint/stake. 
 
 Receipt host-regressions-gameplay-20261008-112357 passed: two authenticated concurrent clients, decoded ping/authoritative position frames, inventory reordering without duplicate source, world save with both connected, fixture game restart, reconnection and persisted position/inventory checks. The disposable cluster stopped. NFT ownership was explicitly simulated in the guarded harness; no mint/stake/RPC occurred. This is two-client loopback evidence, not WAN, combat/NPC activity, provider outage, concurrent snapshot latency or larger capacity evidence. Production gameplay remains closed and the live game has not received the transport change.
 
+
+## Functional NPC combat passed (2026-10-08)
+
+Receipt host-regressions-gameplay-20261008-112824 passed real melee packets from both authenticated clients against two controlled stationary 1-HP NPCs. Each character recorded one NPC kill, 30 gold and 250 experience under the fixture's balance settings. World save, game restart and reconnect preserved these rewards without duplication and retained reordered inventory and saved positions. Disposable PostgreSQL stopped. This is functional combat coverage, not representative NPC difficulty, sustained gameplay load or actual NFT ownership; chain ownership remains simulated and public gameplay closed.
+

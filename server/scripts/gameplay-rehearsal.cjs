@@ -46,9 +46,14 @@ async function main(){
  // Fixture-only legacy off-chain characters. The guards above pin this client
  // to the generated disposable database; production triggers remain intact.
  await fixture.query('ALTER TABLE characters ALTER COLUMN chain_required SET DEFAULT FALSE');
+ // Controlled weak NPCs exercise the real melee/death/reward paths. This is
+ // a functional fixture, not representative combat load or difficulty.
+ const npc=await fixture.query(`UPDATE game_npcs SET npc_type=0,movement=0,data=data||$1::jsonb WHERE id=504 RETURNING id`,[JSON.stringify({npcType:0,movement:0,hp:1,maxHp:1,def:0,poderEvasion:-1000,minHit:0,maxHit:0,exp:50,gold:10,drop:[],objs:[]})]);
+ check(npc.rowCount===1,'controlled combat NPC template exists');
  const dir=path.join(root,'gameplay');fs.mkdirSync(dir,{recursive:true});
  for(const name of ['api','server']){const dest=path.join(dir,name);fs.mkdirSync(dest);fs.cpSync(path.join(repo,name,'dist'),path.join(dest,'dist'),{recursive:true});for(const file of fs.readdirSync(path.join(repo,name)))if(file.endsWith('.sql'))fs.copyFileSync(path.join(repo,name,file),path.join(dest,file));}
  for(const folder of ['jsons','mapas_source'])fs.cpSync(path.join(repo,'server',folder),path.join(dir,'server',folder),{recursive:true});
+ const npcState=path.join(dir,'npc-state','mapa_2');fs.mkdirSync(npcState,{recursive:true});fs.writeFileSync(path.join(npcState,'npcs.json'),JSON.stringify([{mapNum:2,x:22,y:13,npcIndex:504,movement:0},{mapNum:2,x:24,y:13,npcIndex:504,movement:0}]));
  fs.copyFileSync(path.join(__dirname,'gameplay-api-bootstrap.cjs'),path.join(dir,'api/gameplay-api-bootstrap.cjs'));
  const token=crypto.randomBytes(32).toString('hex');
  const base={PATH:process.env.PATH,SystemRoot:process.env.SystemRoot,TEMP:process.env.TEMP,TMP:process.env.TMP,NODE_ENV:'test',HOST:'127.0.0.1',NODE_PATH:[path.join(repo,'api/node_modules'),path.join(repo,'server/node_modules')].join(path.delimiter)};
@@ -62,6 +67,7 @@ async function main(){
  check(true,'fixture game ready');stage='account creation and login';
  const accounts=[];
  for(let i=0;i<2;i++){const suffix=Array.from(crypto.randomBytes(8),v=>String.fromCharCode(97+v%26)).join('');const a=await request('/auth/register',null,{name:'Fixture'+suffix,email:suffix+'@example.invalid',password:crypto.randomBytes(20).toString('hex')});const created=await request('/auth/create-character',a.sessionToken,{name:'Fixture'+suffix,class:'guerrero',race:'humano',gender:'male',headId:1});const character=created.characters.find(c=>c.name==='Fixture'+suffix);await request('/auth/select-character',a.sessionToken,{characterId:character._id});a.id=character._id;accounts.push(a);}
+ for(const [i,a] of accounts.entries())await fixture.query('UPDATE characters SET map_id=2,pos_x=$1,pos_y=14 WHERE id=$2',[22+i*2,a.id]);
  const clients=await Promise.all(accounts.map(connect));check((await(await fetch(game+'/health')).json()).players===2,'two authenticated players simultaneously connected');
  stage='inventory persistence';const originals=[];
  for(const [i,a] of accounts.entries()){
@@ -74,6 +80,14 @@ async function main(){
   const absent=await fixture.query('SELECT 1 FROM character_items WHERE character_id=$1 AND id_pos=$2',[a.id,source.id_pos]);
   check(absent.rowCount===0,'inventory reorder persisted without duplicate source');
  }
+ stage='NPC melee combat';
+ const combatBefore=(await fixture.query('SELECT id,npc_matados,gold,exp FROM characters ORDER BY id')).rows;
+ for(let round=0;round<10;round++){for(const c of clients){c.ws.send(p.createChangeHeadingPacket(1));c.ws.send(p.createAttackMeleePacket());}await pause(1100);}
+ const combatSave=await fetch(game+'/internal/save',{method:'POST',headers:{authorization:token},signal:AbortSignal.timeout(60000)});check(combatSave.ok&&(await combatSave.json()).ok===true,'combat state world save');
+ const combatAfter=(await fixture.query('SELECT id,npc_matados,gold,exp FROM characters ORDER BY id')).rows;
+ check(combatAfter.every((row,i)=>Number(row.npc_matados)>Number(combatBefore[i].npc_matados)),'both players kill an NPC through real melee packets');
+ check(combatAfter.every((row,i)=>Number(row.gold)>Number(combatBefore[i].gold)&&Number(row.exp)>Number(combatBefore[i].exp)),'NPC gold and experience rewards persisted for both players');
+ report.combat={before:combatBefore,after:combatAfter,fixture:'two stationary 1-HP NPCs; functional coverage only'};
  stage='movement';for(let tick=0;tick<40;tick++){for(const [i,c] of clients.entries()){c.ws.send(p.createPingPacket(tick));c.ws.send(p.createPositionPacket([1,2,3,4][(Math.floor(tick/5)+i)%4],tick+1));}await pause(250);}
  check(clients.every(c=>c.pongs>3&&c.decodeErrors===0),'both clients receive decoded ping responses');check(clients.every(c=>c.positions>0),'authoritative position frames received');
  stage='world save';const saved=await fetch(game+'/internal/save',{method:'POST',headers:{authorization:token},signal:AbortSignal.timeout(60000)});check(saved.ok&&(await saved.json()).ok===true,'world save while two players connected');
@@ -82,7 +96,8 @@ async function main(){
  stage='game restart';server=launch('server',gameEnv);await until(()=>health(server),180000);stage='reconnect';
  const reconnected=await Promise.all(accounts.map(connect));check((await(await fetch(game+'/health')).json()).players===2,'both players reconnect after fixture game process restart');
  const after=await fixture.query('SELECT id,map_id,pos_x,pos_y FROM characters ORDER BY id');check(JSON.stringify(before.rows)===JSON.stringify(after.rows),'saved positions survive restart');check(reconnected.every(c=>c.decodeErrors===0),'reconnect snapshots decode');
+ const combatReload=(await fixture.query('SELECT id,npc_matados,gold,exp FROM characters ORDER BY id')).rows;check(JSON.stringify(combatReload)===JSON.stringify(combatAfter),'NPC rewards survive game restart without duplication');
  for(const [i,c] of reconnected.entries())check(c.character.inventory.some(item=>item.slot===21&&item.idItem===originals[i].id_item&&item.amount===originals[i].cant),'reconnected inventory reflects persisted reorder');
  report.passed=true;
 }
-main().catch(error=>{report.failure='Disposable gameplay rehearsal failed; inspect protected fixture logs locally.';report.failureStage=stage;report.failureCategory=error.name;fs.writeFileSync(path.join(root,'gameplay-error.log'),error.stack||String(error));process.exitCode=1;}).finally(async()=>{for(const ws of sockets)ws.terminate();for(const child of children.reverse())await stop(child).catch(()=>{report.passed=false;});if(fixtureConnected)await fixture.end();await admin.end().catch(()=>{});report.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(root,'gameplay-receipt.json'),JSON.stringify(report,null,2));console.log(report.passed?'Two-player loopback movement/save/restart rehearsal passed. Combat, load, provider outages and chain lifecycle remain unverified.':'Gameplay fixture stopped at '+stage+'; inspect its protected receipt.');});
+main().catch(error=>{report.failure='Disposable gameplay rehearsal failed; inspect protected fixture logs locally.';report.failureStage=stage;report.failureCategory=error.name;fs.writeFileSync(path.join(root,'gameplay-error.log'),error.stack||String(error));process.exitCode=1;}).finally(async()=>{for(const ws of sockets)ws.terminate();for(const child of children.reverse())await stop(child).catch(()=>{report.passed=false;});if(fixtureConnected)await fixture.end();await admin.end().catch(()=>{});report.finishedAt=new Date().toISOString();fs.writeFileSync(path.join(root,'gameplay-receipt.json'),JSON.stringify(report,null,2));console.log(report.passed?'Two-player loopback combat/inventory/save/restart rehearsal passed. Sustained load, provider outages and chain lifecycle remain unverified.':'Gameplay fixture stopped at '+stage+'; inspect its protected receipt.');});
