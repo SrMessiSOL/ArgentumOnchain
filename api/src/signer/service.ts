@@ -15,7 +15,7 @@ export function validateSignerEnvironment(env:NodeJS.ProcessEnv){
  if(!path.isAbsolute(env.AOWEB_SIGNER_JOURNAL_DIR!)||!path.isAbsolute(env.AOWEB_GOLD_AUTHORITY_FILE!))deny();
  if(env.TOKEN_AUTH||env.GAME_SERVICE_TOKEN||env.AOWEB_DEVNET_ISSUER_FILE)deny();
  const url=new URL(env.DATABASE_URL!);
- if(!['postgres:','postgresql:'].includes(url.protocol)||url.hostname!=='127.0.0.1'||url.username!=='aoweb_signer_reader')deny();
+ if(!['postgres:','postgresql:'].includes(url.protocol)||url.hostname!=='127.0.0.1'||url.username!=='aoweb_signer_reader'||!url.password||url.port!=='55432'||url.pathname!=='/aochain_fresh'||url.search||url.hash)deny();
  const port=Number(env.PORT),gold=Number(env.AOWEB_SIGNER_MAX_GOLD),lamports=Number(env.AOWEB_SIGNER_MAX_LAMPORTS);
  if(!Number.isInteger(port)||port<1024||port>65535||![gold,lamports].every(n=>Number.isSafeInteger(n)&&n>0))deny();
  new PublicKey(env.AOWEB_GOLD_MINT!);

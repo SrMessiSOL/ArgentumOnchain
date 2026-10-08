@@ -47,8 +47,15 @@ try{
  const partial=randomUUID();fs.writeFileSync(path.join(dir,partial+'.json'),'{');assert.throws(()=>recordSignedReceipt(dir,{...receipt,id:partial}));
  assert.throws(()=>recordSignedReceipt(dir,{...receipt,id:'../escape'}));
 }finally{fs.rmSync(dir,{recursive:true,force:true});}
-const env={NODE_ENV:'production',HOST:'127.0.0.1',PORT:'3104',AOWEB_SIGNER_ENABLED:'0',AOWEB_SIGNER_TOKEN:'t'.repeat(64),AOWEB_SIGNER_JOURNAL_DIR:dir,AOWEB_GOLD_AUTHORITY_FILE:path.join(dir,'fixture-only'),DATABASE_URL:'postgresql://aoweb_signer_reader:fixture@127.0.0.1:55432/fixture',AOWEB_GOLD_MINT:mint.toBase58(),AOWEB_SIGNER_MAX_GOLD:'100',AOWEB_SIGNER_MAX_LAMPORTS:'1000000'};
+const env={NODE_ENV:'production',HOST:'127.0.0.1',PORT:'3104',AOWEB_SIGNER_ENABLED:'0',AOWEB_SIGNER_TOKEN:'t'.repeat(64),AOWEB_SIGNER_JOURNAL_DIR:dir,AOWEB_GOLD_AUTHORITY_FILE:path.join(dir,'fixture-only'),DATABASE_URL:'postgresql://aoweb_signer_reader:fixture@127.0.0.1:55432/aochain_fresh',AOWEB_GOLD_MINT:mint.toBase58(),AOWEB_SIGNER_MAX_GOLD:'100',AOWEB_SIGNER_MAX_LAMPORTS:'1000000'};
 validateSignerEnvironment(env);
+for(const databaseUrl of [
+ 'postgresql://aoweb_signer_reader:fixture@127.0.0.1:55433/aochain_fresh',
+ 'postgresql://aoweb_signer_reader:fixture@127.0.0.1:55432/other_realm',
+ 'postgresql://aoweb_signer_reader:fixture@127.0.0.1:55432/aochain_fresh?options=-c%20default_transaction_read_only=off',
+ 'postgresql://aoweb_signer_reader:fixture@127.0.0.1:55432/aochain_fresh#ignored',
+ 'postgresql://aoweb_signer_reader@127.0.0.1:55432/aochain_fresh'
+])assert.throws(()=>validateSignerEnvironment({...env,DATABASE_URL:databaseUrl}));
 const reader={rolsuper:false,rolcreatedb:false,rolcreaterole:false,rolreplication:false,rolbypassrls:false};
 validateSignerDatabaseRole(reader);
 for(const key of Object.keys(reader))assert.throws(()=>validateSignerDatabaseRole({...reader,[key]:true}));
