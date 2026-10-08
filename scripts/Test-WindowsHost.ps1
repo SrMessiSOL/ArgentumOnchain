@@ -74,6 +74,7 @@ try {
  $env:TOKEN_AUTH='test-only-operations-'+[Guid]::NewGuid().ToString('N')
  Run-Check 'Offline signer policy and journal' (Join-Path $repo 'api') @('scripts/signer-policy.test.cjs')
  Run-Check 'Signer isolation and lifetime budgets' (Join-Path $repo 'api') @('scripts/signer-isolation.test.cjs')
+ Run-Check 'Signer HTTP protocol isolation' (Join-Path $repo 'api') @('scripts/signer-http.test.cjs')
  Run-Check 'Signer database reader isolation' (Join-Path $repo 'api') @('scripts/signer-reader.test.cjs')
  Run-Check 'Backup authenticated encryption' $repo @('scripts/realm-backup-crypto.test.cjs')
  $env:GAME_SERVICE_TOKEN='test-only-game-'+[Guid]::NewGuid().ToString('N')

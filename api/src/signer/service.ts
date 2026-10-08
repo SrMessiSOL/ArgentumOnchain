@@ -1,6 +1,6 @@
 import http from 'node:http';
 import path from 'node:path';
-import {timingSafeEqual} from 'node:crypto';
+import {signerHttpHandler} from './http';
 import {Pool} from 'pg';
 import {Keypair,PublicKey} from '@solana/web3.js';
 import {checkedChain} from '../economy-chain';
@@ -25,7 +25,6 @@ export function validateSignerEnvironment(env:NodeJS.ProcessEnv){
 // Activation requires the custody/privilege/restore/lifecycle review in the release gate.
 export async function startSigner(){
  validateSignerEnvironment(process.env);
- const token=Buffer.from(process.env.AOWEB_SIGNER_TOKEN!);
  const pool=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:3000,query_timeout:3000,options:'-c default_transaction_read_only=on -c statement_timeout=3000'});
  const privileges=await pool.query("SELECT rolsuper,rolcreatedb,rolcreaterole,rolreplication FROM pg_roles WHERE rolname=current_user");
  if(!privileges.rows[0]||Object.values(privileges.rows[0]).some(Boolean))throw Error('Signer database role is privileged');
@@ -35,14 +34,8 @@ export async function startSigner(){
  EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p') AND
  (has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,TRIGGER') OR has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE'))) AS writes`);
  if(Object.values(forbidden.rows[0]).some(Boolean))throw Error('Signer database role is writable');
- const server=http.createServer(async(req,res)=>{
-  res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');
-  const supplied=Buffer.from(req.headers.authorization?.replace(/^Bearer /,'')??'');
-  if(supplied.length!==token.length||!timingSafeEqual(supplied,token)){res.writeHead(401).end('{"error":"unauthorized"}');return;}
-  if(req.method==='GET'&&req.url==='/health'){res.end('{"ok":true,"enabled":false}');return;}
-  // No route can sign while preparation mode is enforced.
-  res.writeHead(503).end('{"error":"signer.disabled"}');
- });
+ // No production signing hooks are bound: activation remains a separate gate.
+ const server=http.createServer(signerHttpHandler(process.env.AOWEB_SIGNER_TOKEN!,false));
  server.requestTimeout=5000;server.headersTimeout=5000;server.maxHeadersCount=20;
  server.listen(Number(process.env.PORT),'127.0.0.1');
  server.on('close',()=>{void pool.end();});
