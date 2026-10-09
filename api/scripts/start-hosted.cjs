@@ -28,8 +28,11 @@ function validateHostedEnvironment(env) {
       site.pathname !== '/' || site.search || site.hash || env.CORS_ORIGIN !== site.origin) {
     reject('Hosted startup requires one matching HTTPS site and CORS origin');
   }
-  // Until signer custody is implemented, this entry point permits preparation only.
-  if (env.AOWEB_SETTLEMENT_PAUSED !== '1') reject('Hosted preparation requires settlement paused');
+  // The first wallet rehearsal is local only. Opening external settlement is a
+  // separate gate; mounting authority files into the API is never permitted.
+  const privateWalletTest=env.AOWEB_PRIVATE_WALLET_TEST==='1'&&env.AOWEB_SETTLEMENT_PAUSED==='0';
+  if (env.AOWEB_SETTLEMENT_PAUSED !== '1'&&!privateWalletTest) reject('Hosted preparation requires settlement paused');
+  if(privateWalletTest&&(!env.AOWEB_SIGNER_URL||!env.AOWEB_GOLD_MINT||!env.AOWEB_DEVNET_METADATA_URL))reject('Private wallet rehearsal requires isolated custody and mint metadata');
   if (env.AOWEB_GOLD_AUTHORITY_FILE || env.AOWEB_DEVNET_ISSUER_FILE) {
     reject('Do not mount authority files into the hosted API; signer isolation remains unfinished');
   }

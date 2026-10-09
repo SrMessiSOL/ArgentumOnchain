@@ -103,9 +103,9 @@ async function main(){
    }
    const elapsed=Date.now()-begin;
    if(elapsed>=nextInventory){
-    const destination=slot===21?22:21;
-    for(const c of clients)c.ws.send(p.createReorderInventoryItemPacket(slot,destination));
-    await until(async()=>{for(const [i,a] of accounts.entries()){const rows=(await fixture.query('SELECT id_pos,cant FROM character_items WHERE character_id=$1 AND id_item=$2',[a.id,originals[i].id_item])).rows;if(rows.length!==1||rows[0].id_pos!==destination||rows[0].cant!==originals[i].cant)return false;}return true;},15000);
+    const destination=slot===21?0:21;
+    for(const [i,c] of clients.entries())c.ws.send(p.createReorderInventoryItemPacket(slot===21?21:originals[i].id_pos,destination===21?21:originals[i].id_pos));
+    await until(async()=>{for(const [i,a] of accounts.entries()){const rows=(await fixture.query('SELECT id_pos,cant FROM character_items WHERE character_id=$1 AND id_item=$2',[a.id,originals[i].id_item])).rows;if(rows.length!==1||rows[0].id_pos!==(destination===21?21:originals[i].id_pos)||rows[0].cant!==originals[i].cant)return false;}return true;},15000);
     slot=destination;nextInventory=elapsed+15000;
    }
    if(elapsed>=nextSave){
@@ -116,7 +116,7 @@ async function main(){
    await pause(Math.max(0,due-Date.now()));lag.push(Math.max(0,Date.now()-due));tick++;
    if(tick%240===0)console.log('Disposable gameplay soak: '+Math.round((Date.now()-begin)/1000)+' seconds; '+playerCount+' clients.');
   }
-  if(slot!==21){for(const c of clients)c.ws.send(p.createReorderInventoryItemPacket(slot,21));await until(async()=>{for(const [i,a] of accounts.entries()){const rows=(await fixture.query('SELECT id_pos,cant FROM character_items WHERE character_id=$1 AND id_item=$2',[a.id,originals[i].id_item])).rows;if(rows.length!==1||rows[0].id_pos!==21||rows[0].cant!==originals[i].cant)return false;}return true;},15000);}
+  if(slot!==21){for(const [i,c] of clients.entries())c.ws.send(p.createReorderInventoryItemPacket(originals[i].id_pos,21));await until(async()=>{for(const [i,a] of accounts.entries()){const rows=(await fixture.query('SELECT id_pos,cant FROM character_items WHERE character_id=$1 AND id_item=$2',[a.id,originals[i].id_item])).rows;if(rows.length!==1||rows[0].id_pos!==21||rows[0].cant!==originals[i].cant)return false;}return true;},15000);}
   check(clients.every((c,i)=>c.decodeErrors===0&&c.pongs>pongs[i]+soakSeconds),'sustained protocol responses without decoder errors');
   const r=await fetch(game+'/internal/save',{method:'POST',headers:{authorization:token},signal:AbortSignal.timeout(60000)});check(r.ok&&(await r.json()).ok===true,'final soak save');
   combatAfter=(await fixture.query('SELECT id,npc_matados,gold,exp FROM characters ORDER BY id')).rows;

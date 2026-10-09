@@ -9,9 +9,9 @@ import {recordSignedReceipt} from './journal';
 import {reserveIssuance,type IssuanceBudget} from './budget';
 import {signCommittedCharacterPurchase,type CharacterPurchaseApproval} from './market-policy';
 
-export function validateSignerEnvironment(env:NodeJS.ProcessEnv){
+export function validateSignerEnvironment(env:NodeJS.ProcessEnv,activation=false){
  const deny=()=>{throw Error('Signer startup policy failed');};
- if(env.NODE_ENV!=='production'||env.HOST!=='127.0.0.1'||env.AOWEB_SIGNER_ENABLED!=='0')deny();
+ if(env.NODE_ENV!=='production'||env.HOST!=='127.0.0.1'||env.AOWEB_SIGNER_ENABLED!==(activation?'1':'0'))deny();
  if(!env.AOWEB_SIGNER_TOKEN||env.AOWEB_SIGNER_TOKEN.length<64||!env.AOWEB_SIGNER_JOURNAL_DIR||!env.AOWEB_GOLD_AUTHORITY_FILE)deny();
  if(!path.isAbsolute(env.AOWEB_SIGNER_JOURNAL_DIR!)||!path.isAbsolute(env.AOWEB_GOLD_AUTHORITY_FILE!))deny();
  if(env.TOKEN_AUTH||env.GAME_SERVICE_TOKEN||env.AOWEB_DEVNET_ISSUER_FILE)deny();
@@ -29,9 +29,10 @@ export function validateSignerDatabaseRole(row:Record<string,unknown>|undefined)
 
 // Preparation-only service: disabled is deliberately the only accepted startup mode.
 // Activation requires the custody/privilege/restore/lifecycle review in the release gate.
-export async function startSigner(){
- validateSignerEnvironment(process.env);
+export async function startSigner(activation=false){
+ validateSignerEnvironment(process.env,activation);
  const pool=new Pool({connectionString:process.env.DATABASE_URL,max:2,connectionTimeoutMillis:3000,query_timeout:3000,options:'-c default_transaction_read_only=on -c statement_timeout=3000'});
+ try{
  const privileges=await pool.query("SELECT rolsuper,rolcreatedb,rolcreaterole,rolreplication,rolbypassrls FROM pg_roles WHERE rolname=current_user");
  validateSignerDatabaseRole(privileges.rows[0]);
  const forbidden=await pool.query(`SELECT has_schema_privilege(current_user,'public','CREATE') AS schema_create,
@@ -40,12 +41,14 @@ export async function startSigner(){
  EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('r','p') AND
  (has_table_privilege(current_user,c.oid,'INSERT,UPDATE,DELETE,TRUNCATE,TRIGGER') OR has_any_column_privilege(current_user,c.oid,'INSERT,UPDATE'))) AS writes`);
  if(Object.values(forbidden.rows[0]).some(Boolean))throw Error('Signer database role is writable');
- // No production signing hooks are bound: activation remains a separate gate.
- const server=http.createServer(signerHttpHandler(process.env.AOWEB_SIGNER_TOKEN!,false));
+ // Only the separate activation entry point can bind committed-intent handlers.
+ const handlers=activation?await (await import('./activation.js')).loadActivatedHandlers(pool):undefined;
+ const server=http.createServer(signerHttpHandler(process.env.AOWEB_SIGNER_TOKEN!,activation,handlers));
  server.requestTimeout=5000;server.headersTimeout=5000;server.maxHeadersCount=20;
  server.listen(Number(process.env.PORT),'127.0.0.1');
  server.on('close',()=>{void pool.end();});
  return server;
+ }catch(error){await pool.end();throw error;}
 }
 
 /** Reviewed signing core, not exposed by the preparation service. No broadcast. */

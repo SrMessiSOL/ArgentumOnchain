@@ -23,6 +23,7 @@ function playerRoute(method, path) {
 }
 
 function validateConfig(cfg) {
+  if(cfg.metadataEnabled!==undefined&&typeof cfg.metadataEnabled!=='boolean')throw Error('Invalid metadata switch');
   if(cfg.proxyHmacKey!==undefined&&!/^[a-f0-9]{64}$/i.test(cfg.proxyHmacKey))throw Error('Invalid separate proxy credential');
   for (const field of ['backendOrigin', 'siteOrigin']) {
     const url = new URL(cfg[field]);
@@ -33,6 +34,7 @@ function validateConfig(cfg) {
 
 function createGateway(readConfig, ports = {api:3101, game:7766}) {
   const verifyProxy=createVerifier();
+  let metadataActive=0,metadataWindow=0,metadataReads=0;
   function getConfig(req) {
     try {
       const cfg = validateConfig(readConfig());
@@ -50,6 +52,26 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
     return result;
   }
   const server = http.createServer((req,res) => {
+    // Public NFT metadata is read-only and may be available while player access
+    // stays closed. Exact UUID query only; no cookies or credentials forwarded.
+    if(req.method==='GET'&&/^\/player-api\/game-assets\/metadata\?id=[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(req.url||'')){
+      try{
+        const cfg=validateConfig(readConfig());
+        if(cfg.metadataEnabled===true&&req.headers.host===new URL(cfg.backendOrigin).host){
+          const now=Date.now();if(now-metadataWindow>=60000){metadataWindow=now;metadataReads=0;}
+          if(metadataActive>=2||metadataReads>=60){res.writeHead(429,{'retry-after':'60'});return res.end();}
+          metadataActive++;metadataReads++;let released=false;
+          const release=()=>{if(!released){released=true;metadataActive--;}};
+          const upstream=http.get({hostname:'127.0.0.1',port:ports.api,path:req.url.slice('/player-api'.length),headers:{accept:'application/json',host:'127.0.0.1'}},reply=>{
+            let size=0;const chunks=[];reply.on('data',chunk=>{size+=chunk.length;if(size>32768){upstream.destroy();return;}chunks.push(chunk);});
+            reply.on('end',()=>{release();if(![200,404].includes(reply.statusCode)){res.writeHead(503);return res.end();}try{const data=JSON.parse(Buffer.concat(chunks));res.writeHead(reply.statusCode,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(data));}catch{res.writeHead(502);res.end();}});
+          });
+          upstream.setTimeout(5000,()=>upstream.destroy());
+          upstream.on('error',()=>{release();if(!res.headersSent)res.writeHead(502);res.end();});
+          req.on('aborted',()=>upstream.destroy());res.on('close',()=>{release();upstream.destroy();});return;
+        }
+      }catch{res.writeHead(503);return res.end();}
+    }
     // A fixed, authenticated diagnostic can establish Vercel key matching while
     // every player/internal route stays disabled. It never contacts the API.
     if(req.method==='GET'&&req.url==='/player-api/proxy-health'){

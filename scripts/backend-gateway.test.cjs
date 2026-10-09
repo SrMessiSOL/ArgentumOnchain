@@ -3,6 +3,21 @@ const assert=require('node:assert/strict');
 const http=require('node:http');
 const net=require('node:net');
 const {playerRoute,validateConfig,createGateway}=require('./backend-gateway.cjs');
+test('closed gateway optional metadata is exact, bounded and credential-free',async t=>{
+ const received=[];const api=http.createServer((req,res)=>{received.push(req.headers);res.setHeader('content-type','application/json');res.end(JSON.stringify({name:'fixture',attributes:[]}));});
+ await new Promise(r=>api.listen(0,'127.0.0.1',r));
+ const cfg={enabled:false,metadataEnabled:true,backendOrigin:'https://backend.example',siteOrigin:'https://site.example'};
+ const gateway=createGateway(()=>cfg,{api:api.address().port,game:1});await new Promise(r=>gateway.listen(0,'127.0.0.1',r));
+ t.after(()=>{gateway.closeAllConnections();gateway.close();api.closeAllConnections();api.close();});
+ const request=(url,method='GET')=>new Promise((resolve,reject)=>{const req=http.request({hostname:'127.0.0.1',port:gateway.address().port,path:url,method,headers:{host:'backend.example',authorization:'Bearer secret-fixture',cookie:'fixture=secret','x-game-data-admin-token':'secret'}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));});req.on('error',reject);req.end();});
+ const url='/player-api/game-assets/metadata?id=01234567-89ab-cdef-0123-456789abcdef';
+ assert.equal(await request(url),200);assert.equal(received[0].authorization,undefined);assert.equal(received[0].cookie,undefined);assert.equal(received[0]['x-game-data-admin-token'],undefined);
+ for(const blocked of [url+'&extra=1',url.replace('id=','id=%'),'/player-api/auth/session','/player-api/internal/save'])assert.equal(await request(blocked),503);
+ assert.equal(await request(url,'POST'),503);
+ cfg.metadataEnabled=false;assert.equal(await request(url),503);cfg.metadataEnabled=true;
+ for(let i=1;i<60;i++)assert.equal(await request(url),200);
+ assert.equal(await request(url),429);assert.equal(received.length,60);
+});
 test('signed closed diagnostic returns only booleans and cannot open player routes',async t=>{
  const {createHmac,randomBytes}=require('node:crypto'),{canonical}=require('./backend-proxy-proof.cjs');
  const key='ab'.repeat(32),gateway=createGateway(()=>({enabled:false,backendOrigin:'https://backend.example',siteOrigin:'https://site.example',proxyHmacKey:key}),{api:1,game:1});

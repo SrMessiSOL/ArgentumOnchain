@@ -18,6 +18,7 @@ function resolveBuildId(): string {
 const buildId = resolveBuildId();
 
 const nextConfig: NextConfig = {
+    output: process.env.AOWEB_PRIVATE_BUILD === '1' ? 'standalone' : undefined,
     distDir: process.env.NEXT_DIST_DIR || ".next",
     typescript: {
         tsconfigPath: process.env.NEXT_TSCONFIG_PATH || "tsconfig.json",

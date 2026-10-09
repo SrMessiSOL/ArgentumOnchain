@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');const {Keypair,Transaction}=require('@solana/web3.js');
+const {TOKEN_PROGRAM_ID,decodeInitializeMint2Instruction,MINT_SIZE}=require('@solana/spl-token');
+const {mintTransaction,canRenewAttempt}=require('./provision-devnet.cjs');
+const issuer=Keypair.generate(),mint=Keypair.generate(),blockhash=Keypair.generate().publicKey.toBase58();
+const tx=mintTransaction(issuer,mint,1461600,blockhash);tx.sign(issuer,mint);
+const restored=Transaction.from(tx.serialize());assert(restored.verifySignatures());assert(restored.serializeMessage().equals(tx.serializeMessage()));
+assert.equal(tx.instructions.length,2);const init=decodeInitializeMint2Instruction(tx.instructions[1],TOKEN_PROGRAM_ID);
+assert.equal(init.data.decimals,0);assert.equal(init.data.freezeAuthority,null);assert(init.data.mintAuthority.equals(issuer.publicKey));assert(tx.feePayer.equals(issuer.publicKey));assert.equal(MINT_SIZE,82);
+assert.equal(canRenewAttempt(null,100,100,false),false);assert.equal(canRenewAttempt(null,100,101,false),true);
+assert.equal(canRenewAttempt(null,100,101,true),false);
+for(const confirmationStatus of ['processed','confirmed','finalized'])assert.equal(canRenewAttempt({confirmationStatus,err:null},100,101,false),false);
+assert.equal(canRenewAttempt({err:{InstructionError:[0,'fixture']}},100,101,false),true);
+assert.throws(()=>canRenewAttempt(null,NaN,101,false));
+console.log('Real SDK devnet mint preparation and exact signed-byte roundtrip passed; no RPC or broadcast.');
