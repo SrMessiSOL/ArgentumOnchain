@@ -96,10 +96,10 @@ const FULLSCREEN_PROMPT_MAX_HEIGHT = 900;
 const PLAY_HOTKEYS_HINT_STORAGE_KEY = "ao-play-hotkeys-hint-dismissed";
 const PLAY_SOUND_VOLUME_STORAGE_KEY = "ao-play-sound-volume";
 const LOGOUT_STARTED_MESSAGE =
-    "[Servidor] Debes permanecer quieto durante 10 segundos para salir. Si te mueves, la salida se cancelarÃƒÂ¡.";
-const LOGOUT_CANCELLED_PATTERN = /^\[Servidor\] La salida se cancelÃƒÂ³ porque /;
+    "[Servidor] Debes permanecer quieto durante 10 segundos para salir. Si te mueves, la salida se cancelará.";
+const LOGOUT_CANCELLED_PATTERN = /^\[Servidor\] La salida se canceló porque /;
 const LOGOUT_DENIED_PATTERN = /^\[Servidor\] No puedes salir /;
-const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesiÃƒÂ³n...";
+const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesión...";
 const LOGOUT_DELAY_MS = 10000;
 const CHALLENGE_INSTANCE_MAP_START = 2000;
 const RETOS_INFO_MESSAGES = new Set([
@@ -109,28 +109,28 @@ const RETOS_INFO_MESSAGES = new Set([
 ]);
 const RETOS_ERROR_MESSAGES = new Set([
     "Solo puedes usar retos en Mundo Abierto.",
-    "No puedes usar retos mientras estÃƒÂ¡s muerto.",
+    "No puedes usar retos mientras estás muerto.",
     "Solo puedes usar retos estando en zona segura.",
-    "Ese personaje ya estÃƒÂ¡ participando en otro reto.",
+    "Ese personaje ya está participando en otro reto.",
     "Para crear o unirte a un reto 2vs2 debes estar en una party de 2.",
-    "Solo el lÃƒÂ­der de la party puede crear o aceptar retos 2vs2.",
+    "Solo el líder de la party puede crear o aceptar retos 2vs2.",
     "El reto 2vs2 requiere una party exacta de 2 personajes.",
     "Todos los miembros de la party deben estar conectados para el reto 2vs2.",
     "Debes estar conectado para usar retos.",
-    "El modo de reto es invÃƒÂ¡lido.",
-    "El reto ya no estÃƒÂ¡ disponible.",
+    "El modo de reto es inválido.",
+    "El reto ya no está disponible.",
     "Solo puedes cancelar tu propio reto.",
-    "El retador ya no estÃƒÂ¡ disponible.",
+    "El retador ya no está disponible.",
     "No puedes aceptar tu propio reto.",
 ]);
 const CONSOLE_DISCORD_URL = "https://discord.gg/sf8rWAvgxs";
 const CONSOLE_FEEDBACK_FORM_URL = "https://forms.gle/Df2cmGExTBjjJhAR8";
 const WELCOME_CONSOLE_MESSAGES = {
     discord:
-        "Bienvenido a AOCHAIN. Si quieres enterarte de las ÃƒÂºltimas actualizaciones del juego, puedes ingresar a nuestro Discord.",
+        "Bienvenido a AOCHAIN. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.",
     feedback:
         "- Si quieres reportar erorres o sugerir cambios, puedes hacerlo en: https://forms.gle/Df2cmGExTBjjJhAR8",
-    rules: "- EstÃƒÂ¡ completamente prohibido el uso de personajes cÃƒÂ¡mara, cheats o cualquier programa externo que modifique el juego, como auto tomar pociones o auto removerse. El uso de los mismos terminarÃƒÂ¡ en un ban permanente, sin previo aviso.",
+    rules: "- Está completamente prohibido el uso de personajes cámara, cheats o cualquier programa externo que modifique el juego, como auto tomar pociones o auto removerse. El uso de los mismos terminará en un ban permanente, sin previo aviso.",
 } as const;
 const CHALLENGE_OVERLAY_PATTERN = /^\[Reto\]\s+(10|[0-9]|YA)$/;
 
@@ -930,8 +930,8 @@ function HomeContent() {
         ? "Volver al sacerdote"
         : "Volver a la ciudad";
     const deathHomeDescription = arenaMode
-        ? "TambiÃƒÂ©n puedes volver al sacerdote con el comando /hogar"
-        : "TambiÃƒÂ©n puedes volver con el comando /hogar";
+        ? "También puedes volver al sacerdote con el comando /hogar"
+        : "También puedes volver con el comando /hogar";
 
     useEffect(() => {
         activeChatTabRef.current = activeChatTab;
@@ -2730,7 +2730,7 @@ function HomeContent() {
                                             )
                                         ) : (
                                             <div className="text-stone-300/55"><LocalizedText source={"No hay mensajes en"} />{" "}
-                                                {localizeText(activeChatTabLabel).toLowerCase()}{" "}<LocalizedText source={"todavÃƒÂ­a. "} /></div>
+                                                {localizeText(activeChatTabLabel).toLowerCase()}{" "}<LocalizedText source={"todavía. "} /></div>
                                         )}
                                     </div>
                                 </div>
@@ -2754,7 +2754,7 @@ function HomeContent() {
                                     <div ref={consoleScrollRef} role="log" aria-label={localizeText(activeChatTabLabel)} aria-live="polite" className="min-h-0 flex-1 overflow-y-auto px-3 py-3 text-xs leading-5 text-stone-200/90">
                                         {visibleConsoleEntries.length ? visibleConsoleEntries.map(entry => (
                                             <div key={entry.id} className="break-words" style={{color:entry.color || 'rgba(231, 229, 228, 0.92)'}}>{renderConsoleEntryText(localizeConsoleEntry(entry,locale),locale)}</div>
-                                        )) : <p className="text-stone-400"><LocalizedText source="No hay mensajes en" />{' '}{localizeText(activeChatTabLabel).toLowerCase()}{' '}<LocalizedText source="todavÃƒÂ­a. " /></p>}
+                                        )) : <p className="text-stone-400"><LocalizedText source="No hay mensajes en" />{' '}{localizeText(activeChatTabLabel).toLowerCase()}{' '}<LocalizedText source="todavía. " /></p>}
                                     </div>
                                     <div className="shrink-0 border-t border-white/10 p-2">
                                         {isChatOpen ? chatInputForm : <button type="button" onClick={event=>{setIsChatOpen(true);event.currentTarget.blur();}} className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-stone-300"><span>{localizeText('Chat')}</span><kbd className="rounded border border-white/20 px-1.5 text-xs">Enter</kbd></button>}
@@ -2967,7 +2967,7 @@ function HomeContent() {
                                                     )
                                                 ) : (
                                                     <div className="text-stone-300/55"><LocalizedText source={"No hay mensajes en"} />{" "}
-                                                        {localizeText(activeChatTabLabel).toLowerCase()}{" "}<LocalizedText source={"todavÃƒÂ­a. "} /></div>
+                                                        {localizeText(activeChatTabLabel).toLowerCase()}{" "}<LocalizedText source={"todavía. "} /></div>
                                                 )}
                                             </div>
                                         </div>
@@ -3386,7 +3386,7 @@ function HomeContent() {
 
                                     {authSession && !arenaMode ? (
                                         <div className="text-center text-[11px] leading-5 tracking-[0.04em] text-stone-300/85">
-                                            {localizeText("En zona insegura cerrÃƒÂ¡ el personaje con /salir o quedarÃƒÂ¡ conectado por 10 segundos.")}
+                                            {localizeText("En zona insegura cerrá el personaje con /salir o quedará conectado por 10 segundos.")}
                                         </div>
                                     ) : null}
                                 </div>

@@ -7,7 +7,6 @@ import { vaultRecovery } from './vaultRecovery';
 import { characterRecovery } from './characterRecovery';
 import { worldRecovery } from './worldRecovery';
 import { marketRecovery } from './marketRecovery';
-import {CosmeticReplication, encodeCosmeticSnapshot} from './cosmeticReplication';
 import type { GameApi } from "./game";
 import type { HandleProtocolApi } from "./handleProtocol";
 import type { NpcsApi } from "./npcs";
@@ -182,23 +181,6 @@ const npcs = require("./npcs") as NpcsApi;
 const runtimeTiming = require("./runtimeTiming");
 const handleProtocol = require("./handleProtocol") as HandleProtocolApi;
 
-const cosmeticReplication = new CosmeticReplication(async characterId => {
-    const result = await require('./functions').fetchUrl('/internal/characters/'+encodeURIComponent(characterId)+'/cosmetic-title', {headers:{Authorization:vars.tokenAuth}});
-    return result.kind;
-});
-setInterval(() => {
-    if(!vars.serverReady)return;
-    const subjects = Object.values(vars.personajes).filter((user:any)=>user?.connected&&!user.cerrado) as RuntimeCharacter[];
-    cosmeticReplication.refresh(subjects);
-    for(const viewer of subjects){
-        const client=getClientById(viewer.id);
-        if(!client||client.readyState!==1)continue;
-        const nearby:RuntimeCharacter[]=[];
-        game.loopArea(client,target=>{if('_id' in target)nearby.push(target as RuntimeCharacter);});
-        const entries=cosmeticReplication.snapshot(viewer.map,nearby);
-        try{client.send(encodeCosmeticSnapshot(viewer.map,entries));}catch{/* A closed socket must not interrupt other players. */}
-    }
-},2000).unref();
 
 function getWorldSaveIntervalMs() {
     // Database balance settings must not silently disable the operations save ceiling.

@@ -192,5 +192,7 @@
   "AOCHAIN | Recuperacion de contraseña": "AOCHAIN | Password recovery",
   "AOWeb | Recuperacion de contraseña": "AOCHAIN | Password recovery",
   "Bienvenido a AOCHAIN. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro ": "Welcome to AOCHAIN. For the latest game updates, join our ",
-  "Pegá la dirección del cosmético de AOCHAIN recibido por tu wallet vinculada. Verificamos la propiedad antes de equiparlo.": "Paste the asset address of an AOCHAIN cosmetic received by your linked wallet. We verify ownership before equipping it."
+  "Pegá la dirección del cosmético de AOCHAIN recibido por tu wallet vinculada. Verificamos la propiedad antes de equiparlo.": "Paste the asset address of an AOCHAIN cosmetic received by your linked wallet. We verify ownership before equipping it.",
+  "También puedes volver con el comando /hogar": "You can also return with /home",
+  "También puedes volver al sacerdote con el comando /hogar": "You can also return to the priest with /home"
 }

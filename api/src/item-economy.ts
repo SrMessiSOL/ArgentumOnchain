@@ -1,9 +1,8 @@
 import type {PoolClient} from 'pg';
 
-// Match the existing game market: no starter gear, money or merchant stock.
-export const itemEligibilitySql=`o.obj_type<>5 AND COALESCE((o.data->>'newbie')::int,0)=0 AND NOT EXISTS (
- SELECT 1 FROM game_npcs n, jsonb_array_elements(CASE WHEN jsonb_typeof(n.data->'objs')='array' THEN n.data->'objs' ELSE '[]'::jsonb END) stock
- WHERE n.npc_type=10 AND (stock->>'item')::int=o.id)`;
+// NPC availability does not restrict ordinary items. Starter gear remains bound;
+// gold objects use the SPL balance flow rather than item NFT export.
+export const itemEligibilitySql=`o.obj_type<>5 AND COALESCE((o.data->>'newbie')::int,0)=0`;
 export async function requireTradableItem(c:PoolClient,item:number){
  const r=await c.query(`SELECT o.id FROM game_objects o WHERE o.id=$1 AND ${itemEligibilitySql}`,[item]);
  if(!r.rowCount)throw Error('economy.itemRestricted');

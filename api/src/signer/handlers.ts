@@ -6,7 +6,6 @@ import type {IssuanceBudget} from './budget';
 import {deriveAssetIdentity} from './asset-identity';
 import {signCommittedEconomyOperation} from './service';
 import {signCommittedAssetOperation} from './asset-policy';
-import {cosmeticIdentity,signCommittedCosmeticOperation} from './cosmetic-policy';
 
 export type CustodyOptions={issuer:Keypair;pool:Pool;journal:string;budget:IssuanceBudget;metadataOrigin:string;cosmeticMetadataUrl?:string;mint:string;maximumGold:number;maximumLamports:number};
 /** Bind only committed-intent approval cores; never expose a generic signing hook. */
@@ -25,9 +24,5 @@ export function createCustodyHandlers(options:CustodyOptions):SignerHandlers{
   },
   economy:(id,transaction)=>signCommittedEconomyOperation(options.pool,id,transaction,options.issuer,policy,options.journal,options.budget,options.metadataOrigin),
   asset:(id,transaction)=>signCommittedAssetOperation(options.pool,id,transaction,options.issuer,options.metadataOrigin,options.journal,options.budget),
-  ...(options.cosmeticMetadataUrl?{
-   cosmeticIdentity:async(account:string,season:string)=>({address:cosmeticIdentity(options.issuer,account,season).publicKey.toBase58(),issuer:options.issuer.publicKey.toBase58()}),
-   cosmetic:(id:string,transaction:string)=>signCommittedCosmeticOperation(options.pool,id,transaction,options.issuer,options.cosmeticMetadataUrl!,options.journal,options.budget)
-  }:{})
  };
 }

@@ -4,7 +4,6 @@ import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 
 
 import {localizeItemDetails} from '../lib/game-i18n';
-import ExplorerCosmetic from "./ExplorerCosmetic";
 import { useI18n } from "@/components/I18nProvider";
 
 import Image from "next/image";
@@ -2323,7 +2322,7 @@ export default function InventoryFloatingPanel({
                                 <div className="min-w-0 flex-1">
                                     <p className="text-[9px] uppercase tracking-[0.3em] text-amber-200/70">{localizeKey("hud.character")}</p>
                                     <h3 className="truncate text-[24px] font-semibold leading-none text-[#efe2c5]">
-                                        {hud?.nameCharacter || "Adventurer"}<ExplorerCosmetic compact />
+                                        {hud?.nameCharacter || "Adventurer"}
                                     </h3>
                                 </div>
                                 <LocalizedLabel><button

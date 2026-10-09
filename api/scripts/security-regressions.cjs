@@ -8,7 +8,9 @@ const cases=[['gold-ledger-security.integration.test.ts','aoweb_ledger_test_'],[
 (async()=>{
  const control=new URL(base);control.pathname='/postgres';const admin=new Client({connectionString:control.toString()});await admin.connect();
  try{
-  for(const [file,prefix]of cases){
+  if(process.env.AOCHAIN_SECURITY_SCOPE&&!['items'].includes(process.env.AOCHAIN_SECURITY_SCOPE))throw Error('Invalid security fixture scope');
+  const selected=process.env.AOCHAIN_SECURITY_SCOPE==='items'?cases.filter(([file])=>['game-assets.integration.test.ts','economy.integration.test.ts'].includes(file)):cases;
+  for(const [file,prefix]of selected){
    const name=prefix+Date.now();if(!/^[a-z0-9_]+$/.test(name))throw Error('Invalid fixture name');
    await admin.query('CREATE DATABASE "'+name+'"');const target=new URL(base);target.pathname='/'+name;
    try{const r=spawnSync(process.execPath,['node_modules/vitest/vitest.mjs','run','src/tests/'+file],{cwd:api,env:{...process.env,DATABASE_URL:target.toString(),NODE_ENV:'test'},stdio:'inherit',timeout:180000});if(r.status!==0)throw Error('Security fixture failed: '+file);}

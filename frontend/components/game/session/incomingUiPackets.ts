@@ -6,11 +6,6 @@ export async function handleIncomingUiPacket({
     ctx,
 }: IncomingPacketHandlerArgs): Promise<boolean> {
     switch (packet.type) {
-        case "cosmeticSnapshot":
-            if(engine && packet.payload.map===engine.mapNumber){
-                engine.remoteCosmetics=new Map(packet.payload.entries.map((entry:{id:number;kind:"explorer"|"first-hunt"})=>[entry.id,{kind:entry.kind,expiresAt:Date.now()+6_000}]));
-            }
-            return true;
         case "console":
             if (
                 /Comienzas a pescar\.|Has dejado de pescar\.|La pesca se canceló\.|Debes equiparte la caña de pescar/i.test(

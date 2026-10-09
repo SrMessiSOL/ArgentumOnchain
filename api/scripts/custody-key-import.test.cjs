@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const {Keypair,Transaction,SystemProgram}=require('@solana/web3.js');
+const {importCustodyKey}=require('../dist/signer/activation');
+const original=Keypair.generate(),bytes=Array.from(original.secretKey);
+const loaded=importCustodyKey(bytes);
+assert(bytes.every(n=>n===0));assert(loaded.publicKey.equals(original.publicKey));
+const tx=new Transaction({feePayer:loaded.publicKey,recentBlockhash:Keypair.generate().publicKey.toBase58()}).add(SystemProgram.transfer({fromPubkey:loaded.publicKey,toPubkey:Keypair.generate().publicKey,lamports:1}));
+tx.sign(loaded);assert(tx.verifySignatures());assert(Transaction.from(tx.serialize()).verifySignatures());
+loaded.secretKey.fill(0);original.secretKey.fill(0);
+assert.throws(()=>importCustodyKey([1,2]));
+console.log('Actual custody import clears input buffers and retains valid transaction signing; disposable keys only.');

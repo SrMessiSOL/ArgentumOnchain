@@ -25,7 +25,7 @@ export function signerHttpHandler(token:string,enabled:boolean,handlers?:SignerH
   if(supplied.length!==expected.length||!timingSafeEqual(supplied,expected)){send(401,{error:'unauthorized'});return;}
   if(req.method==='GET'&&req.url==='/health'){send(200,{ok:true,enabled});return;}
   if(!enabled){send(503,{error:'signer.disabled'});return;}
-  if(req.method!=='POST'||!['/asset-identity','/economy-submit','/asset-submit','/cosmetic-identity','/cosmetic-submit'].includes(req.url??'')){send(404,{error:'notFound'});return;}
+  if(req.method!=='POST'||!['/asset-identity','/economy-submit','/asset-submit'].includes(req.url??'')){send(404,{error:'notFound'});return;}
   if((req.url==='/cosmetic-identity'&&!handlers?.cosmeticIdentity)||(req.url==='/cosmetic-submit'&&!handlers?.cosmetic)){send(503,{error:'signer.disabled'});return;}
   if(active>=2){send(429,{error:'signer.busy'});return;}
   if(req.headers['content-type']!=='application/json'||req.headers['content-encoding']){send(400,{error:'invalidRequest'});return;}

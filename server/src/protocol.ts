@@ -1,5 +1,4 @@
 export {};
-import {cosmeticInspectionMessage} from './cosmeticInspection';
 import { getFactionColor, getFactionRankTitle, getMaxEligibleFactionRank, type CharacterFaction } from "./factions";
 import type {
     DataObject,
@@ -22,20 +21,6 @@ const login = require("./login") as LoginApi;
 const socket = require("./socket") as SocketApi;
 const funct = require("./functions");
 
-const cosmeticInspectionRequests = new WeakMap<object, number>();
-function showCosmeticInspection(target:RuntimeCharacter, viewer:RuntimeCharacter, ws:RuntimeClient) {
-    if(!target._id || Date.now()-(cosmeticInspectionRequests.get(ws)??0)<1500)return;
-    cosmeticInspectionRequests.set(ws,Date.now());
-    const name=target.nameCharacter;
-    // Inspect asynchronously; blockchain availability must never delay normal gameplay.
-    void funct.fetchUrl(`/internal/characters/${encodeURIComponent(target._id)}/cosmetic-title`, {
-        headers:{Authorization:vars.tokenAuth},
-    }).then((result:{kind:unknown})=>{
-        if(ws.id===undefined || vars.personajes[ws.id]!==viewer || ws.readyState!==1 || target.map!==viewer.map)return;
-        const message=cosmeticInspectionMessage(name,result.kind);
-        if(message)handleProtocol.console(message,'#d8b4fe',0,0,ws);
-    }).catch(()=>{/* Ownership unavailable: omit the title, never trust cached client claims. */});
-}
 const vars = require("./vars");
 const command = require("./commands");
 const chatAuditLogger = require("./chatAuditLogger");
@@ -2550,7 +2535,6 @@ function eventClick(ws: RuntimeClient) {
                 }
 
                 handleProtocol.console(staffMsg, "#419900", 1, 0, ws);
-                showCosmeticInspection(selectedCharacter,user,ws);
             } else {
                 if (selectedNpc) {
                     msg = "Ves a " + selectedNpc.nameCharacter + " [NPC]";
@@ -2673,7 +2657,6 @@ function eventClick(ws: RuntimeClient) {
                     }
 
                     handleProtocol.console(msg, color, 1, 0, ws);
-                    showCosmeticInspection(selectedCharacter,user,ws);
                 }
             }
         }

@@ -39,6 +39,8 @@ assert.equal(localizeGameMessage('¡Has ganado 6 monedas de oro!','en'),'You gai
 assert.equal(localizeGameMessage('Conectado como Spelltester','en'),'Connected as Spelltester');
 assert.equal(localizeConsoleEntry({source:'dialog',text:'¡Has matado a Rata Salvaje!'},'en'),'¡Has matado a Rata Salvaje!');
 assert.equal(translateSource('También puedes volver con el comando /hogar','en'),'You can also return with /home');
+assert.equal(translateSource('También puedes volver al sacerdote con el comando /hogar','en'),'You can also return to the priest with /home');
+assert.equal(translateSource('En zona insegura cerrá el personaje con /salir o quedará conectado por 10 segundos.','en'),'In an unsafe area, use /logout to log out or your character will remain connected for 10 seconds.');
 assert.equal(localizeConsoleEntry({source:'console',text:'Uso: /expulsarparty {usuario}'},'en'),'Usage: /kickparty {player}');
 assert.equal(localizeConsoleEntry({source:'console',text:'Use /hogar',senderName:'Player'},'en'),'Use /hogar');
 assert.equal(localizeConsoleEntry({source:'console',text:'Uso: /expulsarparty {usuario}'},'es'),'Uso: /expulsarparty {usuario}');

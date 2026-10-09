@@ -124,5 +124,6 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
   });
   return server;
 }
-module.exports={playerRoute,validateConfig,createGateway};
-if(require.main===module)createGateway(()=>JSON.parse(fs.readFileSync(process.argv[2],'utf8'))).listen(3103,'127.0.0.1');
+function parseGatewayConfig(text){return JSON.parse(text.replace(/^\uFEFF/,''));}
+module.exports={playerRoute,validateConfig,createGateway,parseGatewayConfig};
+if(require.main===module)createGateway(()=>parseGatewayConfig(fs.readFileSync(process.argv[2],'utf8'))).listen(3103,'127.0.0.1');

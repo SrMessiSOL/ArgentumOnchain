@@ -15,7 +15,6 @@ import config from "./config";
 import pool from "./db";
 import { installWalletRoutes } from "./wallet-routes";
 import { installPreferencesRoutes } from "./preferences-routes";
-import { installCosmeticRoutes } from "./cosmetic-routes";
 import { requireAuth } from "./middleware/auth";
 import {
     confirmPasswordReset,
@@ -2653,6 +2652,5 @@ installPreferencesRoutes(app);
 installAchievementRoutes(app);
 installGameAssetRoutes(app);
 installEconomyRoutes(app);
-installCosmeticRoutes(app);
 void start();
 

@@ -13,9 +13,6 @@ export async function earnAchievements() {
 }
 export function installAchievementRoutes(app:Express){
  // Opt-in cutover preserves legacy handlers for rollback. No legacy NFT records are deleted.
- app.get('/auth/cosmetics',async(req,res,next)=>{if(process.env.AOWEB_CHARACTER_ACHIEVEMENTS!=='1'){next();return;}const token=req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];const s=token?await getPublicSessionByToken(token):null;if(!s){res.status(401).json({error:'cosmetic.signIn'});return;}const kind=s.selectedCharacterId?await characterAchievementTitle(s.selectedCharacterId):null;res.json({equipped:Boolean(kind),equippedKind:kind??'explorer',verification:'verified',characterId:s.selectedCharacterId});});
- app.get('/internal/characters/:id/cosmetic-title',requireAuth,async(req,res,next)=>{if(process.env.AOWEB_CHARACTER_ACHIEVEMENTS!=='1'){next();return;}if(!/^[0-9a-f-]{36}$/i.test(String(req.params.id))){res.status(400).json({error:'Invalid character ID'});return;}res.json({kind:await characterAchievementTitle(String(req.params.id))});});
- for(const action of ['claim','equip'])app.post('/auth/cosmetics/'+action,(_,res,next)=>{if(process.env.AOWEB_CHARACTER_ACHIEVEMENTS!=='1'){next();return;}res.status(410).json({error:'economy.characterAchievements'});});
  app.get('/auth/achievements',async(req,res)=>{const token=req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];const s=token?await getPublicSessionByToken(token):null;if(!s){res.status(401).json({error:'economy.signIn'});return;}
  await earnAchievements();const rows=await pool.query(`SELECT c.id,c.name,c.level,c.npc_matados,c.connected,c.economy_lock,t.kind AS title,
  COALESCE((SELECT json_agg(a.kind) FROM character_achievements a WHERE a.character_id=c.id),'[]') AS achievements

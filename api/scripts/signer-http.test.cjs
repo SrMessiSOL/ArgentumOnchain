@@ -45,15 +45,12 @@ async function fixture(enabled,run,cosmetics=false){
   assert.deepEqual(await (await request('/economy-submit',{id,transaction:'fixture'})).json(),{id,message:'message',bytes:'bytes',signature:'signature'});
   assert.deepEqual(await (await request('/asset-submit',{id,transaction:'fixture'})).json(),{error:'signer.denied'});
   assert.equal(calls(),2);
-  assert.equal((await request('/cosmetic-submit',{id,transaction:'fixture'})).status,503);
+  assert.equal((await request('/cosmetic-submit',{id,transaction:'fixture'})).status,404);
  });
- const {COSMETIC_SEASON}=require('../dist/cosmetic-policy');
  await fixture(true,async(request,calls)=>{
-  assert.deepEqual(await(await request('/cosmetic-identity',{account:id,season:COSMETIC_SEASON})).json(),{address:'public-asset',issuer:'public-issuer'});
-  assert.equal((await request('/cosmetic-identity',{account:id,season:'mainnet'})).status,400);
-  assert.equal((await request('/cosmetic-identity',{account:id,season:COSMETIC_SEASON,secret:'extra'})).status,400);
-  assert.deepEqual(await(await request('/cosmetic-submit',{id,transaction:'fixture'})).json(),{id,message:'message',bytes:'bytes',signature:'signature'});
-  assert.equal(calls(),2);
+  assert.equal((await request('/cosmetic-identity',{account:id,season:'explorer-devnet-v1'})).status,404);
+  assert.equal((await request('/cosmetic-submit',{id,transaction:'fixture'})).status,404);
+  assert.equal(calls(),0);
  },true);
  console.log('Signer HTTP authentication, disabled mode, fixed routes, body limits and public-only responses passed; fixture hooks only.');
 })().catch(()=>{console.error('Signer HTTP regression failed');process.exitCode=1;});

@@ -1,5 +1,3 @@
-import {syncCosmeticCrest} from '../rendering/cosmeticCrest';
-import {visibleCosmetic, type VerifiedCosmetic} from '../../../lib/cosmetic-display';
 import {
     Application,
     AnimatedSprite,
@@ -497,8 +495,6 @@ function formatCharacterAnimationDebugLabel(character: Character): string {
 }
 
 export class Engine {
-    verifiedCosmetic: VerifiedCosmetic | null = null;
-    remoteCosmetics = new Map<number, VerifiedCosmetic>();
     // Configuration
     engineBaseSpeed = 0.018;
     scrollPixelsPerFrameX = 8.5;
@@ -1956,10 +1952,6 @@ export class Engine {
                     setVisibilityIfChanged(nameLabel, nextNameLabelVisible);
                 }
 
-                syncCosmeticCrest(displayContainer, nameLabel, visibleCosmetic(
-                    this.remoteCosmetics.get(Number(id)) ?? null, Date.now(),
-                    Boolean(entity.isNpc || entity.dead || entity.invisibleAdmin || entity.invisibleSpell || entity.hiddenSkill),
-                ));
 
                 if (clanLabel) {
                     const labelPosition = getNameLabelPosition(bodySprite);
@@ -2889,10 +2881,6 @@ export class Engine {
                 nameLabel.y = Math.round(labelPosition.y);
             }
 
-            syncCosmeticCrest(this.playerContainer, nameLabel, visibleCosmetic(
-                this.remoteCosmetics.get(Number(this.user.id)) ?? null, Date.now(),
-                Boolean(this.user.dead || this.user.invisibleAdmin || this.user.invisibleSpell || this.user.hiddenSkill),
-            ));
 
             if (clanLabel && bodyMetrics) {
                 const labelPosition = getNameLabelPosition(bodyMetrics);

@@ -4,7 +4,8 @@ param(
  [Parameter(Mandatory=$true)][string]$PgBin,
  [Parameter(Mandatory=$true)][string]$TestRoot,
  [ValidateRange(1024,65535)][int]$Port=55433,
- [switch]$GameplayOnly
+ [switch]$GameplayOnly,
+ [switch]$ItemsOnly
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
@@ -65,7 +66,13 @@ try {
  # These endpoint tests mock signing/RPC and need to exercise unpaused paths.
  # The actual realm's protected environment remains paused and is never loaded.
  $env:AOWEB_SETTLEMENT_PAUSED='0'
- if(!$GameplayOnly){
+ if($ItemsOnly){
+  $savedEnv['AOCHAIN_SECURITY_SCOPE']=[Environment]::GetEnvironmentVariable('AOCHAIN_SECURITY_SCOPE','Process')
+  $env:AOCHAIN_SECURITY_SCOPE='items'
+  $env:TOKEN_AUTH='test-only-operations-'+[Guid]::NewGuid().ToString('N')
+  $env:GAME_SERVICE_TOKEN='test-only-game-'+[Guid]::NewGuid().ToString('N')
+  Run-Check 'Item export, NPC eligibility, escrow and settlement regressions' (Join-Path $repo 'api') @('scripts/security-regressions.cjs')
+ } elseif(!$GameplayOnly){
  foreach($package in @('api','server','frontend')){
   Run-Check "$package frozen install" (Join-Path $repo $package) @($PnpmCjs,'install','--frozen-lockfile')
  }
