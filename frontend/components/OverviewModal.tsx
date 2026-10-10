@@ -378,7 +378,7 @@ export default function OverviewModal({
 
                 <div className="overflow-y-auto px-6 py-6">
                     {!snapshot || snapshot.entries.length === 0 ? (
-                        <div className="rounded-[26px] border border-white/8 bg-black/18 p-6 text-sm text-stone-300"><LocalizedText source={"No hay datos suficientes todavÃ­a. Proba de nuevo cuando haya jugadores activos enviando paquetes no-ping. "} /></div>
+                        <div className="rounded-[26px] border border-white/8 bg-black/18 p-6 text-sm text-stone-300"><LocalizedText source={"No hay datos suficientes todavía. Proba de nuevo cuando haya jugadores activos enviando paquetes no-ping. "} /></div>
                     ) : visibleEntries.length === 0 ? (
                         <div className="rounded-[26px] border border-white/8 bg-black/18 p-6 text-sm text-stone-300"><LocalizedText source={"No hay jugadores que coincidan con ese filtro. "} /></div>
                     ) : (

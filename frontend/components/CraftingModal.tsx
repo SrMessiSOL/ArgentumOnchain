@@ -146,7 +146,7 @@ export default function CraftingModal({
                 <div className="border-b border-[#6a4f39] bg-[#120d09]/85 px-5 py-4">
                     <div className="flex items-center justify-between gap-4">
                         <div>
-                            <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75"><LocalizedText source={"ProfesiÃ³n "} /></p>
+                            <p className="text-[11px] uppercase tracking-[0.28em] text-amber-200/75"><LocalizedText source={"Profesión "} /></p>
                             <h2 className="mt-1 text-xl font-semibold text-[#f3e7c8]">
                                 <LocalizedText source={title} />
                             </h2>
@@ -202,7 +202,7 @@ export default function CraftingModal({
                                                 <LocalizedText source={recipe.name} />
                                             </div>
                                             <div className="mt-1 text-xs text-stone-400">
-                                                <LocalizedText source={recipe.category} /> Â· Skill{" "}
+                                                <LocalizedText source={recipe.category} /> · Skill{" "}
                                                 {recipe.skill}
                                             </div>
                                         </div>
@@ -237,7 +237,7 @@ export default function CraftingModal({
                                             <LocalizedText source={selectedRecipe.name} />
                                         </h3>
                                         <p className="mt-2 text-sm text-stone-300">
-                                            <LocalizedText source={selectedRecipe.details || "Sin descripciÃ³n adicional."} />
+                                            <LocalizedText source={selectedRecipe.details || "Sin descripción adicional."} />
                                         </p>
                                     </div>
                                 </div>

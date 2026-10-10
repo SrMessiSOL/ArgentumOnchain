@@ -92,6 +92,13 @@ function buildSlots<T extends { slot: number }>(items: T[]): Array<T | null> {
     );
 }
 
+function buildMerchantSlots<T extends { slot: number }>(items: T[]): Array<T | null> {
+    // Keep server slot IDs intact: only compact the shop's visual positions.
+    const sorted = [...items].sort((a, b) => a.slot - b.slot);
+    return Array.from({ length: Math.max(MIN_GRID_SLOTS, sorted.length) },
+        (_, index) => sorted[index] ?? null);
+}
+
 function parseItemDetails(details: string): string[] {
     return details
         .split("|")
@@ -101,12 +108,12 @@ function parseItemDetails(details: string): string[] {
 
 function parseTradeItemStats(details: string) {
     const defense = details.match(/Defensa:\s*(\d+\/\d+)/i)?.[1] ?? null;
-    const damage = details.match(/DaÃ±o:\s*(\d+\/\d+)/i)?.[1] ?? null;
+    const damage = details.match(/Daño:\s*(\d+\/\d+)/i)?.[1] ?? null;
     const tier = details.match(/Tier:\s*(\d+)/i)?.[1] ?? null;
     const magicResistance =
-        details.match(/Resistencia mÃ¡gica:\s*(\d+%)/i)?.[1] ?? null;
+        details.match(/Resistencia mágica:\s*(\d+%)/i)?.[1] ?? null;
     const magicDamageBonus =
-        details.match(/Bonus daÃ±o mÃ¡gico:\s*(\d+%)/i)?.[1] ?? null;
+        details.match(/Bonus daño mágico:\s*(\d+%)/i)?.[1] ?? null;
 
     return { defense, damage, tier, magicResistance, magicDamageBonus };
 }
@@ -344,7 +351,7 @@ export default function TradeModal({
     }, [draggedBankItem, finishBankDrag]);
 
     const merchantSlots = React.useMemo(
-        () => buildSlots(merchantItems),
+        () => isBank ? buildSlots(merchantItems) : buildMerchantSlots(merchantItems),
         [merchantItems],
     );
     const playerSlots = React.useMemo(
@@ -449,7 +456,7 @@ export default function TradeModal({
         : [];
     const isSharedVault = isBank && bankTab !== "character";
     const vaultGoldLabel =
-        bankTab === "clan" ? "Oro bÃ³veda clan" : "Oro bÃ³veda cuenta";
+        bankTab === "clan" ? "Oro bóveda clan" : "Oro bóveda cuenta";
     const tabs: Array<{
         key: "character" | "account" | "clan";
         label: string;
@@ -958,7 +965,7 @@ export default function TradeModal({
                                         ? localizeText(" No lo puede usar tu personaje.")
                                         : ""}
                                     {isSharedVault
-                                        ? localizeText(` Oro en la bÃ³veda: ${formatNumber(vaultGold)}.`)
+                                        ? localizeText(` Oro en la bóveda: ${formatNumber(vaultGold)}.`)
                                         : ""}
                                 </p>
                             </div>

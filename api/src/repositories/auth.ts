@@ -356,12 +356,12 @@ function toAuthCharacterSummary(
     const useLastAppearance = character.navegando;
     const classNameById: Record<number, string> = {
         1: "Mago",
-        2: "ClÃ©rigo",
+        2: "Clérigo",
         3: "Guerrero",
         4: "Asesino",
         6: "Bardo",
         7: "Druida",
-        8: "PaladÃ­n",
+        8: "Paladín",
         9: "Cazador",
     };
     const raceNameById: Record<number, string> = {

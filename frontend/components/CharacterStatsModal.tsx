@@ -375,12 +375,12 @@ export default function CharacterStatsModal({
                                     <h3 className="text-[11px] uppercase tracking-[0.3em] text-amber-300/78"><LocalizedText source={"Ofensiva "} /></h3>
                                     <div className="mt-4">
                                         <DetailRow
-                                            label="DaÃ±o equipado"
+                                            label="Daño equipado"
                                             value={formatRange(
                                                 equipmentStats?.minWeaponHit,
                                                 equipmentStats?.maxWeaponHit,
                                             )}
-                                            description="DaÃ±o base que aporta tu arma o municion equipada."
+                                            description="Daño base que aporta tu arma o municion equipada."
                                         />
                                         <DetailRow
                                             label="Tipo de arma"
@@ -388,20 +388,20 @@ export default function CharacterStatsModal({
                                                 equipmentStats?.isProjectileWeapon
                                                     ? "Distancia"
                                                     : equipmentStats?.isStabWeapon
-                                                      ? "ApuÃ±ala"
+                                                      ? "Apuñala"
                                                       : equipmentStats?.weaponName
                                                         ? "Cuerpo a cuerpo"
                                                         : "Sin arma"
                                             }
-                                            description="Define si atacas de cerca, a distancia o con un arma apta para apuÃ±alar."
+                                            description="Define si atacas de cerca, a distancia o con un arma apta para apuñalar."
                                         />
                                         <DetailRow
-                                            label="Bonus daÃ±o mÃ¡gico %"
+                                            label="Bonus daño mágico %"
                                             value={formatSignedNumber(
                                                 equipmentStats?.magicDamageBonus,
                                                 "%",
                                             )}
-                                            description="Porcentaje extra de daÃ±o mÃ¡gico otorgado por tu equipo actual."
+                                            description="Porcentaje extra de daño mágico otorgado por tu equipo actual."
                                         />
                                     </div>
                                 </section>
@@ -415,23 +415,23 @@ export default function CharacterStatsModal({
                                                 equipmentStats?.minDef,
                                                 equipmentStats?.maxDef,
                                             )}
-                                            description="Rango de defensa fÃ­sica que suma el equipo que llevas puesto."
+                                            description="Rango de defensa física que suma el equipo que llevas puesto."
                                         />
                                         <DetailRow
-                                            label="Defensa mÃ¡gica"
+                                            label="Defensa mágica"
                                             value={formatRange(
                                                 equipmentStats?.minDefMag,
                                                 equipmentStats?.maxDefMag,
                                             )}
-                                            description="Rango de defensa mÃ¡gica aportado por cascos, armaduras y escudos equipados."
+                                            description="Rango de defensa mágica aportado por cascos, armaduras y escudos equipados."
                                         />
                                         <DetailRow
-                                            label="Resistencia mÃ¡gica"
+                                            label="Resistencia mágica"
                                             value={formatSignedNumber(
                                                 equipmentStats?.resistenciaMagica,
                                                 "%",
                                             )}
-                                            description="ReducciÃ³n porcentual adicional frente a daÃ±o mÃ¡gico, si tu equipo la otorga."
+                                            description="Reducción porcentual adicional frente a daño mágico, si tu equipo la otorga."
                                         />
                                     </div>
                                 </section>
@@ -516,7 +516,7 @@ export default function CharacterStatsModal({
                                                         snapshot.skills
                                                             .tacticasCombate,
                                                     )}
-                                                    description="Skill base usada para calcular evasiÃ³n y desempeÃ±o general en combate."
+                                                    description="Skill base usada para calcular evasión y desempeño general en combate."
                                                 />
                                                 <DetailRow
                                                     label={localizeKey("hud.defense")}
@@ -530,7 +530,7 @@ export default function CharacterStatsModal({
                                                     value={formatNumber(
                                                         snapshot.skills.armas,
                                                     )}
-                                                    description="Dominio de armas cuerpo a cuerpo que no son de proyectil ni de apuÃ±alar."
+                                                    description="Dominio de armas cuerpo a cuerpo que no son de proyectil ni de apuñalar."
                                                 />
                                                 <DetailRow
                                                     label="Proyectiles"
@@ -538,7 +538,7 @@ export default function CharacterStatsModal({
                                                         snapshot.skills
                                                             .proyectiles,
                                                     )}
-                                                    description="Skill usada cuando atacas con armas de distancia y municiÃ³n."
+                                                    description="Skill usada cuando atacas con armas de distancia y munición."
                                                 />
                                                 <DetailRow
                                                     label="Combate sin armas"
@@ -557,12 +557,12 @@ export default function CharacterStatsModal({
                                                     description="Skill relacionada con esconderte y sostener estados de ocultamiento."
                                                 />
                                                 <DetailRow
-                                                    label="ApuÃ±alar"
+                                                    label="Apuñalar"
                                                     value={formatNumber(
                                                         snapshot.skills
                                                             .apunalar,
                                                     )}
-                                                    description="Skill usada para armas de apuÃ±alar y sus chequeos asociados."
+                                                    description="Skill usada para armas de apuñalar y sus chequeos asociados."
                                                 />
                                             </>
                                         ) : (

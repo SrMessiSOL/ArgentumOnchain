@@ -71,7 +71,7 @@ const MARKET_OBJECT_TYPE_OPTIONS = [
     { value: OBJECT_TYPE.cascos, label: "Cascos" },
     { value: OBJECT_TYPE.anillos, label: "Anillos" },
     { value: OBJECT_TYPE.pociones, label: "Pociones" },
-    { value: OBJECT_TYPE.lenia, label: "LeÃ±as" },
+    { value: OBJECT_TYPE.lenia, label: "Leñas" },
     { value: OBJECT_TYPE.metales, label: "Minerales" },
     { value: OBJECT_TYPE.lingotes, label: "Lingotes" },
     { value: OBJECT_TYPE.gemas, label: "Gemas" },
@@ -402,7 +402,7 @@ export default function MarketModal({
                         <SectionCard title="Estado">
                             <div className="space-y-2 text-sm text-stone-300">
                                 <p><LocalizedText source={"Oro disponible: "} />{formatNumber(gold)}</p>
-                                <p><LocalizedText source={"Tasa publicaciÃ³n:"} />{" "}
+                                <p><LocalizedText source={"Tasa publicación:"} />{" "}
                                     {marketState.publicationFeeBps / 100}%
                                 </p>
                                 <p><LocalizedText source={"Reclamos: "} />{marketState.claims.length}</p>
@@ -585,7 +585,7 @@ export default function MarketModal({
                                                                         )}{" "}<LocalizedText source={"oro c/u "} /></p>
                                                                 </div>
                                                                 {isOwnListing ? (
-                                                                    <span className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-300"><LocalizedText source={"Tu publicaciÃ³n "} /></span>
+                                                                    <span className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-stone-300"><LocalizedText source={"Tu publicación "} /></span>
                                                                 ) : (
                                                                     <button
                                                                         type="button"
@@ -690,7 +690,7 @@ export default function MarketModal({
                                                 });
                                             }}
                                             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:bg-white/10"
-                                        ><LocalizedText source={"Traer mÃ¡s "} /></button>
+                                        ><LocalizedText source={"Traer más "} /></button>
                                     ) : null}
                                 </div>
                             </SectionCard>
@@ -746,7 +746,7 @@ export default function MarketModal({
                                     </div>
                                 </SectionCard>
 
-                                <SectionCard title="Nueva PublicaciÃ³n">
+                                <SectionCard title="Nueva Publicación">
                                     <div className="space-y-3 text-sm text-stone-300">
                                         <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.16em] text-stone-300"><LocalizedText source={"Activas: "} />{activeListingsCount}/
                                             {MARKET_MAX_ACTIVE_LISTINGS}
@@ -782,7 +782,7 @@ export default function MarketModal({
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400"><LocalizedText source={"DuraciÃ³n (horas) "} /></span>
+                                            <span className="mb-1 block text-xs uppercase tracking-[0.2em] text-stone-400"><LocalizedText source={"Duración (horas) "} /></span>
                                             <input
                                                 type="number"
                                                 value={durationText}
@@ -804,7 +804,7 @@ export default function MarketModal({
                                                 {marketState.maxDurationHours}h.
                                             </span>
                                         </label>
-                                        <div className="rounded-xl border border-amber-200/15 bg-amber-950/25 px-3 py-2 text-amber-100"><LocalizedText source={"Tasa de publicaciÃ³n:"} />{" "}
+                                        <div className="rounded-xl border border-amber-200/15 bg-amber-950/25 px-3 py-2 text-amber-100"><LocalizedText source={"Tasa de publicación:"} />{" "}
                                             {formatNumber(publicationFee)}<LocalizedText source={" oro "} /></div>
                                         <button
                                             type="button"
@@ -833,7 +833,7 @@ export default function MarketModal({
                             <SectionCard title="Mis Ventas">
                                 <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
                                     {marketState.myListings.length === 0 ? (
-                                        <p className="text-sm text-stone-400"><LocalizedText source={"No tienes publicaciones todavÃ­a. "} /></p>
+                                        <p className="text-sm text-stone-400"><LocalizedText source={"No tienes publicaciones todavía. "} /></p>
                                     ) : null}
                                     {marketState.myListings.map((listing) => {
                                         const graphicData =
