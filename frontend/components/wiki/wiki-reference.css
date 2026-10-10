@@ -1,0 +1,20 @@
+.realm-wiki-explorer .wiki-section-navigation{padding:8px;border:1px solid #d8c28b20;background:#0d1820;border-radius:18px}
+.realm-wiki-explorer .wiki-section-navigation a{border-radius:12px;min-height:44px;display:inline-flex;align-items:center;font-weight:500}
+.realm-wiki-explorer .wiki-section-navigation a:focus-visible{outline:2px solid #d8c28b;outline-offset:3px}
+.wiki-equipment-table>div:first-child{background:#14232e;color:#b1c0cb;letter-spacing:.1em}
+.wiki-equipment-table>div:not(:first-child){align-items:center;transition:background .15s}
+.wiki-equipment-table>div:not(:first-child):hover{background:#162936}
+.wiki-equipment-table>div>span:first-child{color:#7992a2;font-size:12px;font-variant-numeric:tabular-nums}
+.wiki-equipment-table img{image-rendering:pixelated}
+.crafting-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0}
+.crafting-tools button{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid #b9cbd82b;background:#101f2b;border-radius:14px;padding:16px;min-width:0;transition:background .15s,border-color .15s}
+.crafting-tools button:hover,.crafting-tools button[aria-pressed=true]{background:#1b2d38;border-color:#d8c28b80}
+.crafting-tools button>.market-item-art{width:48px!important;height:48px!important;min-width:48px;transform:scale(.45);margin:0!important}
+.crafting-tools span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.crafting-tools small{color:#d8c28b;font-size:11px}
+.crafting-tools strong{color:#ecede6;font-size:14px;overflow-wrap:anywhere}
+.crafting-tools em{font-style:normal;color:#90a8b9;font-size:11px}
+.crafting-card dl{flex-wrap:wrap}
+.crafting-card dd{font-size:15px}
+@media(max-width:760px){.crafting-tools{grid-template-columns:1fr}.crafting-tools button{padding:12px 16px}.realm-wiki-explorer .wiki-section-navigation a{flex:1;justify-content:center}}
+@media(prefers-reduced-motion:reduce){.wiki-equipment-table>div,.crafting-tools button{transition:none}}

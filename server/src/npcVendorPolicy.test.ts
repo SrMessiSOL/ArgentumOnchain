@@ -38,3 +38,11 @@ assert.equal(canBuyFromNpc(2000,{2000:{...sewingKit[2000],newbie:1}},{},[]),fals
 assert.equal(canNpcVendorTrade(2000,{2000:{...sewingKit[2000],newbie:1}},{},[]),false,'newbie sewing kit cannot be sold');
 assert.equal(canBuyFromNpc(2000,{2000:{objType:2,name:'Costurero de combate'}},{},[]),false,'unreviewed names do not gain exemption');
 console.log('NPC vendor acquisition, catalog, sewing kit and newbie exclusion tests passed');
+
+const tierOne={3000:{objType:2,tier:1},3001:{objType:3,tier:1,newbie:1},3002:{objType:2,tier:2},3003:{objType:5,tier:1}};
+for (const check of [canBuyFromNpc,canNpcVendorTrade]) {
+ assert.equal(check(3000,tierOne,{1:{drop:[{item:3000,cant:1}]}},[{itemId:3000}]),true,'Tier 1 acquisition exception');
+ assert.equal(check(3001,tierOne,{},[]),false,'Tier 1 never overrides newbie');
+ assert.equal(check(3002,tierOne,{},[{itemId:3002}]),false,'Tier 2 stays restricted');
+ assert.equal(check(3003,tierOne,{},[]),false,'Tier 1 never permits gold');
+}

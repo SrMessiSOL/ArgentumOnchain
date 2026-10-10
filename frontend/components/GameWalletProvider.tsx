@@ -3,6 +3,7 @@ import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNod
 import {AppProvider,useConnector,useConnectorClient} from '@solana/connector/react';
 import {getDefaultConfig,createTransactionSigner,type TransactionSigner} from '@solana/connector/headless';
 import {Transaction} from '@solana/web3.js';
+import {resolveSigningWallet} from '@/lib/wallet-connection';
 import PortalModal from './PortalModal';
 import {useI18n} from './I18nProvider';
 
@@ -16,14 +17,26 @@ export function wrapSigner(signer:TransactionSigner):GameWallet{return {address:
 function WalletPicker({children}:{children:ReactNode}){
  const client=useConnectorClient(),state=useConnector(),{locale,t}=useI18n();
  const [open,setOpen]=useState(false),[working,setWorking]=useState(false),[error,setError]=useState(false);
+ const reconnect=useRef<Promise<void>|null>(null);
+ const rememberedKey='aochain:wallet-connector';
+ useEffect(()=>{if(state.wallet.status==='connected'){try{localStorage.setItem(rememberedKey,state.wallet.session.connectorId);}catch{}}},[state.wallet]);
  const pending=useRef<{resolve:(wallet:GameWallet)=>void;reject:(error:Error)=>void}|null>(null);
  function current(){const s=client?.getSnapshot();if(!client||s?.wallet.status!=='connected')return null;const wallet=client.getConnector(s.wallet.session.connectorId);if(!wallet)return null;const signer=createTransactionSigner({wallet,account:s.wallet.session.selectedAccount.account,cluster:s.cluster??undefined});return signer?wrapSigner(signer):null;}
  function cancel(){pending.current?.reject(Error('economy.walletRejected'));pending.current=null;setOpen(false);}
  useEffect(()=>()=>{pending.current?.reject(Error('economy.walletRejected'));},[]);
- async function connect(switchWallet=false){const wallet=current();if(wallet&&!switchWallet)return wallet;if(pending.current)throw Error('assets.pending');setError(false);setOpen(true);return new Promise<GameWallet>((resolve,reject)=>{pending.current={resolve,reject};});}
+ async function connect(switchWallet=false){
+  if(!switchWallet&&client&&client.getSnapshot().wallet.status==='disconnected'){
+   let remembered:string|null=null;try{remembered=localStorage.getItem(rememberedKey);}catch{}
+   const id=remembered as Parameters<NonNullable<typeof client>['connectWallet']>[0]|null;
+   if(id&&client.getSnapshot().connectors.some(connector=>connector.id===id&&connector.ready)){
+    if(!reconnect.current)reconnect.current=client.connectWallet(id).then(()=>{}).finally(()=>{reconnect.current=null;});
+    await reconnect.current;
+   }
+  }
+  return resolveSigningWallet({status:()=>client?.getSnapshot().wallet.status??'disconnected',current,wait:()=>new Promise(resolve=>setTimeout(resolve,100)),choose:()=>{if(pending.current)throw Error('assets.pending');setError(false);setOpen(true);return new Promise<GameWallet>((resolve,reject)=>{pending.current={resolve,reject};});}},switchWallet);}
  async function choose(id:Parameters<NonNullable<typeof client>['connectWallet']>[0]){if(!client||working)return;setWorking(true);setError(false);try{await client.connectWallet(id);const wallet=current();if(!wallet)throw Error('wallet.unsupported');pending.current?.resolve(wallet);pending.current=null;setOpen(false);}catch{setError(true);}finally{setWorking(false);}}
  const displayName=(name:string)=>name;
- return <Context.Provider value={{connect,address:state.wallet.status==='connected'?state.wallet.session.selectedAccount.account.address:null,disconnect:async()=>{await client?.disconnectWallet();}}}>{children}{open&&<PortalModal title={locale==='es'?'Elegí tu wallet':'Choose your wallet'} locked={working} onClose={cancel}><div className="wallet-options"><p>{locale==='es'?'Conectá una wallet compatible con Solana. Después te pediremos verificar tu propiedad con una firma.':'Connect a Solana-compatible wallet. You will then be asked to verify ownership with a signature.'}</p>{state.connectors.filter(w=>w.ready).map(w=><button key={w.id} disabled={working} onClick={()=>choose(w.id)}>{displayName(w.name)}<span>→</span></button>)}{!state.connectors.some(w=>w.ready)&&<div className="wallet-empty"><h3>{locale==='es'?'No encontramos wallets':'No wallet detected'}</h3><p>{locale==='es'?'Abrí esta página desde el navegador de tu wallet de Solana, o instalá una extensión compatible con Wallet Standard y recargá.':'Open this page in your Solana wallet’s browser, or install a Wallet Standard browser extension and reload.'}</p></div>}{error&&<p role="alert">{locale==='es'?'No se pudo conectar. Reintentá o elegí otra wallet.':'Connection failed. Retry or choose another wallet.'}</p>}<small>Solana devnet · {locale==='es'?'Activos de prueba':'Test assets'}</small><button disabled={working} onClick={cancel}>{t('common.cancel')}</button></div></PortalModal>}</Context.Provider>;
+ return <Context.Provider value={{connect,address:state.wallet.status==='connected'?state.wallet.session.selectedAccount.account.address:null,disconnect:async()=>{try{localStorage.removeItem(rememberedKey);}catch{}await client?.disconnectWallet();}}}>{children}{open&&<PortalModal title={locale==='es'?'Elegí tu wallet':'Choose your wallet'} locked={working} onClose={cancel}><div className="wallet-options"><p>{locale==='es'?'Conectá una wallet compatible con Solana. Después te pediremos verificar tu propiedad con una firma.':'Connect a Solana-compatible wallet. You will then be asked to verify ownership with a signature.'}</p>{state.connectors.filter(w=>w.ready).map(w=><button key={w.id} disabled={working} onClick={()=>choose(w.id)}>{displayName(w.name)}<span>→</span></button>)}{!state.connectors.some(w=>w.ready)&&<div className="wallet-empty"><h3>{locale==='es'?'No encontramos wallets':'No wallet detected'}</h3><p>{locale==='es'?'Abrí esta página desde el navegador de tu wallet de Solana, o instalá una extensión compatible con Wallet Standard y recargá.':'Open this page in your Solana wallet’s browser, or install a Wallet Standard browser extension and reload.'}</p></div>}{error&&<p role="alert">{locale==='es'?'No se pudo conectar. Reintentá o elegí otra wallet.':'Connection failed. Retry or choose another wallet.'}</p>}<small>Solana devnet · {locale==='es'?'Activos de prueba':'Test assets'}</small><button disabled={working} onClick={cancel}>{t('common.cancel')}</button></div></PortalModal>}</Context.Provider>;
 }
 export default function GameWalletProvider({children}:{children:ReactNode}){
  const config=useMemo(()=>getDefaultConfig({appName:'AOCHAIN',appUrl:process.env.NEXT_PUBLIC_SITE_URL,network:'devnet',clusters:[{id:'solana:devnet',label:'Devnet',url:'https://api.devnet.solana.com'}],autoConnect:true,enableMobile:true,persistClusterSelection:false}),[]);

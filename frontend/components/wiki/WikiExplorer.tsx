@@ -3,6 +3,7 @@
 import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import {useI18n} from '@/components/I18nProvider';
 import {uxEnglish,uxSpanish} from "@/lib/ux-copy";
+import './wiki-reference.css';
 import CraftingReference from './CraftingReference';
 import NpcArtwork from './NpcArtwork';
 import BrowseToolbar from "@/components/BrowseToolbar";
@@ -642,7 +643,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
 
             {section === "npcs" ? (
                 <section className="space-y-4">
-                    <div className="overflow-x-auto rounded-[28px] border border-white/8 bg-[#08101a] shadow-xl">
+                    <div className="wiki-equipment-table overflow-x-auto rounded-[20px] border border-white/8 bg-[#08101a] shadow-xl">
                         <div className="grid min-w-[950px] grid-cols-[1.8fr_110px_110px_110px_1.8fr_1.6fr] gap-3 border-b border-white/8 px-4 py-3 text-xs uppercase tracking-[0.18em] text-stone-500">
                             <span>NPC</span>
                             <span><LocalizedText source={"Vida"} /></span>
@@ -685,26 +686,24 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                             <h2 className="text-lg font-semibold text-white">
                                 <LocalizedText source={group.label} />
                             </h2>
-                            <div className="overflow-x-auto rounded-[28px] border border-white/8 bg-[#08101a] shadow-xl">
-                                <div className="grid min-w-[1120px] grid-cols-[90px_84px_1.7fr_140px_100px_120px_90px_1.8fr_220px] gap-3 border-b border-white/8 px-4 py-3 text-xs uppercase tracking-[0.18em] text-stone-500">
+                            <div className="wiki-equipment-table overflow-x-auto rounded-[20px] border border-white/8 bg-[#08101a] shadow-xl">
+                                <div className="grid min-w-[900px] grid-cols-[58px_72px_1.7fr_100px_110px_1.6fr_190px] gap-3 border-b border-white/8 px-4 py-3 text-xs uppercase tracking-[0.18em] text-stone-500">
                                     <span>ID</span>
                                     <span>Img</span>
                                     <span>Item</span>
-                                    <span><LocalizedText source={"Tipo"} /></span>
                                     <span><LocalizedText source={"Valor"} /></span>
                                     <span>
                                         <LocalizedText source={getEquipmentStatLabel(
                                             group.key as PublicWikiResponse["equipment"][number]["category"],
                                         )} />
                                     </span>
-                                    <span>Tier</span>
                                     <span><LocalizedText source={"Dropean"} /></span>
                                     <span><LocalizedText source={"Clases permitidas"} /></span>
                                 </div>
                                 {group.items.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="grid min-w-[1120px] grid-cols-[90px_84px_1.7fr_140px_100px_120px_90px_1.8fr_220px] gap-3 border-b border-white/6 px-4 py-3 text-sm text-stone-200 last:border-b-0"
+                                        className="grid min-w-[900px] grid-cols-[58px_72px_1.7fr_100px_110px_1.6fr_190px] gap-3 border-b border-white/6 px-4 py-3 text-sm text-stone-200 last:border-b-0"
                                     >
                                         <span>{item.id}</span>
                                         <div className="flex items-center justify-center rounded-2xl border border-white/8 bg-black/20 p-2">
@@ -727,12 +726,8 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                                                 </p>
                                             ) : null}
                                         </div>
-                                        <span><LocalizedText source={item.objTypeLabel} /></span>
                                         <span>{item.category==='boat'?"—":formatNumber(item.value)}</span>
                                         <span>{formatEquipmentStat(item)}</span>
-                                        <span>
-                                            {item.tier > 0 ? item.tier : "-"}
-                                        </span>
                                         <span className="text-xs leading-5 text-stone-400">
                                             {dedupeNpcNames(item.droppedBy)}
                                         </span>
@@ -755,7 +750,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
 
             {section === "spells" ? (
                 <section className="space-y-4">
-                    <div className="overflow-x-auto rounded-[28px] border border-white/8 bg-[#08101a] shadow-xl">
+                    <div className="wiki-equipment-table overflow-x-auto rounded-[20px] border border-white/8 bg-[#08101a] shadow-xl">
                         <div className="grid min-w-[1200px] grid-cols-[80px_1.5fr_100px_100px_120px_1.4fr_1.7fr_1.7fr] gap-3 border-b border-white/8 px-4 py-3 text-xs uppercase tracking-[0.18em] text-stone-500">
                             <span>ID</span>
                             <span><LocalizedText source={"Hechizo"} /></span>

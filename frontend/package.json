@@ -11,6 +11,7 @@
         "lint": "eslint",
         "generate:headswithfile": "node ./scripts/generate-headswithfile.mjs",
         "test:wiki": "node scripts/test-crafting-wiki.mjs",
+        "test:wallet-connection": "node scripts/test-wallet-connection.mjs",
         "test:english": "node scripts/test-english.mjs",
         "audit:english-data": "node --import ../server/node_modules/tsx/dist/loader.mjs scripts/audit-english-data.ts"
     },
