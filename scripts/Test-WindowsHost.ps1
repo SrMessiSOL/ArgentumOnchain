@@ -50,9 +50,13 @@ try {
  $data=Join-Path $root 'data'
  & (Join-Path $PgBin 'initdb.exe') -D $data -U aochain_test_admin --auth-local=scram-sha-256 --auth-host=scram-sha-256 --encoding=UTF8 "--pwfile=$pwfile"
  if($LASTEXITCODE -ne 0){throw 'Disposable initdb failed'}
- & (Join-Path $PgBin 'pg_ctl.exe') -D $data -l (Join-Path $root 'postgres.log') -o "-h 127.0.0.1 -p $Port" -w start
- if($LASTEXITCODE -ne 0){throw 'Disposable PostgreSQL startup failed; no realm process was changed'}
+ $startupArgs=@('-D',$data,'-l',(Join-Path $root 'postgres.log'),'-o',"-h 127.0.0.1 -p $Port",'-w','start')
+ $quoted=@($startupArgs|ForEach-Object {if($_.Contains('"') -or $_.EndsWith('\')){throw 'Unexpected startup argument'};'"'+$_+'"'})
  $started=$true
+ $startup=Start-Process -FilePath (Join-Path $PgBin 'pg_ctl.exe') -ArgumentList $quoted -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $root 'startup.out.log') -RedirectStandardError (Join-Path $root 'startup.err.log')
+ $startupHandle=$startup.Handle
+ if(!$startup.WaitForExit(60000)){throw 'Disposable PostgreSQL startup timed out'}
+ if($null -ne $startup.ExitCode -and $startup.ExitCode -ne 0){throw 'Disposable PostgreSQL startup failed; no realm process was changed'}
  $keys=@('PATH','AOCHAIN_SECURITY_ADMIN_DATABASE_URL','DATABASE_URL','TOKEN_AUTH','GAME_SERVICE_TOKEN','NODE_ENV','NEXT_TELEMETRY_DISABLED','AOWEB_GOLD_AUTHORITY_FILE','AOWEB_DEVNET_ISSUER_FILE','AOWEB_DEVNET_RPC','AOWEB_SETTLEMENT_PAUSED')
  foreach($key in $keys){$savedEnv[$key]=[Environment]::GetEnvironmentVariable($key,'Process')}
  $env:PATH=(Split-Path $NodeExe -Parent)+';'+$env:PATH
