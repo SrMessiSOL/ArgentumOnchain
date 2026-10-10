@@ -155,7 +155,7 @@
       {
         "itemId": 58,
         "name": "Leña",
-        "amount": 25000
+        "amount": 10000
       }
     ],
     "resolved": true,
@@ -173,25 +173,7 @@
       {
         "itemId": 58,
         "name": "Leña",
-        "amount": 30000
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "carpentry-476",
-    "profession": "carpentry",
-    "skill": 100,
-    "output": {
-      "itemId": 476,
-      "name": "Galeón"
-    },
-    "materials": [
-      {
-        "itemId": 58,
-        "name": "Leña",
-        "amount": 40000
+        "amount": 20000
       }
     ],
     "resolved": true,
@@ -282,534 +264,6 @@
         "itemId": 58,
         "name": "Leña",
         "amount": 1200
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-15",
-    "profession": "blacksmith",
-    "skill": 0,
-    "output": {
-      "itemId": 15,
-      "name": "Daga"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 3
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-165",
-    "profession": "blacksmith",
-    "skill": 15,
-    "output": {
-      "itemId": 165,
-      "name": "Daga +1"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 10
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-365",
-    "profession": "blacksmith",
-    "skill": 35,
-    "output": {
-      "itemId": 365,
-      "name": "Daga +2"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 50
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-366",
-    "profession": "blacksmith",
-    "skill": 60,
-    "output": {
-      "itemId": 366,
-      "name": "Daga +3"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 100
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-367",
-    "profession": "blacksmith",
-    "skill": 100,
-    "output": {
-      "itemId": 367,
-      "name": "Daga +4"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 100
-      },
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 100
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-164",
-    "profession": "blacksmith",
-    "skill": 25,
-    "output": {
-      "itemId": 164,
-      "name": "Espada Corta"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 50
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-2",
-    "profession": "blacksmith",
-    "skill": 25,
-    "output": {
-      "itemId": 2,
-      "name": "Espada Larga"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 20
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-125",
-    "profession": "blacksmith",
-    "skill": 30,
-    "output": {
-      "itemId": 125,
-      "name": "Sable"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 30
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-159",
-    "profession": "blacksmith",
-    "skill": 70,
-    "output": {
-      "itemId": 159,
-      "name": "Hacha de Bárbaro"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 55
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-399",
-    "profession": "blacksmith",
-    "skill": 55,
-    "output": {
-      "itemId": 399,
-      "name": "Cimitarra"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 100
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-123",
-    "profession": "blacksmith",
-    "skill": 70,
-    "output": {
-      "itemId": 123,
-      "name": "Espada Vikinga"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 50
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-124",
-    "profession": "blacksmith",
-    "skill": 75,
-    "output": {
-      "itemId": 124,
-      "name": "Katana"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 90
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-129",
-    "profession": "blacksmith",
-    "skill": 80,
-    "output": {
-      "itemId": 129,
-      "name": "Hacha de Guerra Dos Filos"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 105
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-403",
-    "profession": "blacksmith",
-    "skill": 90,
-    "output": {
-      "itemId": 403,
-      "name": "Espada de Plata"
-    },
-    "materials": [
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 105
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-1036",
-    "profession": "blacksmith",
-    "skill": 80,
-    "output": {
-      "itemId": 1036,
-      "name": "Guantes de Lucha"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 105
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-195",
-    "profession": "blacksmith",
-    "skill": 76,
-    "output": {
-      "itemId": 195,
-      "name": "Armadura de Placas Completa"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 210
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-356",
-    "profession": "blacksmith",
-    "skill": 100,
-    "output": {
-      "itemId": 356,
-      "name": "Armadura de las Sombras"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 300
-      },
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 200
-      },
-      {
-        "itemId": 388,
-        "name": "Lingote de Oro",
-        "amount": 30
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-854",
-    "profession": "blacksmith",
-    "skill": 100,
-    "output": {
-      "itemId": 854,
-      "name": "Armadura de las Sombras (E/G)"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 300
-      },
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 200
-      },
-      {
-        "itemId": 388,
-        "name": "Lingote de Oro",
-        "amount": 30
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-496",
-    "profession": "blacksmith",
-    "skill": 100,
-    "output": {
-      "itemId": 496,
-      "name": "Armadura de la Ciénaga"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 550
-      },
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 350
-      },
-      {
-        "itemId": 388,
-        "name": "Lingote de Oro",
-        "amount": 150
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-495",
-    "profession": "blacksmith",
-    "skill": 100,
-    "output": {
-      "itemId": 495,
-      "name": "Armadura Escarlata"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 550
-      },
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 350
-      },
-      {
-        "itemId": 388,
-        "name": "Lingote de Oro",
-        "amount": 150
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-128",
-    "profession": "blacksmith",
-    "skill": 55,
-    "output": {
-      "itemId": 128,
-      "name": "Escudo de Hierro"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 30
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-133",
-    "profession": "blacksmith",
-    "skill": 90,
-    "output": {
-      "itemId": 133,
-      "name": "Escudo Imperial"
-    },
-    "materials": [
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 100
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-699",
-    "profession": "blacksmith",
-    "skill": 75,
-    "output": {
-      "itemId": 699,
-      "name": "Anillo de Disolución Mágica"
-    },
-    "materials": [
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 75
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-131",
-    "profession": "blacksmith",
-    "skill": 65,
-    "output": {
-      "itemId": 131,
-      "name": "Casco de Hierro Completo"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 105
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-405",
-    "profession": "blacksmith",
-    "skill": 75,
-    "output": {
-      "itemId": 405,
-      "name": "Casco de Plata"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 180
-      },
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 210
-      },
-      {
-        "itemId": 388,
-        "name": "Lingote de Oro",
-        "amount": 60
-      }
-    ],
-    "resolved": true,
-    "pending": false
-  },
-  {
-    "id": "blacksmith-814",
-    "profession": "blacksmith",
-    "skill": 100,
-    "output": {
-      "itemId": 814,
-      "name": "Relicario"
-    },
-    "materials": [
-      {
-        "itemId": 386,
-        "name": "Lingote de Hierro",
-        "amount": 5
-      },
-      {
-        "itemId": 387,
-        "name": "Lingote de Plata",
-        "amount": 5
       }
     ],
     "resolved": true,
@@ -911,7 +365,7 @@
     "skill": 25,
     "output": {
       "itemId": 508,
-      "name": "Item #508"
+      "name": "Ropa Estuaria (H/E/EO-M)"
     },
     "materials": [
       {
@@ -920,7 +374,7 @@
         "amount": 30
       }
     ],
-    "resolved": false,
+    "resolved": true,
     "pending": false
   },
   {
@@ -1274,6 +728,180 @@
     "pending": false
   },
   {
+    "id": "carpentry-476",
+    "profession": "carpentry",
+    "skill": 100,
+    "output": {
+      "itemId": 476,
+      "name": "Galeón"
+    },
+    "materials": [
+      {
+        "itemId": 58,
+        "name": "Leña",
+        "amount": 30000
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "carpentry-660",
+    "profession": "carpentry",
+    "skill": 75,
+    "output": {
+      "itemId": 660,
+      "name": "Báculo Engarzado"
+    },
+    "materials": [
+      {
+        "itemId": 1006,
+        "name": "Leña Elfica",
+        "amount": 500
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "blacksmith-481",
+    "profession": "blacksmith",
+    "skill": 100,
+    "output": {
+      "itemId": 481,
+      "name": "Armadura de Dragón"
+    },
+    "materials": [
+      {
+        "itemId": 386,
+        "name": "Lingote de Hierro",
+        "amount": 500
+      },
+      {
+        "itemId": 387,
+        "name": "Lingote de Plata",
+        "amount": 250
+      },
+      {
+        "itemId": 388,
+        "name": "Lingote de Oro",
+        "amount": 100
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "blacksmith-483",
+    "profession": "blacksmith",
+    "skill": 100,
+    "output": {
+      "itemId": 483,
+      "name": "Armadura de Dragón (E/G)"
+    },
+    "materials": [
+      {
+        "itemId": 386,
+        "name": "Lingote de Hierro",
+        "amount": 500
+      },
+      {
+        "itemId": 387,
+        "name": "Lingote de Plata",
+        "amount": 250
+      },
+      {
+        "itemId": 388,
+        "name": "Lingote de Oro",
+        "amount": 100
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "blacksmith-697",
+    "profession": "blacksmith",
+    "skill": 25,
+    "output": {
+      "itemId": 697,
+      "name": "Anillo Mágico"
+    },
+    "materials": [
+      {
+        "itemId": 387,
+        "name": "Lingote de Plata",
+        "amount": 25
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "blacksmith-698",
+    "profession": "blacksmith",
+    "skill": 50,
+    "output": {
+      "itemId": 698,
+      "name": "Anillo de Resistencia Mágica"
+    },
+    "materials": [
+      {
+        "itemId": 387,
+        "name": "Lingote de Plata",
+        "amount": 50
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "blacksmith-699",
+    "profession": "blacksmith",
+    "skill": 100,
+    "output": {
+      "itemId": 699,
+      "name": "Anillo de Disolución Mágica"
+    },
+    "materials": [
+      {
+        "itemId": 387,
+        "name": "Lingote de Plata",
+        "amount": 75
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "blacksmith-402",
+    "profession": "blacksmith",
+    "skill": 100,
+    "output": {
+      "itemId": 402,
+      "name": "Espada Mata Dragones"
+    },
+    "materials": [
+      {
+        "itemId": 386,
+        "name": "Lingote de Hierro",
+        "amount": 500
+      },
+      {
+        "itemId": 387,
+        "name": "Lingote de Plata",
+        "amount": 500
+      },
+      {
+        "itemId": 388,
+        "name": "Lingote de Oro",
+        "amount": 500
+      }
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
     "id": "tailoring-35",
     "profession": "tailoring",
     "skill": 5,
@@ -1289,7 +917,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-501",
@@ -1307,7 +935,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-502",
@@ -1325,7 +953,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-641",
@@ -1343,7 +971,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-135",
@@ -1361,7 +989,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-670",
@@ -1379,7 +1007,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-930",
@@ -1397,7 +1025,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-238",
@@ -1415,7 +1043,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-239",
@@ -1433,7 +1061,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "tailoring-671",
@@ -1456,7 +1084,7 @@
       }
     ],
     "resolved": true,
-    "pending": true
+    "pending": false
   },
   {
     "id": "smelt-1",

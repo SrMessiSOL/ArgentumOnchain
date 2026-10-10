@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const read=name=>JSON.parse(fs.readFileSync(new URL('../lib/'+name,import.meta.url),'utf8').replace(/^\uFEFF/,''));
+const catalog=read('crafting-catalog-snapshot.json'),wiki=read('wiki-snapshot.json');
+const objects=new Map(wiki.equipment.map(item=>[Number(item.id),item]));
+const item=id=>({itemId:Number(id),name:objects.get(Number(id))?.name??`Item #${id}`});
+const recipes=catalog.recipes.map(r=>({id:r.profession+'-'+r.itemId,profession:r.profession,skill:r.skill,output:item(r.itemId),materials:r.materials.map(m=>({...item(m.itemId),amount:m.amount})),resolved:Boolean(objects.has(Number(r.itemId))&&r.materials.every(m=>objects.has(Number(m.itemId)))),pending:false}));
+recipes.push(...catalog.smelting.filter(r=>!r.deleted).map(r=>({id:'smelt-'+r.id,profession:'smelting',skill:r.requiredSkill,output:item(r.ingotItemId),materials:[{...item(r.mineralItemId),amount:r.mineralsPerIngot}],resolved:objects.has(Number(r.ingotItemId))&&objects.has(Number(r.mineralItemId)),pending:false})));
+if(!recipes.length||new Set(recipes.map(r=>r.id)).size!==recipes.length)throw Error('Empty or duplicate public crafting catalog');
+fs.writeFileSync(new URL('../lib/crafting-wiki.json',import.meta.url),JSON.stringify(recipes,null,2)+'\n');
+console.log(`Generated ${recipes.length} installed recipes; ${recipes.filter(r=>!r.resolved).length} unresolved references shown.`);

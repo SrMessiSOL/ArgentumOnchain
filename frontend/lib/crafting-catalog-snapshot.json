@@ -1,0 +1,822 @@
+{
+  "source": "installed realm public catalog",
+  "recipes": [
+    {
+      "id": 1,
+      "profession": "carpentry",
+      "itemId": 480,
+      "skill": 5,
+      "materials": [
+        {
+          "amount": 1,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 2,
+      "profession": "carpentry",
+      "itemId": 551,
+      "skill": 45,
+      "materials": [
+        {
+          "amount": 2,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 3,
+      "profession": "carpentry",
+      "itemId": 552,
+      "skill": 63,
+      "materials": [
+        {
+          "amount": 3,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 4,
+      "profession": "carpentry",
+      "itemId": 553,
+      "skill": 75,
+      "materials": [
+        {
+          "amount": 6,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 5,
+      "profession": "carpentry",
+      "itemId": 478,
+      "skill": 10,
+      "materials": [
+        {
+          "amount": 200,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 6,
+      "profession": "carpentry",
+      "itemId": 663,
+      "skill": 25,
+      "materials": [
+        {
+          "amount": 500,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 7,
+      "profession": "carpentry",
+      "itemId": 479,
+      "skill": 63,
+      "materials": [
+        {
+          "amount": 900,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 8,
+      "profession": "carpentry",
+      "itemId": 665,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 1000,
+          "itemId": 1006
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 9,
+      "profession": "carpentry",
+      "itemId": 474,
+      "skill": 75,
+      "materials": [
+        {
+          "amount": 10000,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 10,
+      "profession": "carpentry",
+      "itemId": 475,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 20000,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 11,
+      "profession": "carpentry",
+      "itemId": 696,
+      "skill": 75,
+      "materials": [
+        {
+          "amount": 800,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 12,
+      "profession": "carpentry",
+      "itemId": 208,
+      "skill": 75,
+      "materials": [
+        {
+          "amount": 1200,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 13,
+      "profession": "carpentry",
+      "itemId": 1049,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 600,
+          "itemId": 1006
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 14,
+      "profession": "carpentry",
+      "itemId": 1050,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 900,
+          "itemId": 1006
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 15,
+      "profession": "carpentry",
+      "itemId": 659,
+      "skill": 60,
+      "materials": [
+        {
+          "amount": 1200,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 42,
+      "profession": "tailoring",
+      "itemId": 3578,
+      "skill": 0,
+      "materials": [
+        {
+          "amount": 1,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 43,
+      "profession": "tailoring",
+      "itemId": 32,
+      "skill": 2,
+      "materials": [
+        {
+          "amount": 1,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 44,
+      "profession": "tailoring",
+      "itemId": 240,
+      "skill": 0,
+      "materials": [
+        {
+          "amount": 7,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 45,
+      "profession": "tailoring",
+      "itemId": 1975,
+      "skill": 10,
+      "materials": [
+        {
+          "amount": 20,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 46,
+      "profession": "tailoring",
+      "itemId": 2911,
+      "skill": 10,
+      "materials": [
+        {
+          "amount": 20,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 47,
+      "profession": "tailoring",
+      "itemId": 508,
+      "skill": 25,
+      "materials": [
+        {
+          "amount": 30,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 48,
+      "profession": "tailoring",
+      "itemId": 196,
+      "skill": 35,
+      "materials": [
+        {
+          "amount": 50,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 49,
+      "profession": "tailoring",
+      "itemId": 1226,
+      "skill": 35,
+      "materials": [
+        {
+          "amount": 50,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 50,
+      "profession": "tailoring",
+      "itemId": 1955,
+      "skill": 45,
+      "materials": [
+        {
+          "amount": 60,
+          "itemId": 414
+        },
+        {
+          "amount": 5,
+          "itemId": 415
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 51,
+      "profession": "tailoring",
+      "itemId": 1089,
+      "skill": 55,
+      "materials": [
+        {
+          "amount": 70,
+          "itemId": 414
+        },
+        {
+          "amount": 10,
+          "itemId": 415
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 52,
+      "profession": "tailoring",
+      "itemId": 2857,
+      "skill": 55,
+      "materials": [
+        {
+          "amount": 70,
+          "itemId": 414
+        },
+        {
+          "amount": 10,
+          "itemId": 415
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 53,
+      "profession": "tailoring",
+      "itemId": 2932,
+      "skill": 55,
+      "materials": [
+        {
+          "amount": 70,
+          "itemId": 414
+        },
+        {
+          "amount": 10,
+          "itemId": 415
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 54,
+      "profession": "tailoring",
+      "itemId": 2916,
+      "skill": 65,
+      "materials": [
+        {
+          "amount": 80,
+          "itemId": 414
+        },
+        {
+          "amount": 15,
+          "itemId": 415
+        },
+        {
+          "amount": 1,
+          "itemId": 416
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 55,
+      "profession": "tailoring",
+      "itemId": 1961,
+      "skill": 65,
+      "materials": [
+        {
+          "amount": 80,
+          "itemId": 414
+        },
+        {
+          "amount": 15,
+          "itemId": 415
+        },
+        {
+          "amount": 1,
+          "itemId": 416
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 56,
+      "profession": "tailoring",
+      "itemId": 2854,
+      "skill": 65,
+      "materials": [
+        {
+          "amount": 80,
+          "itemId": 414
+        },
+        {
+          "amount": 15,
+          "itemId": 415
+        },
+        {
+          "amount": 1,
+          "itemId": 416
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 57,
+      "profession": "tailoring",
+      "itemId": 519,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 45,
+          "itemId": 414
+        },
+        {
+          "amount": 25,
+          "itemId": 415
+        },
+        {
+          "amount": 3,
+          "itemId": 416
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 58,
+      "profession": "tailoring",
+      "itemId": 1957,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 45,
+          "itemId": 414
+        },
+        {
+          "amount": 25,
+          "itemId": 415
+        },
+        {
+          "amount": 3,
+          "itemId": 416
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 59,
+      "profession": "tailoring",
+      "itemId": 1778,
+      "skill": 10,
+      "materials": [
+        {
+          "amount": 15,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 60,
+      "profession": "tailoring",
+      "itemId": 3462,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 300,
+          "itemId": 414
+        },
+        {
+          "amount": 150,
+          "itemId": 415
+        },
+        {
+          "amount": 40,
+          "itemId": 416
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 61,
+      "profession": "tailoring",
+      "itemId": 3822,
+      "skill": 0,
+      "materials": [
+        {
+          "amount": 1,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 62,
+      "profession": "tailoring",
+      "itemId": 3990,
+      "skill": 75,
+      "materials": [
+        {
+          "amount": 6,
+          "itemId": 416
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 63,
+      "profession": "carpentry",
+      "itemId": 476,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 30000,
+          "itemId": 58
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 64,
+      "profession": "carpentry",
+      "itemId": 660,
+      "skill": 75,
+      "materials": [
+        {
+          "amount": 500,
+          "itemId": 1006
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 65,
+      "profession": "blacksmith",
+      "itemId": 481,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 500,
+          "itemId": 386
+        },
+        {
+          "amount": 250,
+          "itemId": 387
+        },
+        {
+          "amount": 100,
+          "itemId": 388
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 66,
+      "profession": "blacksmith",
+      "itemId": 483,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 500,
+          "itemId": 386
+        },
+        {
+          "amount": 250,
+          "itemId": 387
+        },
+        {
+          "amount": 100,
+          "itemId": 388
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 67,
+      "profession": "blacksmith",
+      "itemId": 697,
+      "skill": 25,
+      "materials": [
+        {
+          "amount": 25,
+          "itemId": 387
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 68,
+      "profession": "blacksmith",
+      "itemId": 698,
+      "skill": 50,
+      "materials": [
+        {
+          "amount": 50,
+          "itemId": 387
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 69,
+      "profession": "blacksmith",
+      "itemId": 699,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 75,
+          "itemId": 387
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 70,
+      "profession": "blacksmith",
+      "itemId": 402,
+      "skill": 100,
+      "materials": [
+        {
+          "amount": 500,
+          "itemId": 386
+        },
+        {
+          "amount": 500,
+          "itemId": 387
+        },
+        {
+          "amount": 500,
+          "itemId": 388
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 71,
+      "profession": "tailoring",
+      "itemId": 35,
+      "skill": 5,
+      "materials": [
+        {
+          "amount": 2,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 72,
+      "profession": "tailoring",
+      "itemId": 501,
+      "skill": 10,
+      "materials": [
+        {
+          "amount": 5,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 73,
+      "profession": "tailoring",
+      "itemId": 502,
+      "skill": 10,
+      "materials": [
+        {
+          "amount": 5,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 74,
+      "profession": "tailoring",
+      "itemId": 641,
+      "skill": 5,
+      "materials": [
+        {
+          "amount": 3,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 75,
+      "profession": "tailoring",
+      "itemId": 135,
+      "skill": 20,
+      "materials": [
+        {
+          "amount": 15,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 76,
+      "profession": "tailoring",
+      "itemId": 670,
+      "skill": 35,
+      "materials": [
+        {
+          "amount": 50,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 77,
+      "profession": "tailoring",
+      "itemId": 930,
+      "skill": 35,
+      "materials": [
+        {
+          "amount": 40,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 78,
+      "profession": "tailoring",
+      "itemId": 238,
+      "skill": 35,
+      "materials": [
+        {
+          "amount": 40,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 79,
+      "profession": "tailoring",
+      "itemId": 239,
+      "skill": 30,
+      "materials": [
+        {
+          "amount": 30,
+          "itemId": 414
+        }
+      ],
+      "deleted": false
+    },
+    {
+      "id": 80,
+      "profession": "tailoring",
+      "itemId": 671,
+      "skill": 55,
+      "materials": [
+        {
+          "amount": 30,
+          "itemId": 414
+        },
+        {
+          "amount": 15,
+          "itemId": 415
+        }
+      ],
+      "deleted": false
+    }
+  ],
+  "smelting": [
+    {
+      "id": 1,
+      "ingotItemId": 386,
+      "mineralItemId": 192,
+      "requiredSkill": 25,
+      "mineralsPerIngot": 13
+    },
+    {
+      "id": 2,
+      "ingotItemId": 387,
+      "mineralItemId": 193,
+      "requiredSkill": 50,
+      "mineralsPerIngot": 25
+    },
+    {
+      "id": 3,
+      "ingotItemId": 388,
+      "mineralItemId": 194,
+      "requiredSkill": 100,
+      "mineralsPerIngot": 50
+    }
+  ]
+}
