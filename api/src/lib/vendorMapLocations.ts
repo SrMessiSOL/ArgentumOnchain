@@ -7,7 +7,9 @@ export function readVendorMapLocations(mapsDir:string,stateDir?:string):Record<n
  for(const folder of folders){
   const meta=JSON.parse(fs.readFileSync(path.join(mapsDir,folder.name,'meta.json'),'utf8'));
   if(String(meta.zona).toUpperCase()!=='CIUDAD')continue;
-  if(typeof meta.name!=='string'||!meta.name.trim())throw Error('Town name missing');
+  if(typeof meta.name!=='string')throw Error('Town name missing');
+  // Preserve unnamed-town occurrences so shared NPCs cannot look town-unique.
+  const town=meta.name.trim()||`[unnamed town ${folder.name}]`;
   const override=stateDir?path.join(stateDir,folder.name,'npcs.json'):undefined;
   const bundled=path.join(mapsDir,folder.name,'npcs.json');
   const file=override&&fs.existsSync(override)?override:bundled;
@@ -16,7 +18,7 @@ export function readVendorMapLocations(mapsDir:string,stateDir?:string):Record<n
   if(!Array.isArray(placements))throw Error('Invalid NPC placement file');
   for(const placement of placements){
    const id=Number(placement.npcIndex);if(!Number.isSafeInteger(id)||id<=0)throw Error('Invalid NPC template');
-   locations[id]??=[];if(!locations[id].includes(meta.name))locations[id].push(meta.name);
+   locations[id]??=[];if(!locations[id].includes(town))locations[id].push(town);
   }
  }
  return locations;

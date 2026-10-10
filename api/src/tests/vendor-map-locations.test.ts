@@ -11,6 +11,8 @@ try{
  assert.deepEqual(readVendorMapLocations(maps),{10:['Ullathorpe']});
  fs.mkdirSync(path.join(state,'mapa_1'),{recursive:true});fs.writeFileSync(path.join(state,'mapa_1','npcs.json'),'[{"npcIndex":20}]');
  assert.deepEqual(readVendorMapLocations(maps,state),{20:['Ullathorpe']});
+ fs.mkdirSync(path.join(maps,'mapa_59'));fs.writeFileSync(path.join(maps,'mapa_59','meta.json'),JSON.stringify({zona:'CIUDAD',name:''}));fs.writeFileSync(path.join(maps,'mapa_59','npcs.json'),'[{"npcIndex":20}]');
+ assert.deepEqual(readVendorMapLocations(maps,state),{20:['Ullathorpe','[unnamed town mapa_59]']});
  fs.writeFileSync(path.join(state,'mapa_1','npcs.json'),'{}');assert.throws(()=>readVendorMapLocations(maps,state));
  console.log('PASS: missing NPC files, bundled placements, authoritative overrides and malformed data rejection.');
 }finally{fs.rmSync(temp,{recursive:true,force:true});}
