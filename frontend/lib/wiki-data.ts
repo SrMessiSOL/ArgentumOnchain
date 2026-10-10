@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { getApiBaseUrlCandidates } from "@/lib/api-base-url";
 import type { PublicWikiResponse } from "@/lib/wiki";
+import objects from "../public/init/objs.json";
 import wikiSnapshot from "./wiki-snapshot.json";
 
 export const WIKI_REVALIDATE_SECONDS = 60 * 60 * 24 * 30;
@@ -9,7 +10,7 @@ function inferEquipmentCategory(
     objType: number,
     name?: string,
 ): {
-    category: "weapon" | "armor" | "shield" | "helmet" | "magic_weapon";
+    category: "weapon" | "armor" | "shield" | "helmet" | "magic_weapon" | "boat";
     categoryLabel: string;
 } | null {
     const normalizedName = String(name ?? "")
@@ -27,6 +28,8 @@ function inferEquipmentCategory(
     }
 
     switch (objType) {
+        case 31:
+            return {category: "boat", categoryLabel: "Boats & ships"};
         case 2:
             return { category: "weapon", categoryLabel: "Armas" };
         case 3:
@@ -86,7 +89,7 @@ function normalizeWikiResponse(payload: unknown): PublicWikiResponse {
         npcs: Array.isArray(raw.npcs)
             ? (raw.npcs as PublicWikiResponse["npcs"])
             : [],
-        equipment: normalizedEquipment as PublicWikiResponse["equipment"],
+        equipment: [...normalizedEquipment, ...Object.entries(objects).filter(([id, item]) => item.objType === 31 && [474,475,476].includes(Number(id)) && !normalizedEquipment.some(entry => Number((entry as Record<string, unknown>).id) === Number(id))).map(([id, item]) => ({...item, id:Number(id), grhIndex:Number(item.grhIndex), category:'boat', categoryLabel:'Boats & ships', objTypeLabel:'Boats & ships', value:0, tier:0, newbie:false, blockedClasses:[],soldBy:[],droppedBy:[],searchIndex:`${id} ${item.name} boat galley galleon`}))] as PublicWikiResponse["equipment"],
         spells: Array.isArray(raw.spells)
             ? (raw.spells as PublicWikiResponse["spells"])
             : [],

@@ -3,6 +3,7 @@
 import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import {useI18n} from '@/components/I18nProvider';
 import {uxEnglish,uxSpanish} from "@/lib/ux-copy";
+import ItemRequirements from './ItemRequirements';
 import CraftingReference from './CraftingReference';
 import NpcArtwork from './NpcArtwork';
 import BrowseToolbar from "@/components/BrowseToolbar";
@@ -322,6 +323,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
 
     const equipmentSections = useMemo(
         () => [
+            {key:"boat",label:locale==='es'?"Barcos":"Boats & ships",items:filteredEquipment.filter(item=>item.category==="boat")},
             {
                 key: "weapon",
                 label: "Armas",
@@ -383,7 +385,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                     ),
             },
         ],
-        [filteredEquipment],
+        [filteredEquipment,locale],
     );
 
     const formatNpcWithMap = (npcId: number, npcName: string): string => {
@@ -679,6 +681,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
 
             {section === "equipment" ? (
                 <section className="space-y-4">
+                    <p className="text-sm text-stone-400">{locale==='es'?"Nivel y skill para usar se muestran separados de fabricación. Las restricciones de clase, raza, facción y newbie siguen aplicando.":"Use requirements are separate from crafting requirements. Class, race, faction and newbie restrictions still apply."}</p>
                     {equipmentSections.filter(group=>group.items.length>0).map((group) => (
                         <div key={group.key} className="space-y-3">
                             <h2 className="text-lg font-semibold text-white">
@@ -720,6 +723,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                                             <p className="font-medium text-white">
                                                 <LocalizedText source={item.name} />
                                             </p>
+                                            <ItemRequirements itemId={item.id} />
                                             {item.newbie ? (
                                                 <p className="mt-1 text-xs text-cyan-200">
                                                     Newbie
@@ -727,7 +731,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                                             ) : null}
                                         </div>
                                         <span><LocalizedText source={item.objTypeLabel} /></span>
-                                        <span>{formatNumber(item.value)}</span>
+                                        <span>{item.category==='boat'?"—":formatNumber(item.value)}</span>
                                         <span>{formatEquipmentStat(item)}</span>
                                         <span>
                                             {item.tier > 0 ? item.tier : "-"}
