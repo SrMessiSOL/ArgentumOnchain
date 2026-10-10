@@ -13,6 +13,13 @@ import {assetReady,assetIdentity,signAssetSubmission,prepareAssetTransaction,ver
 import {saveSnapshot,readBundle,bundleHash} from './game-asset-policy';
 import {receiptState,hasPreparedSignatures,canWalletBroadcastPrepared,economyConnection} from './economy-chain';
 
+function reportBroadcastFailure(operationId:string,error:unknown){
+ const detail=error instanceof Error?error.message:'';
+ const category=/blockhash not found|blockheight exceeded|expired/i.test(detail)?'blockhash-expired':/insufficient funds|insufficient lamports/i.test(detail)?'insufficient-funds':/429|too many requests|rate limit/i.test(detail)?'rpc-throttled':/timeout|timed out|fetch failed|socket|connection/i.test(detail)?'rpc-transport':'broadcast-rejected';
+ // Never log the exception body, transaction bytes, wallet credentials or RPC URL.
+ console.warn('[AssetBroadcast]',JSON.stringify({operationId,category}));
+}
+
 async function identity(req:Request){const token=req.headers.authorization?.match(/^Bearer (.+)$/)?.[1];const session=token?await getPublicSessionByToken(token):null;if(!session)throw Error('assets.signIn');return session.account._id;}
 async function transaction<T>(fn:(c:PoolClient)=>Promise<T>){const c=await pool.connect();try{await c.query('BEGIN');await c.query("SELECT set_config('aoweb.economy_writer','yes',true)");const value=await fn(c);await c.query('COMMIT');return value;}catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}}
 async function wallet(c:PoolClient,account:string){const row=(await c.query('SELECT address FROM account_wallets WHERE account_id=$1 FOR UPDATE',[account])).rows[0];if(!row)throw Error('assets.linkWallet');return row.address as string;}
@@ -101,7 +108,7 @@ export function installGameAssetRoutes(app:Express){
    if(op.signature&&op.signature!==signed.signature)throw Error('economy.invalidTransaction');
    await c.query("UPDATE game_asset_operations SET state='signed',signature=$2,transaction_bytes=$3 WHERE id=$1",[op.id,signed.signature,signed.bytes]);return {...op,...{state:'signed',signature:signed.signature,transaction_bytes:signed.bytes}};
   });
-  if(row.state==='signed')try{await economyConnection.sendRawTransaction(Buffer.from(row.transaction_bytes,'base64'),{skipPreflight:false,maxRetries:1});}catch{/* Keep exact signed bytes for recovery; do not release reservations. */}
+  if(row.state==='signed')try{await economyConnection.sendRawTransaction(Buffer.from(row.transaction_bytes,'base64'),{skipPreflight:false,preflightCommitment:'confirmed',maxRetries:1});}catch(error){reportBroadcastFailure(row.id,error);/* Keep exact signed bytes for recovery; do not release reservations. */}
   return {id:row.id,signature:row.signature,...await reconcileAssetOperation(row.id,account)};
  });
  route('/reconcile',async(req,account)=>reconcileAssetOperation(z.string().uuid().parse(req.body?.operationId),account));
@@ -118,7 +125,7 @@ export async function reconcileAssetOperation(id:string,account?:string){
  const initial=(await pool.query('SELECT * FROM game_asset_operations WHERE id=$1',[id])).rows[0];if(!initial||(account&&initial.account_id!==account))throw Error('assets.notOwned');
  if(['complete','failed'].includes(initial.state))return {state:initial.state};
  const proof=await receiptState(initial.signature,Number(initial.last_valid_height));
- if(proof==='pending'){if(initial.state==='signed')try{await economyConnection.sendRawTransaction(Buffer.from(initial.transaction_bytes,'base64'),{skipPreflight:false,maxRetries:1});}catch{}return {state:'pending'};}
+ if(proof==='pending'){if(initial.state==='signed')try{await economyConnection.sendRawTransaction(Buffer.from(initial.transaction_bytes,'base64'),{skipPreflight:false,preflightCommitment:'confirmed',maxRetries:1});}catch(error){reportBroadcastFailure(initial.id,error);}return {state:'pending'};}
  if(proof==='failed'&&initial.state==='prepared'&&(hasPreparedSignatures(initial.transaction_bytes)||canWalletBroadcastPrepared(initial.transaction_bytes,initial.wallet)))return {state:'pending'};
  if(proof==='complete'&&initial.state!=='signed')throw Error('assets.inconsistent');
  return transaction(async c=>{

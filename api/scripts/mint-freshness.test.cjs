@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict');
+const {randomUUID}=require('node:crypto');
+const {Keypair,Transaction}=require('@solana/web3.js');
+const chain=require('../dist/economy-chain');
+const calls=[],hash=Keypair.generate().publicKey.toBase58();
+chain.checkedChain=async()=>({getAccountInfo:async()=>{calls.push('account-check');return null;},getLatestBlockhash:async commitment=>{calls.push('blockhash');assert.equal(commitment,'confirmed');return {blockhash:hash,lastValidBlockHeight:12345};}});
+const {assetIdentity,prepareAssetTransaction,signAssetSubmission}=require('../dist/game-asset-chain');
+(async()=>{
+ const issuer=Keypair.generate(),wallet=Keypair.generate(),id=randomUUID(),operation=randomUUID(),identity=assetIdentity(id,issuer);
+ const record={id,kind:'character',character_id:id,asset_address:identity.address,issuer_address:identity.issuer,metadata_uri:'https://fixture.invalid/metadata'};
+ const settlement={version:1,hash:'a'.repeat(64)};
+ const prepared=await prepareAssetTransaction('mint',operation,record,wallet.publicKey.toBase58(),'Fixture',settlement,undefined,issuer);
+ assert.deepEqual(calls,['account-check','blockhash']);assert.equal(prepared.last_valid_height,12345);
+ const reconstructed=await prepareAssetTransaction('mint',operation,record,wallet.publicKey.toBase58(),'Fixture',settlement,hash,issuer);
+ assert.equal(reconstructed.message_bytes,prepared.message_bytes);assert.equal(calls.filter(x=>x==='blockhash').length,1);
+ const tx=Transaction.from(Buffer.from(prepared.transaction_bytes,'base64'));tx.partialSign(wallet);
+ const signed=signAssetSubmission(tx.serialize({requireAllSignatures:false}).toString('base64'),prepared.message_bytes,wallet.publicKey.toBase58(),'mint',record,issuer);
+ assert.equal(Transaction.from(Buffer.from(signed.bytes,'base64')).verifySignatures(),true);
+ console.log('Mint freshness passed: account checks precede confirmed blockhash, signer reconstruction preserves exact message, real SDK signatures valid. No RPC or broadcast.');
+})().catch(error=>{console.error(error);process.exitCode=1;});

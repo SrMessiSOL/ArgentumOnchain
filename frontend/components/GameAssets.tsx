@@ -107,7 +107,7 @@ export default function GameAssets(){
 
   const provider=await walletConnection.connect();if(provider.address!==data?.wallet)throw Error('economy.wrongWallet');
 
-  const operation=await post('prepare',body);setTracked(operation.id);sessionStorage.setItem('aochain:asset-operation',operation.id);setStage('signing');await refresh();setNotice('signing');
+  const operation=await post('prepare',body);setTracked(operation.id);sessionStorage.setItem('aochain:asset-operation',operation.id);setStage('signing');setNotice('signing');
 
   const signed=await provider.signTransaction(Transaction.from(Uint8Array.from(atob(operation.transaction),c=>c.charCodeAt(0))));
 

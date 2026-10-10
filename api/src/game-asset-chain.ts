@@ -68,7 +68,10 @@ function append(tx:ReturnType<typeof createEconomyTransaction>,builder:Transacti
  for(const instruction of builder.getInstructions())tx.add(new TransactionInstruction({programId:new PublicKey(instruction.programId),keys:instruction.keys.map(k=>({pubkey:new PublicKey(k.pubkey),isSigner:k.isSigner,isWritable:k.isWritable})),data:Buffer.from(instruction.data)}));
 }
 export async function prepareAssetTransaction(action:AssetAction,operation:string,record:AssetRecord,wallet:string,name:string,settlement?:Settlement,fixedBlockhash?:string,authority?:Keypair){
- const conn=await checkedChain();const {blockhash,lastValidBlockHeight}=fixedBlockhash?{blockhash:fixedBlockhash,lastValidBlockHeight:0}:await conn.getLatestBlockhash('finalized');
+ const conn=await checkedChain();
+ // Acquire the live blockhash after account checks and transaction construction.
+ // A fixed hash reconstructs the exact message for signer approval.
+ const blockhash=fixedBlockhash??PublicKey.default.toBase58();
  const {umi,issuer,signer}=context(wallet,authority);const tx=createEconomyTransaction(new PublicKey(wallet),blockhash);
  if(action==='mint'||action==='item-export'){
   if(await fetchGameAsset(record.asset_address))throw Error('assets.alreadyMinted');
@@ -99,6 +102,9 @@ export async function prepareAssetTransaction(action:AssetAction,operation:strin
   }else append(tx,burn(umi,{asset,authority:umi.payer}));
  }
  tx.add(new TransactionInstruction({programId:new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),keys:[{pubkey:issuer.publicKey,isSigner:true,isWritable:false}],data:Buffer.from(`aochain:assets:v1:${action}:${operation}`)}));
+ const latest=fixedBlockhash?{blockhash:fixedBlockhash,lastValidBlockHeight:0}:await conn.getLatestBlockhash('confirmed');
+ tx.recentBlockhash=latest.blockhash;
+ const lastValidBlockHeight=latest.lastValidBlockHeight;
  return {transaction_bytes:tx.serialize({requireAllSignatures:false}).toString('base64'),message_bytes:tx.serializeMessage().toString('base64'),last_valid_height:lastValidBlockHeight};
 }
 /** Payment and NFT delivery occur in the same Solana transaction. */
