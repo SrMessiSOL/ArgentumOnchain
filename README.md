@@ -240,3 +240,5 @@ The Wiki now covers all known bundled objects and every configured crafting/smel
 An optional per-character skill system separates trained skills from assigned points, persists with character snapshots, and provides `/skills`, `/assignskill` and a configurable navigation requirement. It is **disabled by default**; server migration and private-host validation are required before activation. Botany/alchemy and functional house ownership/unlocking are not implemented.
 
 See [Content and skills host rollout](docs/GAME-CONTENT-AND-SKILLS-ROLLOUT.md) for dry runs, backups, activation gates and authoritative Wiki export.
+
+The public [Commands Wiki](https://argentum-onchain.vercel.app/wiki/commands) documents player commands with search, categories, syntax and eligibility notes. Prepared skill commands are explicitly marked pending activation; administrator tools are excluded.

@@ -1,0 +1,392 @@
+[
+  {
+    "group": "basics",
+    "syntax": "/help",
+    "description": {
+      "en": "Show the in-game command summary.",
+      "es": "Mostrar el resumen de comandos."
+    },
+    "requirement": {
+      "en": "",
+      "es": ""
+    },
+    "pending": false
+  },
+  {
+    "group": "basics",
+    "syntax": "/stats",
+    "description": {
+      "en": "Open your character statistics.",
+      "es": "Abrir las estadísticas del personaje."
+    },
+    "requirement": {
+      "en": "",
+      "es": ""
+    },
+    "pending": false
+  },
+  {
+    "group": "basics",
+    "syntax": "/online",
+    "description": {
+      "en": "Show how many players are online.",
+      "es": "Mostrar cuántos jugadores están conectados."
+    },
+    "requirement": {
+      "en": "",
+      "es": ""
+    },
+    "pending": false
+  },
+  {
+    "group": "basics",
+    "syntax": "/meditate",
+    "description": {
+      "en": "Start meditating to recover mana.",
+      "es": "Comenzar a meditar para recuperar maná."
+    },
+    "requirement": {
+      "en": "",
+      "es": ""
+    },
+    "pending": false
+  },
+  {
+    "group": "basics",
+    "syntax": "/home",
+    "description": {
+      "en": "Return to your saved home.",
+      "es": "Volver al hogar guardado."
+    },
+    "requirement": {
+      "en": "While dead or in a safe zone; unavailable in jail or during challenges. Arena characters must be dead.",
+      "es": "Estando muerto o en zona segura; no funciona en la cárcel ni durante retos. En arena requiere estar muerto."
+    },
+    "pending": false
+  },
+  {
+    "group": "basics",
+    "syntax": "/sethome",
+    "description": {
+      "en": "Set your home to the current town.",
+      "es": "Asignar el hogar al pueblo actual."
+    },
+    "requirement": {
+      "en": "Stand near a governor. Unavailable in jail or for arena characters.",
+      "es": "Acercate a un gobernador. No disponible en la cárcel ni para personajes de arena."
+    },
+    "pending": false
+  },
+  {
+    "group": "basics",
+    "syntax": "/logout",
+    "description": {
+      "en": "Leave the game safely.",
+      "es": "Salir del juego de forma segura."
+    },
+    "requirement": {
+      "en": "In an unsafe area your character stays connected for the logout countdown.",
+      "es": "En zona insegura el personaje permanece conectado durante la cuenta regresiva."
+    },
+    "pending": false
+  },
+  {
+    "group": "chat",
+    "syntax": "/global <message>",
+    "description": {
+      "en": "Send a global message.",
+      "es": "Enviar un mensaje global."
+    },
+    "requirement": {
+      "en": "Chat restrictions and cooldowns apply.",
+      "es": "Se aplican las restricciones y los tiempos de espera del chat."
+    },
+    "pending": false
+  },
+  {
+    "group": "chat",
+    "syntax": "/p <message>",
+    "description": {
+      "en": "Talk to your party.",
+      "es": "Hablar con tu grupo."
+    },
+    "requirement": {
+      "en": "Party membership required.",
+      "es": "Requiere pertenecer a un grupo."
+    },
+    "pending": false
+  },
+  {
+    "group": "chat",
+    "syntax": "/c <message>",
+    "description": {
+      "en": "Talk to your clan.",
+      "es": "Hablar con tu clan."
+    },
+    "requirement": {
+      "en": "Clan membership required.",
+      "es": "Requiere pertenecer a un clan."
+    },
+    "pending": false
+  },
+  {
+    "group": "chat",
+    "syntax": "/w \"<player>\" <message>",
+    "description": {
+      "en": "Send a private message. Example: /w \"Alice\" Hello!",
+      "es": "Enviar un mensaje privado. Ejemplo: /w \"Alice\" ¡Hola!"
+    },
+    "requirement": {
+      "en": "Use quotes around the character name. Recipient must be online.",
+      "es": "Escribí el nombre entre comillas. El destinatario debe estar conectado."
+    },
+    "pending": false
+  },
+  {
+    "group": "party",
+    "syntax": "/party <player>",
+    "description": {
+      "en": "Invite a player to your party.",
+      "es": "Invitar un jugador a tu grupo."
+    },
+    "requirement": {
+      "en": "The target must be online; party eligibility rules apply.",
+      "es": "El destinatario debe estar conectado; se aplican las reglas del grupo."
+    },
+    "pending": false
+  },
+  {
+    "group": "party",
+    "syntax": "/accept",
+    "description": {
+      "en": "Accept a pending party invitation.",
+      "es": "Aceptar una invitación pendiente al grupo."
+    },
+    "requirement": {
+      "en": "",
+      "es": ""
+    },
+    "pending": false
+  },
+  {
+    "group": "party",
+    "syntax": "/leaveparty",
+    "description": {
+      "en": "Leave your current party.",
+      "es": "Salir del grupo actual."
+    },
+    "requirement": {
+      "en": "",
+      "es": ""
+    },
+    "pending": false
+  },
+  {
+    "group": "party",
+    "syntax": "/kickparty <player>",
+    "description": {
+      "en": "Remove a player from your party.",
+      "es": "Expulsar un jugador de tu grupo."
+    },
+    "requirement": {
+      "en": "Party leader only.",
+      "es": "Solo el líder del grupo."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/clan",
+    "description": {
+      "en": "Show clan command usage.",
+      "es": "Mostrar cómo usar los comandos de clan."
+    },
+    "requirement": {
+      "en": "",
+      "es": ""
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/createclan <name>|<minimumLevel>",
+    "description": {
+      "en": "Create a clan. Example: /createclan Knights|10",
+      "es": "Crear un clan. Ejemplo: /createclan Knights|10"
+    },
+    "requirement": {
+      "en": "Clan creation requirements apply. Separate values with |.",
+      "es": "Se aplican los requisitos de creación. Separá los valores con |."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/applyclan <clanId>|<message>",
+    "description": {
+      "en": "Apply to join a clan.",
+      "es": "Postularte para entrar a un clan."
+    },
+    "requirement": {
+      "en": "Use the clan ID; separate your message with |.",
+      "es": "Usá el ID del clan y separá el mensaje con |."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/acceptclan <requestId>",
+    "description": {
+      "en": "Accept a clan application.",
+      "es": "Aceptar una solicitud de ingreso."
+    },
+    "requirement": {
+      "en": "Requires clan management permission and the application ID.",
+      "es": "Requiere permisos de gestión y el ID de la solicitud."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/rejectclan <requestId>",
+    "description": {
+      "en": "Reject a clan application.",
+      "es": "Rechazar una solicitud de ingreso."
+    },
+    "requirement": {
+      "en": "Requires clan management permission.",
+      "es": "Requiere permisos de gestión del clan."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/leaveclan",
+    "description": {
+      "en": "Leave your clan.",
+      "es": "Salir de tu clan."
+    },
+    "requirement": {
+      "en": "Clan leadership restrictions apply.",
+      "es": "Se aplican las restricciones de liderazgo."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/kickclan <characterId>",
+    "description": {
+      "en": "Remove a clan member.",
+      "es": "Expulsar un miembro del clan."
+    },
+    "requirement": {
+      "en": "Use the character ID, not their name. Requires management permission.",
+      "es": "Usá el ID del personaje, no su nombre. Requiere permisos de gestión."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/clancoleader <characterId>|<co_leader or member>",
+    "description": {
+      "en": "Set a clan member role. Example: /clancoleader character-id|co_leader",
+      "es": "Cambiar el rol de un miembro. Ejemplo: /clancoleader character-id|co_leader"
+    },
+    "requirement": {
+      "en": "Requires the appropriate clan role. Keep role tokens in English.",
+      "es": "Requiere el rol correspondiente del clan. Los nombres de rol se escriben en inglés."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/clanleader <characterId>",
+    "description": {
+      "en": "Transfer clan leadership.",
+      "es": "Transferir el liderazgo del clan."
+    },
+    "requirement": {
+      "en": "Current leader only. Use the target character ID.",
+      "es": "Solo el líder actual. Usá el ID del personaje."
+    },
+    "pending": false
+  },
+  {
+    "group": "clan",
+    "syntax": "/deleteclan confirm",
+    "description": {
+      "en": "Delete your clan.",
+      "es": "Eliminar tu clan."
+    },
+    "requirement": {
+      "en": "Clan leader only. This is a destructive action; confirm is required.",
+      "es": "Solo el líder. Esta acción elimina el clan y requiere confirm."
+    },
+    "pending": false
+  },
+  {
+    "group": "faction",
+    "syntax": "/enlist",
+    "description": {
+      "en": "Enlist with a faction.",
+      "es": "Enlistarte en una facción."
+    },
+    "requirement": {
+      "en": "Stand near the faction NPC and meet its level, alignment and other eligibility rules.",
+      "es": "Acercate al NPC de la facción y cumplí sus requisitos de nivel, alineación y elegibilidad."
+    },
+    "pending": false
+  },
+  {
+    "group": "faction",
+    "syntax": "/reward",
+    "description": {
+      "en": "Claim your faction rewards.",
+      "es": "Reclamar recompensas de tu facción."
+    },
+    "requirement": {
+      "en": "Stand near your own faction NPC; eligible rewards required.",
+      "es": "Acercate al NPC de tu propia facción; requiere recompensas disponibles."
+    },
+    "pending": false
+  },
+  {
+    "group": "faction",
+    "syntax": "/bail",
+    "description": {
+      "en": "Pay bail to become a citizen.",
+      "es": "Pagar fianza para volver a ser ciudadano."
+    },
+    "requirement": {
+      "en": "Safe zone, criminal status and sufficient gold required. Clan/alignment restrictions apply.",
+      "es": "Requiere zona segura, ser criminal y tener oro suficiente. Se aplican restricciones de clan y alineación."
+    },
+    "pending": false
+  },
+  {
+    "group": "skills",
+    "syntax": "/skills",
+    "description": {
+      "en": "Show trained skills, assigned skills and available points.",
+      "es": "Mostrar habilidades entrenadas, asignadas y puntos disponibles."
+    },
+    "requirement": {
+      "en": "Only when the server activates natural skills. Currently prepared, not active.",
+      "es": "Solo cuando el servidor active skills naturales. Actualmente preparado, no activo."
+    },
+    "pending": true
+  },
+  {
+    "group": "skills",
+    "syntax": "/assignskill <skill> <points>",
+    "description": {
+      "en": "Assign available points. Example: /assignskill navigation 10",
+      "es": "Asignar puntos disponibles. Ejemplo: /assignskill navigation 10"
+    },
+    "requirement": {
+      "en": "Natural skills must be active. Positive whole points; total skill cannot exceed 100.",
+      "es": "Skills naturales deben estar activos. Puntos enteros positivos; la habilidad total no puede superar 100."
+    },
+    "pending": true
+  }
+]
