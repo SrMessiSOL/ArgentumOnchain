@@ -13,7 +13,9 @@
         "name": "Leña",
         "amount": 1
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-551",
@@ -29,7 +31,9 @@
         "name": "Leña",
         "amount": 2
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-552",
@@ -45,7 +49,9 @@
         "name": "Leña",
         "amount": 3
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-553",
@@ -61,7 +67,9 @@
         "name": "Leña",
         "amount": 6
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-478",
@@ -77,7 +85,9 @@
         "name": "Leña",
         "amount": 200
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-663",
@@ -93,7 +103,9 @@
         "name": "Leña",
         "amount": 500
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-479",
@@ -109,7 +121,9 @@
         "name": "Leña",
         "amount": 900
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-665",
@@ -125,7 +139,9 @@
         "name": "Leña Elfica",
         "amount": 1000
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-474",
@@ -141,7 +157,9 @@
         "name": "Leña",
         "amount": 25000
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-475",
@@ -157,7 +175,9 @@
         "name": "Leña",
         "amount": 30000
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-476",
@@ -173,7 +193,9 @@
         "name": "Leña",
         "amount": 40000
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-696",
@@ -189,7 +211,9 @@
         "name": "Leña",
         "amount": 800
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-208",
@@ -205,7 +229,9 @@
         "name": "Leña",
         "amount": 1200
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-1049",
@@ -221,7 +247,9 @@
         "name": "Leña Elfica",
         "amount": 600
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-1050",
@@ -237,7 +265,9 @@
         "name": "Leña Elfica",
         "amount": 900
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "carpentry-659",
@@ -253,7 +283,9 @@
         "name": "Leña",
         "amount": 1200
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-15",
@@ -269,7 +301,9 @@
         "name": "Lingote de Hierro",
         "amount": 3
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-165",
@@ -285,7 +319,9 @@
         "name": "Lingote de Hierro",
         "amount": 10
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-365",
@@ -301,7 +337,9 @@
         "name": "Lingote de Hierro",
         "amount": 50
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-366",
@@ -317,7 +355,9 @@
         "name": "Lingote de Hierro",
         "amount": 100
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-367",
@@ -338,7 +378,9 @@
         "name": "Lingote de Plata",
         "amount": 100
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-164",
@@ -354,7 +396,9 @@
         "name": "Lingote de Hierro",
         "amount": 50
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-2",
@@ -370,7 +414,9 @@
         "name": "Lingote de Hierro",
         "amount": 20
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-125",
@@ -386,7 +432,9 @@
         "name": "Lingote de Hierro",
         "amount": 30
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-159",
@@ -402,7 +450,9 @@
         "name": "Lingote de Hierro",
         "amount": 55
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-399",
@@ -418,7 +468,9 @@
         "name": "Lingote de Hierro",
         "amount": 100
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-123",
@@ -434,7 +486,9 @@
         "name": "Lingote de Hierro",
         "amount": 50
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-124",
@@ -450,7 +504,9 @@
         "name": "Lingote de Hierro",
         "amount": 90
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-129",
@@ -466,7 +522,9 @@
         "name": "Lingote de Hierro",
         "amount": 105
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-403",
@@ -482,7 +540,9 @@
         "name": "Lingote de Plata",
         "amount": 105
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-1036",
@@ -498,7 +558,9 @@
         "name": "Lingote de Hierro",
         "amount": 105
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-195",
@@ -514,7 +576,9 @@
         "name": "Lingote de Hierro",
         "amount": 210
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-356",
@@ -540,7 +604,9 @@
         "name": "Lingote de Oro",
         "amount": 30
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-854",
@@ -566,7 +632,9 @@
         "name": "Lingote de Oro",
         "amount": 30
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-496",
@@ -592,7 +660,9 @@
         "name": "Lingote de Oro",
         "amount": 150
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-495",
@@ -618,7 +688,9 @@
         "name": "Lingote de Oro",
         "amount": 150
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-128",
@@ -634,7 +706,9 @@
         "name": "Lingote de Hierro",
         "amount": 30
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-133",
@@ -650,7 +724,9 @@
         "name": "Lingote de Plata",
         "amount": 100
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-699",
@@ -666,7 +742,9 @@
         "name": "Lingote de Plata",
         "amount": 75
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-131",
@@ -682,7 +760,9 @@
         "name": "Lingote de Hierro",
         "amount": 105
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-405",
@@ -708,7 +788,9 @@
         "name": "Lingote de Oro",
         "amount": 60
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "blacksmith-814",
@@ -729,7 +811,27 @@
         "name": "Lingote de Plata",
         "amount": 5
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "tailoring-3578",
+    "profession": "tailoring",
+    "skill": 0,
+    "output": {
+      "itemId": 3578,
+      "name": "Item #3578"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 1
+      }
+    ],
+    "resolved": false,
+    "pending": false
   },
   {
     "id": "tailoring-32",
@@ -745,7 +847,9 @@
         "name": "Piel Lobo",
         "amount": 1
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "tailoring-240",
@@ -761,7 +865,63 @@
         "name": "Piel Lobo",
         "amount": 7
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "tailoring-1975",
+    "profession": "tailoring",
+    "skill": 10,
+    "output": {
+      "itemId": 1975,
+      "name": "Item #1975"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 20
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-2911",
+    "profession": "tailoring",
+    "skill": 10,
+    "output": {
+      "itemId": 2911,
+      "name": "Item #2911"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 20
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-508",
+    "profession": "tailoring",
+    "skill": 25,
+    "output": {
+      "itemId": 508,
+      "name": "Item #508"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 30
+      }
+    ],
+    "resolved": false,
+    "pending": false
   },
   {
     "id": "tailoring-196",
@@ -777,7 +937,203 @@
         "name": "Piel Lobo",
         "amount": 50
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "tailoring-1226",
+    "profession": "tailoring",
+    "skill": 35,
+    "output": {
+      "itemId": 1226,
+      "name": "Item #1226"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 50
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-1955",
+    "profession": "tailoring",
+    "skill": 45,
+    "output": {
+      "itemId": 1955,
+      "name": "Item #1955"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 60
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 5
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-1089",
+    "profession": "tailoring",
+    "skill": 55,
+    "output": {
+      "itemId": 1089,
+      "name": "Item #1089"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 70
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 10
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-2857",
+    "profession": "tailoring",
+    "skill": 55,
+    "output": {
+      "itemId": 2857,
+      "name": "Item #2857"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 70
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 10
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-2932",
+    "profession": "tailoring",
+    "skill": 55,
+    "output": {
+      "itemId": 2932,
+      "name": "Item #2932"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 70
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 10
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-2916",
+    "profession": "tailoring",
+    "skill": 65,
+    "output": {
+      "itemId": 2916,
+      "name": "Item #2916"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 80
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 15
+      },
+      {
+        "itemId": 416,
+        "name": "Piel Oso Polar",
+        "amount": 1
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-1961",
+    "profession": "tailoring",
+    "skill": 65,
+    "output": {
+      "itemId": 1961,
+      "name": "Item #1961"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 80
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 15
+      },
+      {
+        "itemId": 416,
+        "name": "Piel Oso Polar",
+        "amount": 1
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-2854",
+    "profession": "tailoring",
+    "skill": 65,
+    "output": {
+      "itemId": 2854,
+      "name": "Item #2854"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 80
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 15
+      },
+      {
+        "itemId": 416,
+        "name": "Piel Oso Polar",
+        "amount": 1
+      }
+    ],
+    "resolved": false,
+    "pending": false
   },
   {
     "id": "tailoring-519",
@@ -803,7 +1159,304 @@
         "name": "Piel Oso Polar",
         "amount": 3
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
+  },
+  {
+    "id": "tailoring-1957",
+    "profession": "tailoring",
+    "skill": 100,
+    "output": {
+      "itemId": 1957,
+      "name": "Item #1957"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 45
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 25
+      },
+      {
+        "itemId": 416,
+        "name": "Piel Oso Polar",
+        "amount": 3
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-1778",
+    "profession": "tailoring",
+    "skill": 10,
+    "output": {
+      "itemId": 1778,
+      "name": "Item #1778"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 15
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-3462",
+    "profession": "tailoring",
+    "skill": 100,
+    "output": {
+      "itemId": 3462,
+      "name": "Item #3462"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 300
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 150
+      },
+      {
+        "itemId": 416,
+        "name": "Piel Oso Polar",
+        "amount": 40
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-3822",
+    "profession": "tailoring",
+    "skill": 0,
+    "output": {
+      "itemId": 3822,
+      "name": "Item #3822"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 1
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-3990",
+    "profession": "tailoring",
+    "skill": 75,
+    "output": {
+      "itemId": 3990,
+      "name": "Item #3990"
+    },
+    "materials": [
+      {
+        "itemId": 416,
+        "name": "Piel Oso Polar",
+        "amount": 6
+      }
+    ],
+    "resolved": false,
+    "pending": false
+  },
+  {
+    "id": "tailoring-35",
+    "profession": "tailoring",
+    "skill": 5,
+    "output": {
+      "itemId": 35,
+      "name": "Vestimentas Comunes"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 2
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-501",
+    "profession": "tailoring",
+    "skill": 10,
+    "output": {
+      "itemId": 501,
+      "name": "Ropa de Campesino"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 5
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-502",
+    "profession": "tailoring",
+    "skill": 10,
+    "output": {
+      "itemId": 502,
+      "name": "Ropa de Campesino (E/G)"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 5
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-641",
+    "profession": "tailoring",
+    "skill": 5,
+    "output": {
+      "itemId": 641,
+      "name": "Ropa de Pordiosero"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 3
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-135",
+    "profession": "tailoring",
+    "skill": 20,
+    "output": {
+      "itemId": 135,
+      "name": "Túnica Roja Burda"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 15
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-670",
+    "profession": "tailoring",
+    "skill": 35,
+    "output": {
+      "itemId": 670,
+      "name": "Túnica de Mago (E/G)"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 50
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-930",
+    "profession": "tailoring",
+    "skill": 35,
+    "output": {
+      "itemId": 930,
+      "name": "Toga de Aprendiz (E/G)"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 40
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-238",
+    "profession": "tailoring",
+    "skill": 35,
+    "output": {
+      "itemId": 238,
+      "name": "Túnica Azul"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 40
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-239",
+    "profession": "tailoring",
+    "skill": 30,
+    "output": {
+      "itemId": 239,
+      "name": "Túnica Roja"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 30
+      }
+    ],
+    "resolved": true,
+    "pending": true
+  },
+  {
+    "id": "tailoring-671",
+    "profession": "tailoring",
+    "skill": 55,
+    "output": {
+      "itemId": 671,
+      "name": "Túnica de Monje (E/G)"
+    },
+    "materials": [
+      {
+        "itemId": 414,
+        "name": "Piel Lobo",
+        "amount": 30
+      },
+      {
+        "itemId": 415,
+        "name": "Piel Oso Pardo",
+        "amount": 15
+      }
+    ],
+    "resolved": true,
+    "pending": true
   },
   {
     "id": "smelt-1",
@@ -819,7 +1472,9 @@
         "name": "Minerales de Hierro",
         "amount": 13
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "smelt-2",
@@ -835,7 +1490,9 @@
         "name": "Minerales de Plata",
         "amount": 25
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   },
   {
     "id": "smelt-3",
@@ -851,6 +1508,8 @@
         "name": "Minerales de Oro",
         "amount": 50
       }
-    ]
+    ],
+    "resolved": true,
+    "pending": false
   }
 ]

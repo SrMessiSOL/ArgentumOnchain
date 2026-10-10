@@ -10,7 +10,7 @@ function inferEquipmentCategory(
     objType: number,
     name?: string,
 ): {
-    category: "weapon" | "armor" | "shield" | "helmet" | "magic_weapon" | "boat";
+    category: "weapon" | "armor" | "shield" | "helmet" | "magic_weapon" | "boat" | "other";
     categoryLabel: string;
 } | null {
     const normalizedName = String(name ?? "")
@@ -39,7 +39,7 @@ function inferEquipmentCategory(
         case 17:
             return { category: "helmet", categoryLabel: "Cascos" };
         default:
-            return null;
+            return {category:"other",categoryLabel:"Other game items"};
     }
 }
 
@@ -78,18 +78,14 @@ function normalizeWikiResponse(payload: unknown): PublicWikiResponse {
         stats: {
             npcCount: Number(rawStats.npcCount ?? 0),
             combatNpcCount: Number(rawStats.combatNpcCount ?? 0),
-            equipmentCount: Number(
-                rawStats.equipmentCount ??
-                    rawStats.objectCount ??
-                    normalizedEquipment.length,
-            ),
+            equipmentCount: new Set([...normalizedEquipment.map(entry=>Number((entry as Record<string,unknown>).id)),...Object.keys(objects).map(Number)]).size,
             spellCount: Number(rawStats.spellCount ?? 0),
             trainingMapCount: Number(rawStats.trainingMapCount ?? 0),
         },
         npcs: Array.isArray(raw.npcs)
             ? (raw.npcs as PublicWikiResponse["npcs"])
             : [],
-        equipment: [...normalizedEquipment, ...Object.entries(objects).filter(([id, item]) => item.objType === 31 && [474,475,476].includes(Number(id)) && !normalizedEquipment.some(entry => Number((entry as Record<string, unknown>).id) === Number(id))).map(([id, item]) => ({...item, id:Number(id), grhIndex:Number(item.grhIndex), category:'boat', categoryLabel:'Boats & ships', objTypeLabel:'Boats & ships', value:0, tier:0, newbie:false, blockedClasses:[],soldBy:[],droppedBy:[],searchIndex:`${id} ${item.name} boat galley galleon`}))] as PublicWikiResponse["equipment"],
+        equipment: [...normalizedEquipment, ...Object.entries(objects).filter(([id]) => !normalizedEquipment.some(entry => Number((entry as Record<string,unknown>).id)===Number(id))).map(([id,item]) => ({...item,id:Number(id),grhIndex:Number(item.grhIndex),...inferEquipmentCategory(item.objType,item.name),objTypeLabel:'',value:-1,tier:0,newbie:false,blockedClasses:[],soldBy:[],droppedBy:[],catalogOnly:true,searchIndex:`${id} ${item.name}`}))] as PublicWikiResponse["equipment"],
         spells: Array.isArray(raw.spells)
             ? (raw.spells as PublicWikiResponse["spells"])
             : [],

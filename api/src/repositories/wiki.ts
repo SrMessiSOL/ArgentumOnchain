@@ -83,7 +83,7 @@ type WikiEquipmentCategory =
     | "armor"
     | "shield"
     | "helmet"
-    | "magic_weapon";
+    | "magic_weapon" | "boat" | "other";
 
 type WikiEquipmentEntry = {
     id: number;
@@ -244,6 +244,8 @@ function getEquipmentCategory(objType: number): {
             return { key: "weapon", label: "Armas" };
         case 3:
             return { key: "armor", label: "Armaduras" };
+        case 31:
+            return { key: "boat", label: "Boats & ships" };
         case 16:
             return { key: "shield", label: "Escudos" };
         case 17:
@@ -608,7 +610,7 @@ export async function getPublicWiki(): Promise<PublicWikiResponse> {
         .map((entry) => {
             const data = entry.data as Record<string, unknown>;
             const objType = toNumber(data.objType);
-            const defaultCategory = getEquipmentCategory(objType);
+            const defaultCategory = getEquipmentCategory(objType) ?? {key:"other" as const,label:"Other game items"};
             const category = isMagicWeapon(data, objType)
                 ? { key: "magic_weapon" as const, label: "Armas Mágicas" }
                 : defaultCategory;
@@ -658,9 +660,7 @@ export async function getPublicWiki(): Promise<PublicWikiResponse> {
             };
         })
         .filter((entry): entry is WikiEquipmentEntry => Boolean(entry))
-        .filter(
-            (entry) => entry.soldBy.length > 0 || entry.droppedBy.length > 0,
-        )
+
         .sort((left, right) => left.id - right.id);
 
     const spellSourcesBySpellId = new Map<number, WikiSpellSourceReference[]>();

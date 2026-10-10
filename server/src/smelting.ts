@@ -1,3 +1,4 @@
+import {trainCharacterSkill} from './characterSkills';
 import type { DataObject, EntityId, Position, RuntimeCharacter, RuntimeClient, SmeltingState } from "./types/runtime";
 import type { HandleProtocolApi } from "./handleProtocol";
 import { bankOperations } from './bankOperationGuard';
@@ -240,6 +241,7 @@ const smelting: SmeltingApi = {
                 if (getUser(idUser) !== user || user.dead || user.smelting !== state) return;
                 game.quitarUserInvItem(user.id, slotKey, requiredMinerals);
                 addIngotsToInventory(user, config.ingotItemId, ingotAmount);
+                trainCharacterSkill(user,'smelting');
                 await game.persistCharacterItemsById(user.id);
                 withUserClient(idUser, (userClient) => {
                     const ingotName = vars.datObj[config.ingotItemId]?.name ?? "lingotes";

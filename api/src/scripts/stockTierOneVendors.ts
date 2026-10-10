@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import pool from '../db';
 import {computeChecksum,normalizeNpcData,type GameNpcRecordData} from '../lib/gameData';
+import {planHouseAndTailorStock} from '../lib/houseAndTailorStock';
 import {planTierOneVendorStock} from '../lib/tierOneVendorStock';
 
 async function main() {
@@ -17,6 +18,21 @@ async function main() {
         const npcs=await client.query('SELECT id,data FROM game_npcs ORDER BY id FOR UPDATE');
         if(!objects.rows.length || !npcs.rows.length)throw Error('Catalog is empty; refusing to seed or change it.');
         const plan=planTierOneVendorStock(objects.rows,npcs.rows);
+        const mapsIndex=process.argv.indexOf('--maps-dir');
+        const mapsDir=mapsIndex>=0?process.argv[mapsIndex+1]:undefined;
+        if(!mapsDir)throw Error('--maps-dir <authoritative host map directory> is required for town vendors.');
+        const locations:Record<number,string[]>={};
+        for(const folder of fs.readdirSync(mapsDir,{withFileTypes:true}).filter(d=>d.isDirectory()&&/^mapa_\d+$/.test(d.name))){
+            const meta=JSON.parse(fs.readFileSync(path.join(mapsDir,folder.name,'meta.json'),'utf8'));
+            if(String(meta.zona).toUpperCase()!=='CIUDAD')continue;
+            const placements=JSON.parse(fs.readFileSync(path.join(mapsDir,folder.name,'npcs.json'),'utf8'));
+            for(const placement of placements){const id=Number(placement.npcIndex);locations[id]??=[];if(!locations[id].includes(meta.name))locations[id].push(meta.name);}
+        }
+        const base=npcs.rows.map(npc=>({id:npc.id,data:plan.changes.find(c=>c.id===npc.id)?.after??npc.data}));
+        const extras=planHouseAndTailorStock(objects.rows,base,locations);
+        plan.unresolved.push(...extras.unresolved);
+        for(const extra of extras.changes){const existing=plan.changes.find(c=>c.id===extra.id);if(existing){existing.after=extra.after as typeof existing.after;existing.added.push(...extra.added);}else plan.changes.push({...extra,name:extra.before.name,after:extra.after as any});}
+
         console.log(JSON.stringify({mode:apply?'apply':'dry-run',eligibleItems:plan.eligibleItems,unresolved:plan.unresolved,changes:plan.changes.map(({id,name,added})=>({id,name,added}))},null,2));
         if(plan.unresolved.length)throw Error('Some Tier 1 items have no reviewed vendor group. No changes applied.');
         if(!apply || !plan.changes.length){await client.query('ROLLBACK');return;}

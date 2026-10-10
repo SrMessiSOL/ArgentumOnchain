@@ -232,3 +232,11 @@ Some validation documents contain historical URLs, build IDs and superseded earl
 Original AOWeb created by **Damián Catanzaro** ([X](https://x.com/DamianCatanzaro)). AOCHAIN builds on that client, server and game content instead of recreating Argentum Online from scratch.
 
 The upstream server package declares ISC, but a complete license grant for the repository, frontend, bundled artwork and game data has not been established. Fork availability does not establish redistribution or commercial rights. Asset and licensing review remains a release requirement; this README does not grant a new license to upstream material.
+
+### Prepared content and skill rollout
+
+The Wiki now covers all known bundled objects and every configured crafting/smelting recipe, including boats, unresolved catalog references and ten pending tailoring additions. Sewing kits and house keys have a reviewed vendor-stock planner; live NPC placements are required before applying town-specific stock.
+
+An optional per-character skill system separates trained skills from assigned points, persists with character snapshots, and provides `/skills`, `/assignskill` and a configurable navigation requirement. It is **disabled by default**; server migration and private-host validation are required before activation. Botany/alchemy and functional house ownership/unlocking are not implemented.
+
+See [Content and skills host rollout](docs/GAME-CONTENT-AND-SKILLS-ROLLOUT.md) for dry runs, backups, activation gates and authoritative Wiki export.

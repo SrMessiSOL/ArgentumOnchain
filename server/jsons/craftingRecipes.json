@@ -1,567 +1,1066 @@
 [
-    {
-        "id": 1,
-        "profession": "carpentry",
-        "category": "Municion",
-        "itemId": 480,
-        "skill": 5,
-        "materials": [{ "itemId": 58, "amount": 1 }]
-    },
-    {
-        "id": 2,
-        "profession": "carpentry",
-        "category": "Municion",
-        "itemId": 551,
-        "skill": 45,
-        "materials": [{ "itemId": 58, "amount": 2 }]
-    },
-    {
-        "id": 3,
-        "profession": "carpentry",
-        "category": "Municion",
-        "itemId": 552,
-        "skill": 63,
-        "materials": [{ "itemId": 58, "amount": 3 }]
-    },
-    {
-        "id": 4,
-        "profession": "carpentry",
-        "category": "Municion",
-        "itemId": 553,
-        "skill": 75,
-        "materials": [{ "itemId": 58, "amount": 6 }]
-    },
-    {
-        "id": 5,
-        "profession": "carpentry",
-        "category": "Arcos",
-        "itemId": 478,
-        "skill": 10,
-        "materials": [{ "itemId": 58, "amount": 200 }]
-    },
-    {
-        "id": 6,
-        "profession": "carpentry",
-        "category": "Arcos",
-        "itemId": 663,
-        "skill": 25,
-        "materials": [{ "itemId": 58, "amount": 500 }]
-    },
-    {
-        "id": 7,
-        "profession": "carpentry",
-        "category": "Arcos",
-        "itemId": 479,
-        "skill": 63,
-        "materials": [{ "itemId": 58, "amount": 900 }]
-    },
-    {
-        "id": 8,
-        "profession": "carpentry",
-        "category": "Arcos",
-        "itemId": 665,
-        "skill": 100,
-        "materials": [{ "itemId": 1006, "amount": 1000 }]
-    },
-    {
-        "id": 9,
-        "profession": "carpentry",
-        "category": "Barcos",
-        "itemId": 474,
-        "skill": 75,
-        "materials": [{ "itemId": 58, "amount": 25000 }]
-    },
-    {
-        "id": 10,
-        "profession": "carpentry",
-        "category": "Barcos",
-        "itemId": 475,
-        "skill": 100,
-        "materials": [{ "itemId": 58, "amount": 30000 }]
-    },
-    {
-        "id": 63,
-        "profession": "carpentry",
-        "category": "Barcos",
-        "itemId": 476,
-        "skill": 100,
-        "materials": [{ "itemId": 58, "amount": 40000 }]
-    },
-    {
-        "id": 11,
-        "profession": "carpentry",
-        "category": "Instrumentos",
-        "itemId": 696,
-        "skill": 75,
-        "materials": [{ "itemId": 58, "amount": 800 }]
-    },
-    {
-        "id": 12,
-        "profession": "carpentry",
-        "category": "Instrumentos",
-        "itemId": 208,
-        "skill": 75,
-        "materials": [{ "itemId": 58, "amount": 1200 }]
-    },
-    {
-        "id": 13,
-        "profession": "carpentry",
-        "category": "Instrumentos",
-        "itemId": 1049,
-        "skill": 100,
-        "materials": [{ "itemId": 1006, "amount": 600 }]
-    },
-    {
-        "id": 14,
-        "profession": "carpentry",
-        "category": "Instrumentos",
-        "itemId": 1050,
-        "skill": 100,
-        "materials": [{ "itemId": 1006, "amount": 900 }]
-    },
-    {
-        "id": 15,
-        "profession": "carpentry",
-        "category": "Baculos",
-        "itemId": 659,
-        "skill": 60,
-        "materials": [{ "itemId": 58, "amount": 1200 }]
-    },
-    {
-        "id": 16,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 15,
-        "skill": 0,
-        "materials": [{ "itemId": 386, "amount": 3 }]
-    },
-    {
-        "id": 17,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 165,
-        "skill": 15,
-        "materials": [{ "itemId": 386, "amount": 10 }]
-    },
-    {
-        "id": 18,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 365,
-        "skill": 35,
-        "materials": [{ "itemId": 386, "amount": 50 }]
-    },
-    {
-        "id": 19,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 366,
-        "skill": 60,
-        "materials": [{ "itemId": 386, "amount": 100 }]
-    },
-    {
-        "id": 20,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 367,
-        "skill": 100,
-        "materials": [
-            { "itemId": 386, "amount": 100 },
-            { "itemId": 387, "amount": 100 }
-        ]
-    },
-    {
-        "id": 21,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 164,
-        "skill": 25,
-        "materials": [{ "itemId": 386, "amount": 50 }]
-    },
-    {
-        "id": 22,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 2,
-        "skill": 25,
-        "materials": [{ "itemId": 386, "amount": 20 }]
-    },
-    {
-        "id": 23,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 125,
-        "skill": 30,
-        "materials": [{ "itemId": 386, "amount": 30 }]
-    },
-    {
-        "id": 24,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 159,
-        "skill": 70,
-        "materials": [{ "itemId": 386, "amount": 55 }]
-    },
-    {
-        "id": 25,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 399,
-        "skill": 55,
-        "materials": [{ "itemId": 386, "amount": 100 }]
-    },
-    {
-        "id": 26,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 123,
-        "skill": 70,
-        "materials": [{ "itemId": 386, "amount": 50 }]
-    },
-    {
-        "id": 27,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 124,
-        "skill": 75,
-        "materials": [{ "itemId": 386, "amount": 90 }]
-    },
-    {
-        "id": 28,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 129,
-        "skill": 80,
-        "materials": [{ "itemId": 386, "amount": 105 }]
-    },
-    {
-        "id": 29,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 403,
-        "skill": 90,
-        "materials": [{ "itemId": 387, "amount": 105 }]
-    },
-    {
-        "id": 30,
-        "profession": "blacksmith",
-        "category": "Armas",
-        "itemId": 1036,
-        "skill": 80,
-        "materials": [{ "itemId": 386, "amount": 105 }]
-    },
-    {
-        "id": 31,
-        "profession": "blacksmith",
-        "category": "Armaduras",
-        "itemId": 195,
-        "skill": 76,
-        "materials": [{ "itemId": 386, "amount": 210 }]
-    },
-    {
-        "id": 32,
-        "profession": "blacksmith",
-        "category": "Armaduras",
-        "itemId": 356,
-        "skill": 100,
-        "materials": [
-            { "itemId": 386, "amount": 300 },
-            { "itemId": 387, "amount": 200 },
-            { "itemId": 388, "amount": 30 }
-        ]
-    },
-    {
-        "id": 33,
-        "profession": "blacksmith",
-        "category": "Armaduras",
-        "itemId": 854,
-        "skill": 100,
-        "materials": [
-            { "itemId": 386, "amount": 300 },
-            { "itemId": 387, "amount": 200 },
-            { "itemId": 388, "amount": 30 }
-        ]
-    },
-    {
-        "id": 34,
-        "profession": "blacksmith",
-        "category": "Armaduras",
-        "itemId": 496,
-        "skill": 100,
-        "materials": [
-            { "itemId": 386, "amount": 550 },
-            { "itemId": 387, "amount": 350 },
-            { "itemId": 388, "amount": 150 }
-        ]
-    },
-    {
-        "id": 35,
-        "profession": "blacksmith",
-        "category": "Armaduras",
-        "itemId": 495,
-        "skill": 100,
-        "materials": [
-            { "itemId": 386, "amount": 550 },
-            { "itemId": 387, "amount": 350 },
-            { "itemId": 388, "amount": 150 }
-        ]
-    },
-    {
-        "id": 36,
-        "profession": "blacksmith",
-        "category": "Escudos",
-        "itemId": 128,
-        "skill": 55,
-        "materials": [{ "itemId": 386, "amount": 30 }]
-    },
-    {
-        "id": 37,
-        "profession": "blacksmith",
-        "category": "Escudos",
-        "itemId": 133,
-        "skill": 90,
-        "materials": [{ "itemId": 387, "amount": 100 }]
-    },
-    {
-        "id": 38,
-        "profession": "blacksmith",
-        "category": "Accesorios",
-        "itemId": 699,
-        "skill": 75,
-        "materials": [{ "itemId": 387, "amount": 75 }]
-    },
-    {
-        "id": 39,
-        "profession": "blacksmith",
-        "category": "Cascos",
-        "itemId": 131,
-        "skill": 65,
-        "materials": [{ "itemId": 386, "amount": 105 }]
-    },
-    {
-        "profession": "blacksmith",
-        "category": "Cascos",
-        "itemId": 405,
-        "skill": 75,
-        "materials": [
-            { "itemId": 386, "amount": 180 },
-            { "itemId": 387, "amount": 210 },
-            { "itemId": 388, "amount": 60 }
-        ]
-    },
-    {
-        "id": 40,
-        "profession": "blacksmith",
-        "category": "Accesorios",
-        "itemId": 814,
-        "skill": 100,
-        "materials": [
-            { "itemId": 386, "amount": 5 },
-            { "itemId": 387, "amount": 5 }
-        ]
-    },
-    {
-        "id": 42,
-        "profession": "tailoring",
-        "category": "Objetos",
-        "itemId": 3578,
-        "skill": 0,
-        "materials": [{ "itemId": 414, "amount": 1 }]
-    },
-    {
-        "id": 43,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 32,
-        "skill": 2,
-        "materials": [{ "itemId": 414, "amount": 1 }]
-    },
-    {
-        "id": 44,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 240,
-        "skill": 0,
-        "materials": [{ "itemId": 414, "amount": 7 }]
-    },
-    {
-        "id": 45,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 1975,
-        "skill": 10,
-        "materials": [{ "itemId": 414, "amount": 20 }]
-    },
-    {
-        "id": 46,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 2911,
-        "skill": 10,
-        "materials": [{ "itemId": 414, "amount": 20 }]
-    },
-    {
-        "id": 47,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 508,
-        "skill": 25,
-        "materials": [{ "itemId": 414, "amount": 30 }]
-    },
-    {
-        "id": 48,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 196,
-        "skill": 35,
-        "materials": [{ "itemId": 414, "amount": 50 }]
-    },
-    {
-        "id": 49,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 1226,
-        "skill": 35,
-        "materials": [{ "itemId": 414, "amount": 50 }]
-    },
-    {
-        "id": 50,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 1955,
-        "skill": 45,
-        "materials": [
-            { "itemId": 414, "amount": 60 },
-            { "itemId": 415, "amount": 5 }
-        ]
-    },
-    {
-        "id": 51,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 1089,
-        "skill": 55,
-        "materials": [
-            { "itemId": 414, "amount": 70 },
-            { "itemId": 415, "amount": 10 }
-        ]
-    },
-    {
-        "id": 52,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 2857,
-        "skill": 55,
-        "materials": [
-            { "itemId": 414, "amount": 70 },
-            { "itemId": 415, "amount": 10 }
-        ]
-    },
-    {
-        "id": 53,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 2932,
-        "skill": 55,
-        "materials": [
-            { "itemId": 414, "amount": 70 },
-            { "itemId": 415, "amount": 10 }
-        ]
-    },
-    {
-        "id": 54,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 2916,
-        "skill": 65,
-        "materials": [
-            { "itemId": 414, "amount": 80 },
-            { "itemId": 415, "amount": 15 },
-            { "itemId": 416, "amount": 1 }
-        ]
-    },
-    {
-        "id": 55,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 1961,
-        "skill": 65,
-        "materials": [
-            { "itemId": 414, "amount": 80 },
-            { "itemId": 415, "amount": 15 },
-            { "itemId": 416, "amount": 1 }
-        ]
-    },
-    {
-        "id": 56,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 2854,
-        "skill": 65,
-        "materials": [
-            { "itemId": 414, "amount": 80 },
-            { "itemId": 415, "amount": 15 },
-            { "itemId": 416, "amount": 1 }
-        ]
-    },
-    {
-        "id": 57,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 519,
-        "skill": 100,
-        "materials": [
-            { "itemId": 414, "amount": 45 },
-            { "itemId": 415, "amount": 25 },
-            { "itemId": 416, "amount": 3 }
-        ]
-    },
-    {
-        "id": 58,
-        "profession": "tailoring",
-        "category": "Ropas",
-        "itemId": 1957,
-        "skill": 100,
-        "materials": [
-            { "itemId": 414, "amount": 45 },
-            { "itemId": 415, "amount": 25 },
-            { "itemId": 416, "amount": 3 }
-        ]
-    },
-    {
-        "id": 59,
-        "profession": "tailoring",
-        "category": "Gorros",
-        "itemId": 1778,
-        "skill": 10,
-        "materials": [{ "itemId": 414, "amount": 15 }]
-    },
-    {
-        "id": 60,
-        "profession": "tailoring",
-        "category": "Objetos",
-        "itemId": 3462,
-        "skill": 100,
-        "materials": [
-            { "itemId": 414, "amount": 300 },
-            { "itemId": 415, "amount": 150 },
-            { "itemId": 416, "amount": 40 }
-        ]
-    },
-    {
-        "id": 61,
-        "profession": "tailoring",
-        "category": "Objetos",
-        "itemId": 3822,
-        "skill": 0,
-        "materials": [{ "itemId": 414, "amount": 1 }]
-    },
-    {
-        "id": 62,
-        "profession": "tailoring",
-        "category": "Gorros",
-        "itemId": 3990,
-        "skill": 75,
-        "materials": [{ "itemId": 416, "amount": 6 }]
-    }
+  {
+    "id": 1,
+    "profession": "carpentry",
+    "category": "Municion",
+    "itemId": 480,
+    "skill": 5,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "profession": "carpentry",
+    "category": "Municion",
+    "itemId": 551,
+    "skill": 45,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "profession": "carpentry",
+    "category": "Municion",
+    "itemId": 552,
+    "skill": 63,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "profession": "carpentry",
+    "category": "Municion",
+    "itemId": 553,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 6
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "profession": "carpentry",
+    "category": "Arcos",
+    "itemId": 478,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 200
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "profession": "carpentry",
+    "category": "Arcos",
+    "itemId": 663,
+    "skill": 25,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 500
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "profession": "carpentry",
+    "category": "Arcos",
+    "itemId": 479,
+    "skill": 63,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 900
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "profession": "carpentry",
+    "category": "Arcos",
+    "itemId": 665,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 1006,
+        "amount": 1000
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "profession": "carpentry",
+    "category": "Barcos",
+    "itemId": 474,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 25000
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "profession": "carpentry",
+    "category": "Barcos",
+    "itemId": 475,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 30000
+      }
+    ]
+  },
+  {
+    "id": 63,
+    "profession": "carpentry",
+    "category": "Barcos",
+    "itemId": 476,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 40000
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "profession": "carpentry",
+    "category": "Instrumentos",
+    "itemId": 696,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 800
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "profession": "carpentry",
+    "category": "Instrumentos",
+    "itemId": 208,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 1200
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "profession": "carpentry",
+    "category": "Instrumentos",
+    "itemId": 1049,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 1006,
+        "amount": 600
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "profession": "carpentry",
+    "category": "Instrumentos",
+    "itemId": 1050,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 1006,
+        "amount": 900
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "profession": "carpentry",
+    "category": "Baculos",
+    "itemId": 659,
+    "skill": 60,
+    "materials": [
+      {
+        "itemId": 58,
+        "amount": 1200
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 15,
+    "skill": 0,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 165,
+    "skill": 15,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 365,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 50
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 366,
+    "skill": 60,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 100
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 367,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 100
+      },
+      {
+        "itemId": 387,
+        "amount": 100
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 164,
+    "skill": 25,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 50
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 2,
+    "skill": 25,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 20
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 125,
+    "skill": 30,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 159,
+    "skill": 70,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 55
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 399,
+    "skill": 55,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 100
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 123,
+    "skill": 70,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 50
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 124,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 90
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 129,
+    "skill": 80,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 105
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 403,
+    "skill": 90,
+    "materials": [
+      {
+        "itemId": 387,
+        "amount": 105
+      }
+    ]
+  },
+  {
+    "id": 30,
+    "profession": "blacksmith",
+    "category": "Armas",
+    "itemId": 1036,
+    "skill": 80,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 105
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "profession": "blacksmith",
+    "category": "Armaduras",
+    "itemId": 195,
+    "skill": 76,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 210
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "profession": "blacksmith",
+    "category": "Armaduras",
+    "itemId": 356,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 300
+      },
+      {
+        "itemId": 387,
+        "amount": 200
+      },
+      {
+        "itemId": 388,
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "id": 33,
+    "profession": "blacksmith",
+    "category": "Armaduras",
+    "itemId": 854,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 300
+      },
+      {
+        "itemId": 387,
+        "amount": 200
+      },
+      {
+        "itemId": 388,
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "id": 34,
+    "profession": "blacksmith",
+    "category": "Armaduras",
+    "itemId": 496,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 550
+      },
+      {
+        "itemId": 387,
+        "amount": 350
+      },
+      {
+        "itemId": 388,
+        "amount": 150
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "profession": "blacksmith",
+    "category": "Armaduras",
+    "itemId": 495,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 550
+      },
+      {
+        "itemId": 387,
+        "amount": 350
+      },
+      {
+        "itemId": 388,
+        "amount": 150
+      }
+    ]
+  },
+  {
+    "id": 36,
+    "profession": "blacksmith",
+    "category": "Escudos",
+    "itemId": 128,
+    "skill": 55,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "profession": "blacksmith",
+    "category": "Escudos",
+    "itemId": 133,
+    "skill": 90,
+    "materials": [
+      {
+        "itemId": 387,
+        "amount": 100
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "profession": "blacksmith",
+    "category": "Accesorios",
+    "itemId": 699,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 387,
+        "amount": 75
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "profession": "blacksmith",
+    "category": "Cascos",
+    "itemId": 131,
+    "skill": 65,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 105
+      }
+    ]
+  },
+  {
+    "profession": "blacksmith",
+    "category": "Cascos",
+    "itemId": 405,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 180
+      },
+      {
+        "itemId": 387,
+        "amount": 210
+      },
+      {
+        "itemId": 388,
+        "amount": 60
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "profession": "blacksmith",
+    "category": "Accesorios",
+    "itemId": 814,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 386,
+        "amount": 5
+      },
+      {
+        "itemId": 387,
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "profession": "tailoring",
+    "category": "Objetos",
+    "itemId": 3578,
+    "skill": 0,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 32,
+    "skill": 2,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": 44,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 240,
+    "skill": 0,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 7
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 1975,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 20
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 2911,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 20
+      }
+    ]
+  },
+  {
+    "id": 47,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 508,
+    "skill": 25,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 196,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 50
+      }
+    ]
+  },
+  {
+    "id": 49,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 1226,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 50
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 1955,
+    "skill": 45,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 60
+      },
+      {
+        "itemId": 415,
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "id": 51,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 1089,
+    "skill": 55,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 70
+      },
+      {
+        "itemId": 415,
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "id": 52,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 2857,
+    "skill": 55,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 70
+      },
+      {
+        "itemId": 415,
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 2932,
+    "skill": 55,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 70
+      },
+      {
+        "itemId": 415,
+        "amount": 10
+      }
+    ]
+  },
+  {
+    "id": 54,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 2916,
+    "skill": 65,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 80
+      },
+      {
+        "itemId": 415,
+        "amount": 15
+      },
+      {
+        "itemId": 416,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 1961,
+    "skill": 65,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 80
+      },
+      {
+        "itemId": 415,
+        "amount": 15
+      },
+      {
+        "itemId": 416,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": 56,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 2854,
+    "skill": 65,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 80
+      },
+      {
+        "itemId": 415,
+        "amount": 15
+      },
+      {
+        "itemId": 416,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": 57,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 519,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 45
+      },
+      {
+        "itemId": 415,
+        "amount": 25
+      },
+      {
+        "itemId": 416,
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "id": 58,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 1957,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 45
+      },
+      {
+        "itemId": 415,
+        "amount": 25
+      },
+      {
+        "itemId": 416,
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "id": 59,
+    "profession": "tailoring",
+    "category": "Gorros",
+    "itemId": 1778,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 15
+      }
+    ]
+  },
+  {
+    "id": 60,
+    "profession": "tailoring",
+    "category": "Objetos",
+    "itemId": 3462,
+    "skill": 100,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 300
+      },
+      {
+        "itemId": 415,
+        "amount": 150
+      },
+      {
+        "itemId": 416,
+        "amount": 40
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "profession": "tailoring",
+    "category": "Objetos",
+    "itemId": 3822,
+    "skill": 0,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": 62,
+    "profession": "tailoring",
+    "category": "Gorros",
+    "itemId": 3990,
+    "skill": 75,
+    "materials": [
+      {
+        "itemId": 416,
+        "amount": 6
+      }
+    ]
+  },
+  {
+    "id": 64,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 35,
+    "skill": 5,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 501,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "id": 66,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 502,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 641,
+    "skill": 5,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "id": 68,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 135,
+    "skill": 20,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 15
+      }
+    ]
+  },
+  {
+    "id": 69,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 670,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 50
+      }
+    ]
+  },
+  {
+    "id": 70,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 930,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 40
+      }
+    ]
+  },
+  {
+    "id": 71,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 238,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 40
+      }
+    ]
+  },
+  {
+    "id": 72,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 239,
+    "skill": 30,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "id": 73,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 671,
+    "skill": 55,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 30
+      },
+      {
+        "itemId": 415,
+        "amount": 15
+      }
+    ]
+  }
 ]

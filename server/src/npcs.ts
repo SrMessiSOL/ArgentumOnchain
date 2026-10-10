@@ -1,3 +1,4 @@
+import {trainCharacterSkill} from './characterSkills';
 import type { GameApi } from "./game";
 import type { HandleProtocolApi } from "./handleProtocol";
 import type { SocketApi } from "./socket";
@@ -2536,6 +2537,7 @@ function Npcs(this: NpcsApi) {
                     }
 
                     user.hp -= dmg;
+                    if(dmg>0)trainCharacterSkill(user,'defense');
                     user.lastCombatActivityAt = Date.now();
                     emitCharacterFxToUserArea(idUser, COMBAT_HIT_FX_ID);
                     withUserClient(idUser, (userClient) => {

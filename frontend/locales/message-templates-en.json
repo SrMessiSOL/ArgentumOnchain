@@ -234,5 +234,11 @@
   "Plantilla PvP invalida: {0}": "Invalid PvP template: {0}",
   "Tipo {0}": "Type {0}",
   "Mapa {0}": "Map {0}",
-  "{0} — Título: {1}": "{0} — Title: {1}"
+  "{0} — Título: {1}": "{0} — Title: {1}",
+  "Las habilidades naturales no están activas en este reino.": "Natural skills are not active in this realm.",
+  "Puntos de habilidad disponibles: {0}. Usa /assignskill <skill> <points>.": "Available skill points: {0}. Use /assignskill <skill> <points>.",
+  "{0}: {1} ({2} entrenados + {3} asignados).": "{0}: {1} ({2} trained + {3} assigned).",
+  "Puntos de habilidad asignados.": "Skill points assigned.",
+  "No se pudieron asignar las habilidades.": "Skill assignment failed.",
+  "Se requiere Navegación {0} para navegar.": "Navigation skill {0} is required to sail."
 }

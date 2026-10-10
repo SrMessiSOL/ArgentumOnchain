@@ -82,6 +82,7 @@ export type UserOnlineStatRecord = {
 export type CharacterFaction = "none" | "armada" | "caos";
 
 export type CharacterRecord = {
+    skill_state?: Record<string,unknown>|null;
     id: string;
     account_id: string;
     name: string;
@@ -218,6 +219,7 @@ export type CharacterSpellRecord = {
 };
 
 export type CharacterApiResponse = {
+    skillState?: Record<string,unknown>|null;
     _id: string;
     idAccount: string;
     name: string;

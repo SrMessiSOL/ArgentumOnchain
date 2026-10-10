@@ -1,15 +1,7 @@
-# Crafting wiki
+# Crafting Wiki coverage
 
-The public `/wiki/crafting` page covers carpentry, tailoring, blacksmithing and smelting with profession filters, localized item/material names, actual item graphics and a 1–9999 quantity calculator. It is a reference only and does not invoke gameplay or settlement operations.
+All 76 configured crafting/smelting recipes are represented. Ten additional tailoring recipes are marked pending host activation. Seventeen original output references lack bundled object definitions and remain visible as Item #ID with a catalog-repair warning rather than being silently omitted. Every known bundled object appears in the Equipment catalog; additional categories include boats and other game items. Unknown supplemental prices/classes are shown as unavailable, not guessed.
 
-The checked-in snapshot uses `server/jsons/craftingRecipes.json`, `server/jsons/smeltingRecipes.json` and `frontend/public/init/objs.json`. It contains 46 resolvable crafting recipes and three smelting recipes. Seventeen crafting outputs have no bundled object definition and are excluded rather than assigned invented names or images. Live database overrides can differ; the page says this explicitly.
+This is bundled-data coverage, not proof that every live-host item is synchronized. Follow GAME-CONTENT-AND-SKILLS-ROLLOUT.md to export the authoritative catalog and activate content. Not all items have recipes: potions currently have no alchemy profession. Minimum crafting level reflects the currently active legacy level-times-three skills; independent skills remain gated off.
 
-Crafting currently uses `min(100, level * 3)` as skill. The wiki shows the corresponding minimum playable level. Carpentry uses a handsaw, tailoring a sewing kit, and blacksmithing an equipped blacksmith hammer plus an anvil within two tiles. Smelting uses ore and a forge; its configured skill rating is not enforced by the current smelting handler. The page distinguishes this rating from crafting eligibility.
-
-Run `npm run test:wiki` from `frontend` to verify every snapshot recipe/name/material quantity against its bundled source. Update the snapshot when these source definitions change. English release regressions and the production build also validate the page. Browser QA checked profession/search filters, 10-ingot totals (130 iron, 250 silver, 500 gold ore), localized Spanish ingredient search, and a 390x844 layout without horizontal overflow.
-
-A recent NPC-vendor error message was missing its English translation; this change adds it so the current English release tests pass. No live game-server restart or recipe/balance mutation is required for the wiki update.
-
-## Crafting and use requirements
-
-Crafting cards name the profession and required skill, and show the character level derived from the current server rule (level × 3, capped at 100). Boat (474): Carpentry 75, level 25. Galley (475) and Galleon (476): Carpentry 100, level 34. Equipment includes these three ships. Requirement details are displayed only in the Crafting tab, not on Equipment rows. The current equip and navigation handlers do not impose a minimum level or skill; class, race, faction and newbie restrictions remain applicable. No new gameplay requirements are introduced. Smelting recipe ratings remain informational because the current handler does not enforce them.
+Validation: frontend/scripts/test-crafting-wiki.mjs compares all recipe IDs, materials, quantities, skill requirements, pending flags and unresolved references against source definitions. Server/API recipe files must match.

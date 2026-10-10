@@ -1,3 +1,4 @@
+import {getCharacterSkill,trainCharacterSkill} from './characterSkills';
 import type {
     DataObject,
     EntityId,
@@ -193,7 +194,7 @@ function getExtractResourceForLevel(level: number) {
 }
 
 function rollHarvestSuccess(user: HarvestingUser, skill: HarvestingSkill) {
-    const simulatedSkill = getSimulatedSkill(user);
+    const simulatedSkill = getCharacterSkill(user,skill);
     const luck = Math.max(1, Math.floor(-0.00125 * simulatedSkill * simulatedSkill - 0.3 * simulatedSkill + 49));
     const safeZoneBonus = skill === "woodcutting" ? 4 : 2;
     const rollMax = isSafeHarvestingZone(user) ? luck + safeZoneBonus : luck;
@@ -501,6 +502,7 @@ const harvesting: HarvestingApi = {
                 continue;
             }
 
+            trainCharacterSkill(user,state.skill);
             playHarvestingSound(idUser, state.skill);
 
             withUserClient(idUser, (userClient) => {

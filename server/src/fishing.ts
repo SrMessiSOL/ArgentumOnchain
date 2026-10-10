@@ -1,3 +1,4 @@
+import {getCharacterSkill,trainCharacterSkill} from './characterSkills';
 import type { EntityId, FishingState, Position, RuntimeCharacter, RuntimeClient } from "./types/runtime";
 import type { HandleProtocolApi } from "./handleProtocol";
 import { bankOperations } from './bankOperationGuard';
@@ -398,7 +399,7 @@ const fishing: FishingApi = {
 
             state.nextTickAt = now + vars.timing.fishingTickMs;
 
-            const fishingChance = getFishingChanceForSkill(getSimulatedFishingSkill(user));
+            const fishingChance = getFishingChanceForSkill(getCharacterSkill(user,'fishing'));
 
             if (Math.floor(Math.random() * 100) + 1 > fishingChance) {
                 continue;
@@ -420,6 +421,7 @@ const fishing: FishingApi = {
                 continue;
             }
 
+            trainCharacterSkill(user,'fishing');
             withUserClient(idUser, (userClient) => {
                 handleProtocol.console(
                     `Has pescado ${rewardAmount} ${vars.datObj[reward.itemId].name}.`,

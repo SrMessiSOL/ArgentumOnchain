@@ -1,3 +1,4 @@
+import {getCharacterSkill,trainCharacterSkill} from './characterSkills';
 import type { DataObject, EntityId, Position, RuntimeCharacter, RuntimeClient } from "./types/runtime";
 import type { GameApi } from "./game";
 import { bankOperations } from './bankOperationGuard';
@@ -50,9 +51,7 @@ function getUser(idUser: EntityId) {
     return getCharacterById<CraftingUser>(idUser);
 }
 
-function getSimulatedSkill(user: CraftingUser) {
-    return Math.min(100, Math.max(0, Number(user.level ?? 0) * 3));
-}
+function getSimulatedSkill(user: CraftingUser,profession:CraftingProfession) {return getCharacterSkill(user,profession);}
 
 function getProfessionForTool(idItem: number): CraftingProfession | null {
     if (crafting.isCarpentryTool(idItem)) {
@@ -298,7 +297,7 @@ const crafting: CraftingApi = {
             return true;
         }
 
-        const recipes = getProfessionRecipes(profession, getSimulatedSkill(user))
+        const recipes = getProfessionRecipes(profession, getSimulatedSkill(user,profession))
             .map((recipe) => serializeRecipe(user, recipe))
             .filter((recipe) => recipe !== null);
 
@@ -343,7 +342,7 @@ const crafting: CraftingApi = {
 
         user.craftingTarget = undefined;
 
-        const recipes = getProfessionRecipes("blacksmith", getSimulatedSkill(user))
+        const recipes = getProfessionRecipes("blacksmith", getSimulatedSkill(user,"blacksmith"))
             .map((recipe) => serializeRecipe(user, recipe))
             .filter((recipe) => recipe !== null);
 
@@ -378,7 +377,7 @@ const crafting: CraftingApi = {
             return;
         }
 
-        if (getSimulatedSkill(user) < recipe.skill) {
+        if (getSimulatedSkill(user,profession) < recipe.skill) {
             handleProtocol.console("No tienes skill suficiente para fabricar ese objeto.", "white", 0, 0, ws);
             return;
         }
@@ -435,6 +434,7 @@ const crafting: CraftingApi = {
         const game = getGameApi();
 
         game.putItemToInv(user.id, recipe.itemId, safeAmount);
+        trainCharacterSkill(user,profession);
         await game.persistCharacterItemsById(user.id);
 
         const craftedObj = vars.datObj[recipe.itemId] as DataObject | undefined;

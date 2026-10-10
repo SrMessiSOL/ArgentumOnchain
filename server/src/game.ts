@@ -1,3 +1,4 @@
+import {getCharacterSkill,trainCharacterSkill,ensureSkills,skillsEnabled} from './characterSkills';
 import {itemMatchesSearch} from './localization/itemSearch';
 import {canNpcVendorTrade,canBuyFromNpc} from './npcVendorPolicy';
 import { claimLoadedVault } from './vaultClaim';
@@ -431,7 +432,7 @@ function clampChance(value: number, min = 5, max = 95): number {
 }
 
 function getSimulatedSkill(user: GameCharacter): number {
-    return Math.min(100, user.level * 3);
+    return getCharacterSkill(user,'magic');
 }
 
 function getInventoryItem(user: GameCharacter, slot: number | string | undefined) {
@@ -1294,6 +1295,7 @@ function setHiddenSkillState(idUser: EntityId, enabled: boolean) {
     }
 
     user.hiddenSkill = enabled;
+    if(enabled)trainCharacterSkill(user,'hiding');
 
     syncCharacterVisibility(idUser);
     game.syncUserNpcVisibility(idUser);
@@ -3351,6 +3353,7 @@ async function persistCharacterStoragePatch(
 
     const payload = (() => {
         const body: Record<string, unknown> = {};
+        if(user.skillState)body.skillState=user.skillState;
 
         if (options.gold) {
             body.gold = balance.clampGold(user.gold);
@@ -6901,6 +6904,7 @@ function Game(this: GameApi) {
                 }
 
                 user.level++;
+                if(skillsEnabled())ensureSkills(user);
                 leveledUp = true;
                 user.exp -= user.expNextLevel;
 
@@ -7159,6 +7163,7 @@ function Game(this: GameApi) {
                     }
 
                     npc.hp -= dmg;
+                    if(dmg>0)trainCharacterSkill(user,'magic');
                 }
             }
 
@@ -7726,6 +7731,7 @@ function Game(this: GameApi) {
                     }
 
                     npc.hp -= dmg;
+                    if(dmg>0){trainCharacterSkill(user,!weaponItemId?'wrestling':Number(vars.datObj[weaponItemId]?.proyectil)===1?'projectiles':'weapons');trainCharacterSkill(user,'tactics');}
                 }
 
                 let stabResult: StabResult = {
@@ -8318,6 +8324,7 @@ function Game(this: GameApi) {
                 const maxMod = STABBING_NPC_MAX_MOD_BY_CLASS[user.idClase] ?? minMod;
                 const extraDamage = Math.floor(dmg * (Math.random() * (maxMod - minMod) + minMod));
                 npc.hp -= extraDamage;
+                if(extraDamage>0)trainCharacterSkill(user,'stabbing');
 
                 game.calcularExp(idUser, idNpc, extraDamage);
 
@@ -8404,7 +8411,7 @@ function Game(this: GameApi) {
             if (!user) {
                 return 0;
             }
-            return getSimulatedSkill(user);
+            return getCharacterSkill(user,'tactics');
         } catch (err) {
             funct.dumpError(err);
             return 0;
@@ -8422,7 +8429,7 @@ function Game(this: GameApi) {
             if (!user) {
                 return 0;
             }
-            return getSimulatedSkill(user);
+            return getCharacterSkill(user,'defense');
         } catch (err) {
             funct.dumpError(err);
             return 0;
@@ -8440,7 +8447,7 @@ function Game(this: GameApi) {
             if (!user) {
                 return 0;
             }
-            return getSimulatedSkill(user);
+            return getCharacterSkill(user,'weapons');
         } catch (err) {
             funct.dumpError(err);
             return 0;
@@ -8453,7 +8460,7 @@ function Game(this: GameApi) {
             if (!user) {
                 return 0;
             }
-            return getSimulatedSkill(user);
+            return getCharacterSkill(user,'projectiles');
         } catch (err) {
             funct.dumpError(err);
             return 0;
@@ -8466,7 +8473,7 @@ function Game(this: GameApi) {
             if (!user) {
                 return 0;
             }
-            return getSimulatedSkill(user);
+            return getCharacterSkill(user,'wrestling');
         } catch (err) {
             funct.dumpError(err);
             return 0;
@@ -8479,7 +8486,7 @@ function Game(this: GameApi) {
             if (!user) {
                 return 0;
             }
-            return getSimulatedSkill(user);
+            return getCharacterSkill(user,'hiding');
         } catch (err) {
             funct.dumpError(err);
             return 0;
@@ -8497,7 +8504,7 @@ function Game(this: GameApi) {
             if (!user) {
                 return 0;
             }
-            return getSimulatedSkill(user);
+            return getCharacterSkill(user,'stabbing');
         } catch (err) {
             funct.dumpError(err);
             return 0;
@@ -9621,6 +9628,12 @@ function Game(this: GameApi) {
                 return;
             }
 
+            const requiredNavigation=Math.max(0,Math.min(100,Number(process.env.AOWEB_NAVIGATION_SKILL_REQUIRED)||0));
+            if(skillsEnabled() && !user.navegando && !user.dead && getCharacterSkill(user,'navigation')<requiredNavigation){
+                withUserClient(idUser,client=>handleProtocol.console(`Se requiere Navegación ${requiredNavigation} para navegar.`,"white",0,0,client));
+                return;
+            }
+
             if (user.navegando) {
                 if (
                     game.legalPos(user.pos.x - 1, user.pos.y, user.map, false) ||
@@ -9701,6 +9714,7 @@ function Game(this: GameApi) {
                     user.idShield = 0;
 
                     user.navegando = 1;
+                    trainCharacterSkill(user,'navigation');
 
                     withUserClient(idUser, (userClient) => {
                         handleProtocol.selfMapMetaDelta(

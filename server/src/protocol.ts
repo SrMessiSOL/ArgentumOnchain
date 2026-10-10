@@ -1,3 +1,4 @@
+import {getCharacterSkill,trainCharacterSkill} from './characterSkills';
 export {};
 import { getFactionColor, getFactionRankTitle, getMaxEligibleFactionRank, type CharacterFaction } from "./factions";
 import type {
@@ -157,7 +158,7 @@ function getChallengeManager() {
 }
 
 function getSimulatedSkill(user: RuntimeCharacter) {
-    return Math.min(100, Number(user.level ?? 0) * 3);
+    return getCharacterSkill(user,'magic');
 }
 
 function getRequiredLevelForSpell(minSkill: number | undefined) {

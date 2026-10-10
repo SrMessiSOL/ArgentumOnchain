@@ -1,0 +1,11 @@
+import {strict as assert} from 'node:assert';
+import {houseKeyTown,planHouseAndTailorStock} from '../lib/houseAndTailorStock';
+const objects=[{id:54,data:{name:'Llave Ullathorpe Casa Nro 1',objType:9}},{id:237,data:{name:'Costurero',objType:2}},{id:174,data:{name:'Llave Catacumbas de Ullathorpe',objType:9}}];
+const npcs=[{id:10,data:{name:'Mercader',npcType:10,objs:[]}},{id:28,data:{name:'Sastre',npcType:10,objs:[]}}];
+const plan=planHouseAndTailorStock(objects,npcs,{10:['Ciudad de Ullathorpe']});
+assert.deepEqual(plan.unresolved,[]);assert.deepEqual(plan.changes.map(c=>c.added),[[54],[237]]);
+assert.equal(houseKeyTown(objects[2].data),null,'dungeon keys excluded');
+assert.equal(planHouseAndTailorStock(objects,npcs,{10:['Ciudad de Ullathorpe','Ciudad de Nix']}).unresolved.length,1,'shared vendor cannot sell another towns keys');
+const installed=npcs.map(n=>({id:n.id,data:plan.changes.find(c=>c.id===n.id)?.after??n.data}));
+assert.equal(planHouseAndTailorStock(objects,installed,{10:['Ciudad de Ullathorpe']}).changes.length,0);
+console.log('PASS: town key routing, tailor kit, dungeon exclusion, shared-vendor protection and idempotence.');

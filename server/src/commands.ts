@@ -1,3 +1,4 @@
+import {ensureSkills,assignCharacterSkill,SKILLS,skillsEnabled} from './characterSkills';
 import type { GameApi } from "./game";
 import { bankOperations } from './bankOperationGuard';
 import { resolveCommandAlias, playerCommandHelp, normalizeClassInput, parseNpcSpawnOptions, formatAdminBotName } from "./commandAliases";
@@ -2104,6 +2105,22 @@ const command: CommandApi = {
             const userInSafeZone = isInSafeZone(user);
 
             switch (commandText) {
+                case "/skills": {
+                    if(!skillsEnabled()){handleProtocol.console("Las habilidades naturales no están activas en este reino.","white",0,0,ws);break;}
+                    const state=ensureSkills(user);
+                    handleProtocol.console(`Puntos de habilidad disponibles: ${state.points}. Usa /assignskill <skill> <points>.`,"white",0,0,ws);
+                    for(const skill of SKILLS)handleProtocol.console(`${skill}: ${Math.min(100,state.natural[skill]+state.assigned[skill])} (${state.natural[skill]} entrenados + ${state.assigned[skill]} asignados).`,"white",0,0,ws);
+                    break;
+                }
+                case "/assignskill": {
+                    const [skill,rawAmount]=nextText.trim().toLowerCase().split(/\s+/);
+                    try {await bankOperations.run(user.id,async()=>{
+                        assignCharacterSkill(user,skill,Number(rawAmount));
+                        await game.persistCharacterPatch(user,{skillState:ensureSkills(user)});
+                        handleProtocol.console("Puntos de habilidad asignados.","white",0,0,ws);
+                    },undefined);}catch(error){handleProtocol.console(error instanceof Error?error.message:"No se pudieron asignar las habilidades.","white",0,0,ws);}
+                    break;
+                }
                 case "/help":
                     for (const line of playerCommandHelp) {
                         handleProtocol.console(line, "white", 0, 0, ws as CommandClient);

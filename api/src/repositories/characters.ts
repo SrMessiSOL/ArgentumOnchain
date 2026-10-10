@@ -74,6 +74,7 @@ const storagePatchSchema = z.object({
 
 const characterPatchSchema = z
     .object({
+        skillState: z.object({version:z.literal(1),level:z.number().int().min(1).max(1000),points:z.number().int().min(0).max(10000),natural:z.object({tactics:z.number().int().min(0).max(100),defense:z.number().int().min(0).max(100),weapons:z.number().int().min(0).max(100),projectiles:z.number().int().min(0).max(100),wrestling:z.number().int().min(0).max(100),hiding:z.number().int().min(0).max(100),stabbing:z.number().int().min(0).max(100),magic:z.number().int().min(0).max(100),mining:z.number().int().min(0).max(100),woodcutting:z.number().int().min(0).max(100),fishing:z.number().int().min(0).max(100),carpentry:z.number().int().min(0).max(100),tailoring:z.number().int().min(0).max(100),blacksmith:z.number().int().min(0).max(100),smelting:z.number().int().min(0).max(100),navigation:z.number().int().min(0).max(100)}).strict(),assigned:z.object({tactics:z.number().int().min(0).max(100),defense:z.number().int().min(0).max(100),weapons:z.number().int().min(0).max(100),projectiles:z.number().int().min(0).max(100),wrestling:z.number().int().min(0).max(100),hiding:z.number().int().min(0).max(100),stabbing:z.number().int().min(0).max(100),magic:z.number().int().min(0).max(100),mining:z.number().int().min(0).max(100),woodcutting:z.number().int().min(0).max(100),fishing:z.number().int().min(0).max(100),carpentry:z.number().int().min(0).max(100),tailoring:z.number().int().min(0).max(100),blacksmith:z.number().int().min(0).max(100),smelting:z.number().int().min(0).max(100),navigation:z.number().int().min(0).max(100)}).strict(),xp:z.object({tactics:z.number().int().min(0).max(10000),defense:z.number().int().min(0).max(10000),weapons:z.number().int().min(0).max(10000),projectiles:z.number().int().min(0).max(10000),wrestling:z.number().int().min(0).max(10000),hiding:z.number().int().min(0).max(10000),stabbing:z.number().int().min(0).max(10000),magic:z.number().int().min(0).max(10000),mining:z.number().int().min(0).max(10000),woodcutting:z.number().int().min(0).max(10000),fishing:z.number().int().min(0).max(10000),carpentry:z.number().int().min(0).max(10000),tailoring:z.number().int().min(0).max(10000),blacksmith:z.number().int().min(0).max(10000),smelting:z.number().int().min(0).max(10000),navigation:z.number().int().min(0).max(10000)}).strict()}).strict().nullable().optional(),
         operationId: z.string().uuid().optional(),
         floorChanges: z.array(z.discriminatedUnion('action', [
             z.object({ action: z.literal('put'), dropId: z.string().uuid(), map: z.number().int().positive(), x: z.number().int().min(0), y: z.number().int().min(0), itemId: z.number().int().positive(), amount: z.number().int().positive() }),
@@ -165,6 +166,7 @@ const characterPatchSchema = z
     .passthrough();
 
 const fieldMap = [
+    ["skillState", "skill_state"],
     ["name", "name"],
     ["idClase", "id_clase"],
     ["map", "map_id"],
@@ -282,6 +284,7 @@ function toCharacterResponse(
         exp: character.exp,
         expNextLevel: character.exp_next_level,
         level: character.level,
+        skillState: character.skill_state ?? null,
         ip: character.ip,
         banned: character.banned,
         dead: character.dead,
@@ -1121,7 +1124,7 @@ export async function patchCharacter(
                 continue;
             }
 
-            values.push(parsed[apiField]);
+            values.push(apiField==="skillState"?JSON.stringify(parsed[apiField]):parsed[apiField]);
             assignments.push(`${dbField} = $${values.length}`);
         }
 

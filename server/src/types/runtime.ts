@@ -288,6 +288,7 @@ export type RuntimeCharacter = {
     connected?: boolean;
     cerrado?: boolean;
     level?: number;
+    skillState?: unknown;
     exp?: number;
     expNextLevel?: number;
     idClase?: number;

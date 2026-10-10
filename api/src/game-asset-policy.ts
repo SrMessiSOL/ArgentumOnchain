@@ -13,7 +13,7 @@ export function bundleHash(bundle:unknown){return createHash('sha256').update(ca
 export async function readBundle(c:PoolClient,character:Record<string,unknown>){
  const id=character.id as string;
  const excluded=new Set(['account_id','ip','ip_banned_until','banned','privileges','connected','economy_lock','economy_login_until','updated_at','created_at','deleted_at','chain_state','chain_required','asset_address']);
- const data=Object.fromEntries(Object.entries(character).filter(([key])=>!excluded.has(key)));
+ const data=Object.fromEntries(Object.entries(character).filter(([key])=>!excluded.has(key) && !(key==='skill_state' && character[key]==null)));
  const bundle:Record<string,unknown>={character:data};
  for(const table of ['character_items','character_bank_items','character_spells','character_achievements','character_titles']){
   const rows=(await c.query(`SELECT to_jsonb(t)-'character_id' AS value FROM ${table} t WHERE character_id=$1`,[id])).rows.map(r=>r.value);

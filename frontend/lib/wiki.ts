@@ -47,8 +47,9 @@ export type PublicWikiResponse = {
         grhIndex: number;
         objType: number;
         objTypeLabel: string;
-        category: "weapon" | "armor" | "shield" | "helmet" | "magic_weapon" | "boat";
+        category: "weapon" | "armor" | "shield" | "helmet" | "magic_weapon" | "boat" | "other";
         categoryLabel: string;
+        catalogOnly?:boolean;
         value: number;
         minHit: number;
         maxHit: number;

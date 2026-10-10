@@ -1,0 +1,136 @@
+[
+  {
+    "id": 64,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 35,
+    "skill": 5,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 2
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 501,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "id": 66,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 502,
+    "skill": 10,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 641,
+    "skill": 5,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "id": 68,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 135,
+    "skill": 20,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 15
+      }
+    ]
+  },
+  {
+    "id": 69,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 670,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 50
+      }
+    ]
+  },
+  {
+    "id": 70,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 930,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 40
+      }
+    ]
+  },
+  {
+    "id": 71,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 238,
+    "skill": 35,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 40
+      }
+    ]
+  },
+  {
+    "id": 72,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 239,
+    "skill": 30,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 30
+      }
+    ]
+  },
+  {
+    "id": 73,
+    "profession": "tailoring",
+    "category": "Ropas",
+    "itemId": 671,
+    "skill": 55,
+    "materials": [
+      {
+        "itemId": 414,
+        "amount": 30
+      },
+      {
+        "itemId": 415,
+        "amount": 15
+      }
+    ]
+  }
+]

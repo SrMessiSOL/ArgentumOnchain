@@ -1,0 +1,20 @@
+import {strict as assert} from 'node:assert';
+import {getCharacterSkill,trainCharacterSkill,assignCharacterSkill,ensureSkills} from './characterSkills';
+const user:{level:number;skillState?:unknown}={level:1};
+delete process.env.AOWEB_NATURAL_SKILLS;
+assert.equal(getCharacterSkill(user,'mining'),3);assert.equal(user.skillState,undefined);
+process.env.AOWEB_NATURAL_SKILLS='1';
+assert.equal(getCharacterSkill(user,'mining'),0);assert.equal(ensureSkills(user).points,20);
+assignCharacterSkill(user,'carpentry',5);assert.equal(getCharacterSkill(user,'carpentry'),5);
+assert.throws(()=>assignCharacterSkill(user,'__proto__',1));assert.throws(()=>assignCharacterSkill(user,'magic',1.5));
+for(let i=0;i<10;i++)trainCharacterSkill(user,'mining',i*5000);
+assert.equal(getCharacterSkill(user,'mining'),1);
+assert.equal(trainCharacterSkill(user,'mining',45001),false);assert.equal(ensureSkills(user).xp.mining,0);
+user.level=2;assert.equal(ensureSkills(user).points,20);assert.equal(ensureSkills(user).points,20,'level points granted once');
+const legacy={level:25};assert.equal(getCharacterSkill(legacy,'navigation'),75,'legacy baseline preserved');
+assert.throws(()=>assignCharacterSkill(legacy,'navigation',26),'cap enforced');
+const copy=JSON.parse(JSON.stringify(user));assert.equal(getCharacterSkill(copy,'mining'),1,'state survives serialization');
+assert.equal(getCharacterSkill({level:10,pvpChar:true},'magic'),30,'arena templates unchanged');
+console.log('PASS: legacy fallback, natural progression, cooldown, assigned points, cap, level grants and persistence.');
+
+assert.throws(()=>ensureSkills({level:1,skillState:{version:1,level:1,points:20,natural:{},assigned:{},xp:{}}}),"malformed persisted state rejected");

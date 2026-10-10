@@ -46,3 +46,5 @@ for (const check of [canBuyFromNpc,canNpcVendorTrade]) {
  assert.equal(check(3002,tierOne,{},[{itemId:3002}]),false,'Tier 2 stays restricted');
  assert.equal(check(3003,tierOne,{},[]),false,'Tier 1 never permits gold');
 }
+
+for(const check of [canBuyFromNpc,canNpcVendorTrade]){assert.equal(check(54,{54:{objType:9,name:"Llave Ullathorpe Casa 1"}},{},[]),true);assert.equal(check(174,{174:{objType:9,name:"Llave dungeon"}},{},[{itemId:174}]),false);}

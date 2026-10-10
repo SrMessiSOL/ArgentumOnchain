@@ -384,6 +384,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                             left.id - right.id,
                     ),
             },
+            {key:"other",label:locale==='es'?"Otros objetos del juego":"Other game items",items:filteredEquipment.filter(item=>item.category==="other")},
         ],
         [filteredEquipment,locale],
     );
@@ -726,15 +727,13 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                                                 </p>
                                             ) : null}
                                         </div>
-                                        <span>{item.category==='boat'?"—":formatNumber(item.value)}</span>
+                                        <span>{item.value<0?"—":formatNumber(item.value)}</span>
                                         <span>{formatEquipmentStat(item)}</span>
                                         <span className="text-xs leading-5 text-stone-400">
                                             {dedupeNpcNames(item.droppedBy)}
                                         </span>
                                         <span className="text-xs leading-5 text-stone-400">
-                                            {getAllowedClassLabels(
-                                                item.blockedClasses, text,
-                                            )}
+                                            {item.catalogOnly||item.category==='other'?"—":getAllowedClassLabels(item.blockedClasses,text)}
                                         </span>
                                     </div>
                                 ))}

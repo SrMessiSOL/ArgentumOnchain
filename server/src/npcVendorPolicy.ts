@@ -1,5 +1,9 @@
 // Higher-tier crafting/smelting outputs and NPC drops belong to the player economy.
 // Normal Tier 1 equipment, worker tools and potions are acquisition-source exceptions.
+export function isHouseKey(object:Record<string,any>):boolean {
+    const name=String(object.name??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    return Number(object.objType)===9 && /^llave [a-z]+ (casa\b|mansion\b)/.test(name);
+}
 export function isTierOneVendorItem(object:Record<string,any>):boolean {
     return Number(object.tier)===1 && [2,3,16,17,18,26,31].includes(Number(object.objType));
 }
@@ -22,7 +26,7 @@ export function canBuyFromNpc(itemId: number, objects: Record<string, any>,
     smelting: Array<{ingotItemId: number; deleted?: boolean}> = []): boolean {
     const object=objects[itemId];
     if (!object || isNewbie(itemId,object) || Number(object.objType)===5) return false;
-    if (isTierOneVendorItem(object) || Number(object.objType)===11 || isWorkerTool(itemId,object)) return true;
+    if (isHouseKey(object) || isTierOneVendorItem(object) || Number(object.objType)===11 || isWorkerTool(itemId,object)) return true;
     return vendorCatalog.has(Number(itemId)) && canNpcVendorTrade(itemId,objects,npcs,recipes,smelting);
 }
 export function canNpcVendorTrade(itemId: number, objects: Record<string, any>,
@@ -30,7 +34,7 @@ export function canNpcVendorTrade(itemId: number, objects: Record<string, any>,
     smelting: Array<{ingotItemId: number; deleted?: boolean}> = []): boolean {
     const object = objects[itemId];
     if (!object || isNewbie(itemId,object) || Number(object.objType)===5) return false;
-    if (isTierOneVendorItem(object) || Number(object.objType) === 11 || isWorkerTool(itemId,object)) return true;
+    if (isHouseKey(object) || isTierOneVendorItem(object) || Number(object.objType) === 11 || isWorkerTool(itemId,object)) return true;
     if (recipes.some(recipe => !recipe.deleted && Number(recipe.itemId) === Number(itemId))) return false;
     if (smelting.some(recipe => !recipe.deleted && Number(recipe.ingotItemId) === Number(itemId))) return false;
     return !Object.values(npcs).some(npc =>

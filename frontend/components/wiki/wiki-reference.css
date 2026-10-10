@@ -18,3 +18,5 @@
 .crafting-card dd{font-size:15px}
 @media(max-width:760px){.crafting-tools{grid-template-columns:1fr}.crafting-tools button{padding:12px 16px}.realm-wiki-explorer .wiki-section-navigation a{flex:1;justify-content:center}}
 @media(prefers-reduced-motion:reduce){.wiki-equipment-table>div,.crafting-tools button{transition:none}}
+
+.crafting-status{display:inline-block;margin:.45rem 0 0;padding:.3rem .6rem;border:1px solid #856c35;border-radius:.4rem;color:#ead19a;font-size:.75rem;line-height:1.4;}
