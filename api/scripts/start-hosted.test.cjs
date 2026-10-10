@@ -13,6 +13,9 @@ const isolated={AOWEB_SIGNER_URL:'http://127.0.0.1:3104',AOWEB_SIGNER_TOKEN:'s'.
 assert.doesNotThrow(()=>validate({...valid,...isolated}));
 const rehearsal={...valid,...isolated,AOWEB_PRIVATE_WALLET_TEST:'1',AOWEB_SETTLEMENT_PAUSED:'0',AOWEB_GOLD_MINT:'11111111111111111111111111111111',AOWEB_DEVNET_METADATA_URL:'https://realm.example/api/cosmetics/metadata'};
 assert.doesNotThrow(()=>validate(rehearsal));
+const external={...rehearsal,AOWEB_PRIVATE_WALLET_TEST:'0',AOWEB_EXTERNAL_DEVNET_TEST:'1',AOWEB_DEVNET_RPC:'https://api.devnet.solana.com'};
+assert.doesNotThrow(()=>validate(external));
+for(const patch of [{AOWEB_DEVNET_RPC:'https://api.mainnet-beta.solana.com'},{AOWEB_PRIVATE_WALLET_TEST:'1'},{AOWEB_SIGNER_URL:undefined},{AOWEB_GOLD_MINT:undefined}])assert.throws(()=>validate({...external,...patch}));
 for(const patch of [{AOWEB_SIGNER_URL:undefined},{AOWEB_GOLD_MINT:undefined},{AOWEB_DEVNET_METADATA_URL:undefined},{AOWEB_PRIVATE_WALLET_TEST:'0'},{AOWEB_GOLD_AUTHORITY_FILE:'fixture.json'}])assert.throws(()=>validate({...rehearsal,...patch}));
 for(const patch of [{AOWEB_SIGNER_URL:'http://external.invalid:3104'},{AOWEB_SIGNER_URL:'http://secret:password@127.0.0.1:3104'},{AOWEB_SIGNER_TOKEN:undefined},{AOWEB_SIGNER_TOKEN:valid.TOKEN_AUTH},{AOWEB_GOLD_AUTHORITY_PUBLIC_KEY:undefined}])assert.throws(()=>validate({...valid,...isolated,...patch}));
 for (const patch of [

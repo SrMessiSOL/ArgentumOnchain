@@ -31,7 +31,13 @@ function validateHostedEnvironment(env) {
   // The first wallet rehearsal is local only. Opening external settlement is a
   // separate gate; mounting authority files into the API is never permitted.
   const privateWalletTest=env.AOWEB_PRIVATE_WALLET_TEST==='1'&&env.AOWEB_SETTLEMENT_PAUSED==='0';
-  if (env.AOWEB_SETTLEMENT_PAUSED !== '1'&&!privateWalletTest) reject('Hosted preparation requires settlement paused');
+  const externalDevnetTest=env.AOWEB_EXTERNAL_DEVNET_TEST==='1';
+  if(externalDevnetTest){
+    if(env.AOWEB_PRIVATE_WALLET_TEST!=='0'||env.AOWEB_DEVNET_RPC!=='https://api.devnet.solana.com'||
+       !env.AOWEB_SIGNER_URL||!env.AOWEB_GOLD_MINT||!env.AOWEB_DEVNET_METADATA_URL)
+      reject('External devnet test requires isolated custody and exact devnet RPC');
+  }
+  if (env.AOWEB_SETTLEMENT_PAUSED !== '1'&&!privateWalletTest&&!externalDevnetTest) reject('Hosted preparation requires settlement paused');
   if(privateWalletTest&&(!env.AOWEB_SIGNER_URL||!env.AOWEB_GOLD_MINT||!env.AOWEB_DEVNET_METADATA_URL))reject('Private wallet rehearsal requires isolated custody and mint metadata');
   if (env.AOWEB_GOLD_AUTHORITY_FILE || env.AOWEB_DEVNET_ISSUER_FILE) {
     reject('Do not mount authority files into the hosted API; signer isolation remains unfinished');
