@@ -1,6 +1,6 @@
 import {connectionIdentity} from './connectionIdentity';
 import {createInboundPacketValidator} from './inboundPacketValidation';
-import {ConnectionBudget,outboundWithinBudget} from './connectionBudget';
+import {connectionBudgetFromEnvironment,outboundWithinBudget} from './connectionBudget';
 import {InboundBudget,MAX_INBOUND_BYTES} from './inboundBudget';
 import { bankOperations } from './bankOperationGuard';
 import { vaultRecovery } from './vaultRecovery';
@@ -483,7 +483,7 @@ function trackClientActivity(ws: RuntimeClient, packageID: number) {
     console.log(textInitializeServer);
 })();
 
-const connectionBudget = new ConnectionBudget();
+const connectionBudget = connectionBudgetFromEnvironment();
 
 wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnectionRequest) {
     ws.clientIp = getConnectionIp(request, ws);

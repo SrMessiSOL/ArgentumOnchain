@@ -1,4 +1,5 @@
 import {itemMatchesSearch} from './localization/itemSearch';
+import {canNpcVendorTrade,canBuyFromNpc} from './npcVendorPolicy';
 import { claimLoadedVault } from './vaultClaim';
 import { bankOperations } from './bankOperationGuard';
 import { vaultRecovery } from './vaultRecovery';
@@ -9041,6 +9042,11 @@ function Game(this: GameApi) {
 
                 const objItem = vars.datObj[itemNpc.item];
 
+                if (!canBuyFromNpc(itemNpc.item, vars.datObj, vars.datNpc, vars.craftingRecipes ?? [], vars.smeltingRecipes ?? [])) {
+                    withUserClient(idUser, client => handleProtocol.console('Este objeto no está habilitado para comerciar con NPC.', 'white', 1, 0, client));
+                    return;
+                }
+
                 if (objItem.objType === vars.objType.dinero) {
                     withUserClient(idUser, (userClient) => {
                         handleProtocol.console(
@@ -9269,6 +9275,11 @@ function Game(this: GameApi) {
                 }
 
                 const objItem = vars.datObj[itemUser.idItem];
+
+                if (!canNpcVendorTrade(itemUser.idItem, vars.datObj, vars.datNpc, vars.craftingRecipes ?? [], vars.smeltingRecipes ?? [])) {
+                    withUserClient(idUser, client => handleProtocol.console('Este objeto no está habilitado para comerciar con NPC.', 'white', 1, 0, client));
+                    return;
+                }
 
                 if (objItem.objType === vars.objType.dinero) {
                     withUserClient(idUser, (userClient) => {

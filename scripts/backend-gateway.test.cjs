@@ -81,4 +81,9 @@ test('gateway routes player requests, strips identity spoofing and fails closed'
   });
   assert.match(upgrade,/403 Forbidden/);
   assert.equal(received.length,1);
+  cfg.testingExpiresAt=new Date(Date.now()-1000).toISOString();
+  assert.equal(await request('/player-api/wiki'),503);
+  cfg.testingExpiresAt='invalid';assert.equal(await request('/player-api/wiki'),503);
+  cfg.testingExpiresAt=new Date(Date.now()+60000).toISOString();
+  assert.equal(await request('/player-api/wiki'),200);
 });

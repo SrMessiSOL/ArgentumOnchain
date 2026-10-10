@@ -1,4 +1,5 @@
 import type { PackageApi } from "./package";
+import {canBuyFromNpc} from './npcVendorPolicy';
 import type { SocketApi } from "./socket";
 import { getRequiredFactionForItem } from "./factions";
 import type {
@@ -1407,6 +1408,8 @@ const handleServer: HandleProtocolApi = {
                 if (typeof idItem !== "number") {
                     return null;
                 }
+
+                if (!isBankTrade && !canBuyFromNpc(idItem, vars.datObj, vars.datNpc, vars.craftingRecipes ?? [], vars.smeltingRecipes ?? [])) return null;
 
                 return {
                     indexObj,

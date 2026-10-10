@@ -33,11 +33,13 @@ function validateConfig(cfg) {
 }
 
 function createGateway(readConfig, ports = {api:3101, game:7766}) {
+  const windowOpen=cfg=>cfg.testingExpiresAt===undefined||(Number.isFinite(Date.parse(cfg.testingExpiresAt))&&Date.now()<Date.parse(cfg.testingExpiresAt));
   const verifyProxy=createVerifier();
   let metadataActive=0,metadataWindow=0,metadataReads=0;
   function getConfig(req) {
     try {
       const cfg = validateConfig(readConfig());
+      if(!windowOpen(cfg))return null;
       return cfg.enabled === true && req.headers.host === new URL(cfg.backendOrigin).host ? cfg : null;
     } catch { return null; }
   }
@@ -81,7 +83,7 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
         if(req.headers.origin&&req.headers.origin!==cfg.siteOrigin){res.writeHead(403);return res.end();}
         if(!verifyProxy(req,cfg.proxyHmacKey)){res.writeHead(403);return res.end();}
         res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
-        return res.end(JSON.stringify({proxyVerified:true,gatewayClosed:cfg.enabled!==true}));
+        return res.end(JSON.stringify({proxyVerified:true,gatewayClosed:cfg.enabled!==true||!windowOpen(cfg)}));
       }catch{res.writeHead(503);return res.end();}
     }
     const cfg = getConfig(req);
