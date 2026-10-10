@@ -3,6 +3,7 @@
 import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import {useI18n} from '@/components/I18nProvider';
 import {uxEnglish,uxSpanish} from "@/lib/ux-copy";
+import CraftingReference from './CraftingReference';
 import NpcArtwork from './NpcArtwork';
 import BrowseToolbar from "@/components/BrowseToolbar";
 import {browseEnglish,browseSpanish} from "@/lib/browse-copy";
@@ -437,6 +438,7 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                             "spells",
                             "npcs",
                             "maps",
+                            "crafting",
                         ] as const
                     ).map((tab) => (
                         <Link
@@ -449,13 +451,14 @@ export default function WikiExplorer({ data: sourceData, section }: WikiExplorer
                                     : "border border-white/10 bg-white/5 text-stone-300 hover:bg-white/10"
                             }`}
                         >
-                            <LocalizedText source={WIKI_SECTION_LABELS[tab]} />
+                            {tab==='crafting'?(locale==='es'?'Fabricación':'Crafting'):<LocalizedText source={WIKI_SECTION_LABELS[tab]} />}
                         </Link>
                     ))}
                 </div>
             </nav>
 
-            {section !== 'factions' && <><BrowseToolbar query={query} onQuery={setQuery} kind="guide" count={section==='equipment'?filteredEquipment.length:section==='spells'?filteredSpells.length:section==='npcs'?filteredNpcs.length:filteredMaps.length}/><p className="realm-table-hint">{browse.guideHelp}</p>{query && (section==='equipment'?filteredEquipment.length:section==='spells'?filteredSpells.length:section==='npcs'?filteredNpcs.length:filteredMaps.length)===0&&<div className="realm-no-results"><h2>{browse.noResults}</h2><p>{browse.noResultsHelp}</p><button onClick={()=>setQuery('')}>{browse.clear}</button></div>}</>}
+            {section === 'crafting' && <CraftingReference/>}
+            {section !== 'factions' && section !== 'crafting' && <><BrowseToolbar query={query} onQuery={setQuery} kind="guide" count={section==='equipment'?filteredEquipment.length:section==='spells'?filteredSpells.length:section==='npcs'?filteredNpcs.length:filteredMaps.length}/><p className="realm-table-hint">{browse.guideHelp}</p>{query && (section==='equipment'?filteredEquipment.length:section==='spells'?filteredSpells.length:section==='npcs'?filteredNpcs.length:filteredMaps.length)===0&&<div className="realm-no-results"><h2>{browse.noResults}</h2><p>{browse.noResultsHelp}</p><button onClick={()=>setQuery('')}>{browse.clear}</button></div>}</>}
             {section === "factions" ? (
                 <section className="space-y-5">
                     <article className="rounded-[28px] border border-white/8 bg-[#08101a] p-5 shadow-xl">

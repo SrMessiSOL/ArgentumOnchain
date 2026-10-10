@@ -1,8 +1,9 @@
-export const WIKI_SECTIONS = ["factions", "maps", "npcs", "equipment", "spells"] as const;
+export const WIKI_SECTIONS = ["factions", "maps", "npcs", "equipment", "spells", "crafting"] as const;
 
 export type WikiSection = (typeof WIKI_SECTIONS)[number];
 
 export const WIKI_SECTION_LABELS: Record<WikiSection, string> = {
+    crafting: "Crafting",
     factions: "Facciones",
     npcs: "NPCs",
     maps: "Mapas de entrenamiento",

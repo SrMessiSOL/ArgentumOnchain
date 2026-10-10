@@ -280,5 +280,6 @@
   "Se arregló un bug donde algunos usuarios pasaban de mapa y caían al agua.": "Fixed players landing in water after changing maps",
   "* El intervalo de poción, al ser un intervalo nuevo, no está calibrado, se va a ir calibrando en base a feedback y pruebas.": "The new potion interval is still being tuned based on feedback and testing.",
   "fijo": "stationary",
-  "YA": "GO!"
+  "YA": "GO!",
+  "Este objeto no está habilitado para comerciar con NPC.": "This item cannot be traded with NPCs."
 }
