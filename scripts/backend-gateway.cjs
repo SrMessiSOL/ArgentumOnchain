@@ -35,6 +35,7 @@ function validateConfig(cfg) {
 function createGateway(readConfig, ports = {api:3101, game:7766}) {
   const windowOpen=cfg=>cfg.testingExpiresAt===undefined||(Number.isFinite(Date.parse(cfg.testingExpiresAt))&&Date.now()<Date.parse(cfg.testingExpiresAt));
   const verifyProxy=createVerifier();
+  const gameSockets=new Set();
   let metadataActive=0,metadataWindow=0,metadataReads=0;
   function getConfig(req) {
     try {
@@ -110,6 +111,16 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
     const cfg=getConfig(req);
     if(!cfg || req.url !== '/game-socket' || req.headers.origin !== cfg.siteOrigin) {
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');return;
+    }
+    if(gameSockets.size>=16){socket.end('HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\n');return;}
+    gameSockets.add(socket);socket.once('close',()=>gameSockets.delete(socket));
+    // Established connections also close when a bounded testing window expires.
+    let expiryTimer;
+    if(cfg.testingExpiresAt!==undefined){
+      const remaining=Date.parse(cfg.testingExpiresAt)-Date.now();
+      if(remaining<=0||remaining>24*60*60*1000){socket.destroy();return;}
+      expiryTimer=setTimeout(()=>socket.destroy(),remaining);expiryTimer.unref();
+      socket.once('close',()=>clearTimeout(expiryTimer));
     }
     const upstream=http.request({hostname:'127.0.0.1',port:ports.game,path:'/',headers:headers(req,cfg)});
     upstream.on('upgrade',(reply,remote,remoteHead)=>{
