@@ -23,6 +23,7 @@ function playerRoute(method, path) {
 }
 
 function validateConfig(cfg) {
+  if(cfg.maxGameConnections!==undefined&&(!Number.isInteger(cfg.maxGameConnections)||cfg.maxGameConnections<1||cfg.maxGameConnections>100))throw Error('Invalid test connection limit');
   if(cfg.metadataEnabled!==undefined&&typeof cfg.metadataEnabled!=='boolean')throw Error('Invalid metadata switch');
   if(cfg.proxyHmacKey!==undefined&&!/^[a-f0-9]{64}$/i.test(cfg.proxyHmacKey))throw Error('Invalid separate proxy credential');
   for (const field of ['backendOrigin', 'siteOrigin']) {
@@ -112,7 +113,7 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
     if(!cfg || req.url !== '/game-socket' || req.headers.origin !== cfg.siteOrigin) {
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');return;
     }
-    if(gameSockets.size>=16){socket.end('HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\n');return;}
+    if(gameSockets.size>=(cfg.maxGameConnections??16)){socket.end('HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\n');return;}
     gameSockets.add(socket);socket.once('close',()=>gameSockets.delete(socket));
     // Established connections also close when a bounded testing window expires.
     let expiryTimer;

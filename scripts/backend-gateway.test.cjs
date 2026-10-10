@@ -3,20 +3,20 @@ const assert=require('node:assert/strict');
 const http=require('node:http');
 const net=require('node:net');
 const {playerRoute,validateConfig,createGateway}=require('./backend-gateway.cjs');
-test('test gateway bounds live sockets and expires established connections',async t=>{
+test('test gateway admits 100 sockets, rejects socket 101 and expires established connections',async t=>{
  const remotes=new Set(),clients=[];
  const game=http.createServer();game.on('upgrade',(req,socket)=>{remotes.add(socket);socket.once('close',()=>remotes.delete(socket));socket.write('HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n');});
  await new Promise(r=>game.listen(0,'127.0.0.1',r));
- const cfg={enabled:true,backendOrigin:'https://backend.example',siteOrigin:'https://site.example',testingExpiresAt:new Date(Date.now()+2000).toISOString()};
+ const cfg={enabled:true,maxGameConnections:100,backendOrigin:'https://backend.example',siteOrigin:'https://site.example',testingExpiresAt:new Date(Date.now()+3000).toISOString()};
  const gateway=createGateway(()=>cfg,{api:1,game:game.address().port});await new Promise(r=>gateway.listen(0,'127.0.0.1',r));
  t.after(()=>{for(const s of clients)s.destroy();for(const s of remotes)s.destroy();gateway.close();game.close();});
  const connect=()=>new Promise((resolve,reject)=>{
   const socket=net.connect(gateway.address().port,'127.0.0.1',()=>socket.write('GET /game-socket HTTP/1.1\r\nHost: backend.example\r\nOrigin: https://site.example\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n'));
   clients.push(socket);socket.setTimeout(3000,()=>{socket.destroy();reject(Error('Fixture timeout'));});socket.once('error',reject);socket.once('data',data=>resolve({socket,status:data.toString().split('\r\n')[0]}));
  });
- for(let i=0;i<16;i++)assert.match((await connect()).status,/101/);
+ for(let i=0;i<100;i++)assert.match((await connect()).status,/101/);
  assert.match((await connect()).status,/503/);
- await new Promise(resolve=>{let remaining=16;for(const s of clients.slice(0,16)){if(s.destroyed){remaining--;continue;}s.once('close',()=>{if(--remaining===0)resolve();});}if(remaining===0)resolve();});
+ await new Promise(resolve=>{let remaining=100;for(const s of clients.slice(0,100)){if(s.destroyed){remaining--;continue;}s.once('close',()=>{if(--remaining===0)resolve();});}if(remaining===0)resolve();});
  assert.match((await connect()).status,/403/);
 });
 test('closed gateway optional metadata is exact, bounded and credential-free',async t=>{
