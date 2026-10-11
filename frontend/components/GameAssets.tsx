@@ -1,5 +1,7 @@
 "use client";
 
+import {assetSubmissionRecovery} from '@/lib/asset-submission-recovery';
+
 import PortalModal from './PortalModal';
 import SellAssetModal from './SellAssetModal';
 import CharacterChoices from './CharacterChoices';
@@ -103,17 +105,17 @@ export default function GameAssets(){
 
  async function reconcile(){if(running.current)return;running.current=true;setBusy(true);setError('');try{for(const op of pending)await post('reconcile',{operationId:op.id});await refresh();}catch(e){setError(e instanceof Error?e.message:'assets.failed');}finally{setBusy(false);running.current=false;}}
 
- async function sign(body:unknown){if(running.current)return;running.current=true;setBusy(true);setError('');setNotice('');setTracked('');setActiveCharacter((body as {characterId?:string}).characterId??'');setStage('preparing');try{
+ async function sign(body:unknown){if(running.current)return;running.current=true;setBusy(true);setError('');setNotice('');setTracked('');setActiveCharacter((body as {characterId?:string}).characterId??'');setStage('preparing');let operationId:string|null=null;let submissionStarted=false;try{
 
   const provider=await walletConnection.connect();if(provider.address!==data?.wallet)throw Error('economy.wrongWallet');
 
-  const operation=await post('prepare',body);setTracked(operation.id);sessionStorage.setItem('aochain:asset-operation',operation.id);setStage('signing');setNotice('signing');
+  const operation=await post('prepare',body);operationId=operation.id;setTracked(operation.id);sessionStorage.setItem('aochain:asset-operation',operation.id);setStage('signing');setNotice('signing');
 
   const signed=await provider.signTransaction(Transaction.from(Uint8Array.from(atob(operation.transaction),c=>c.charCodeAt(0))));
 
-  setStage('confirming');const transaction=btoa(String.fromCharCode(...signed.serialize({requireAllSignatures:false})));const result=await post('submit',{operationId:operation.id,transaction});setNotice(result.state==='complete'?'complete':'pending');await refresh();
+  setStage('confirming');const transaction=btoa(String.fromCharCode(...signed.serialize({requireAllSignatures:false})));submissionStarted=true;const result=await post('submit',{operationId:operation.id,transaction});setNotice(result.state==='complete'?'complete':'pending');await refresh();
 
- }catch(e){setStage(null);setError(e instanceof Error?e.message:'assets.failed');setNotice('');try{await refresh();}catch{}}finally{setBusy(false);running.current=false;}}
+ }catch(e){setStage(null);setError(e instanceof Error?e.message:'assets.failed');setNotice('');try{const latest=await refresh();const recovered=assetSubmissionRecovery(latest.operations,operationId,submissionStarted);if(recovered){setError('');setNotice(recovered);setStage(recovered==='complete'?'complete':'confirming');}}catch{}}finally{setBusy(false);running.current=false;}}
 
  const currentOperation=data?.operations.find(o=>o.id===tracked);
 

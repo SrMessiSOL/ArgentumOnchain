@@ -26,7 +26,7 @@ import * as safeZone from "./safeZone";
 
 export {};
 const config = require("./config");
-const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesiÃ³n...";
+const LOGOUT_CLOSING_MESSAGE = "[Servidor] Cerrando sesión...";
 const UNSAFE_LOGOUT_DELAY_MS = 10000;
 const RECENT_PACKET_INTERVAL_LIMIT = 300;
 const RECENT_PACKET_PPS_WINDOW_MS = 5000;

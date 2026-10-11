@@ -1597,7 +1597,7 @@ app.get("/auth/clans/:clanId", async (request, response) => {
 
 // This fork runs one shared world; keep upstream arena code dormant.
 app.use(["/arenas", "/internal/arenas"], (_request, response) => {
-    response.status(404).json({ error: "Las salas no estÃƒÂ¡n habilitadas en este servidor." });
+    response.status(404).json({ error: "Las salas no están habilitadas en este servidor." });
 });
 
 app.get("/arenas/rooms", async (request, response) => {

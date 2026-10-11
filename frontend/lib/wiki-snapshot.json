@@ -4418,7 +4418,7 @@
         },
         {
           "mapId": 268,
-          "mapName": "Interior de la Monta�a.",
+          "mapName": "Interior de la Montaña.",
           "spawns": 2
         },
         {
@@ -4461,7 +4461,7 @@
         }
       ],
       "totalSpawns": 45,
-      "searchIndex": "502 zombie comun bosque este de ullathorpe bosque sureste de ullathorpe bosque noreste de nix ducto de escape. bosque sureste de ullathorpe interior de la monta�a. bosque sureste de ullathorpe cienaga de las cobras bosque este de la cienaga de las cobras  monedas de oro ropa de clan monedas de oro pocion roja"
+      "searchIndex": "502 zombie comun bosque este de ullathorpe bosque sureste de ullathorpe bosque noreste de nix ducto de escape. bosque sureste de ullathorpe interior de la montaña. bosque sureste de ullathorpe cienaga de las cobras bosque este de la cienaga de las cobras  monedas de oro ropa de clan monedas de oro pocion roja"
     },
     {
       "id": 503,
@@ -5088,7 +5088,7 @@
       "maps": [
         {
           "mapId": 268,
-          "mapName": "Interior de la Monta�a.",
+          "mapName": "Interior de la Montaña.",
           "spawns": 9
         },
         {
@@ -5141,7 +5141,7 @@
         }
       ],
       "totalSpawns": 23,
-      "searchIndex": "507 lord zombie comun interior de la monta�a. dungeon marabel. dungeon marabel. desierto bosque al sur de banderbill. laberinto oscuro.  monedas de oro pocion roja pocion azul llamado nigromante"
+      "searchIndex": "507 lord zombie comun interior de la montaña. dungeon marabel. dungeon marabel. desierto bosque al sur de banderbill. laberinto oscuro.  monedas de oro pocion roja pocion azul llamado nigromante"
     },
     {
       "id": 508,
@@ -45075,7 +45075,7 @@
     },
     {
       "id": 268,
-      "name": "Interior de la Monta�a.",
+      "name": "Interior de la Montaña.",
       "terreno": "NIEVE",
       "zona": "DUNGEON",
       "restringir": "No",
@@ -45101,7 +45101,7 @@
           "maxHp": 250
         }
       ],
-      "searchIndex": "268 interior de la monta�a. nieve dungeon lord zombie zombie"
+      "searchIndex": "268 interior de la montaña. nieve dungeon lord zombie zombie"
     },
     {
       "id": 85,

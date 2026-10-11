@@ -148,11 +148,11 @@ export default function RetosModal({
                                                                     {
                                                                         participant.name
                                                                     }
-                                                                </span>{" "}<LocalizedText source={"Â· Nivel"} />{" "}
+                                                                </span>{" "}<LocalizedText source={"· Nivel"} />{" "}
                                                                 {
                                                                     participant.level
                                                                 }{" "}
-                                                                Â·{" "}
+                                                                ·{" "}
                                                                 <LocalizedText source={participant.className} />
                                                             </div>
                                                         ),

@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {assetSubmissionRecovery as recover} from '../lib/asset-submission-recovery';
+const operations=[{id:'deposit',state:'complete'},{id:'other',state:'signed'}];
+assert.equal(recover(operations,'deposit',true),'complete');
+assert.equal(recover(operations,'other',true),'pending');
+assert.equal(recover([{id:'deposit',state:'prepared'}],'deposit',true),'pending');
+assert.equal(recover([{id:'deposit',state:'failed'}],'deposit',true),null);
+assert.equal(recover(operations,'missing',true),null);
+assert.equal(recover(operations,'deposit',false),null);
+assert.equal(recover(operations,null,true),null);
+console.log('Lost submit response recovery: exact persisted operation only, no retries or false success');
