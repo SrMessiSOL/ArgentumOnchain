@@ -1,3 +1,4 @@
+import {isRealtimePacketDuringInventorySave} from './inventoryPacketAdmission';
 import {connectionIdentity} from './connectionIdentity';
 import {createInboundPacketValidator} from './inboundPacketValidation';
 import {connectionBudgetFromEnvironment,outboundWithinBudget} from './connectionBudget';
@@ -536,11 +537,12 @@ wsServer?.on("connection", function (ws: RuntimeClient, request: RuntimeConnecti
                 return;
             }
             if (!validateInboundPacket(data)) { ws.close(1008,'Invalid game packet'); return; }
-            // Do not allow another client inventory action or tab switch during a bank save.
-            // Packet bytes are still budgeted above; nothing is queued for later replay.
-            if (ws.id && bankOperations.isBusy(ws.id)) return;
             pkg.setData(data as PacketPayload);
             const packageID = pkg.getPackageID();
+            // Inventory actions stay locked, but do not drop movement/ping while
+            // potion consumption awaits persistence. Validation and budgets still apply.
+            if (ws.id && bankOperations.isBusy(ws.id) &&
+                !isRealtimePacketDuringInventorySave(packageID, pkg.serverPacketID)) return;
 
             trackClientActivity(ws, packageID);
 
