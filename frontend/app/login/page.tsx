@@ -9,6 +9,7 @@ export default function LoginPage() {
     const { loading } = useAuthRedirect({
         redirectTo: "/characters",
         when: "authenticated",
+        allowReauthentication: true,
     });
 
     if (loading) {

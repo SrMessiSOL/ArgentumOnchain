@@ -11,3 +11,5 @@ The wallet screen shows only linked wallets as cards, plus one Add wallet action
 Installed validation: 13 disposable PostgreSQL tests, API/frontend compilation, offline signer policy and SDK lifecycle tests. Real browser linking/minting from a second wallet remains a user rehearsal; no wallet signatures or blockchain transactions were submitted automatically during this update. Existing authorities, assets and pending operations are preserved.
 
 Frontend regression tests exercise additional-wallet challenge mode, exact-address receipt validation, rejection handling and approval/verification stages. These tests do not submit a real wallet signature.
+
+Browser rehearsal found `wallet.reauthenticate` when adding a second wallet from an older session. The login page now accepts `reauth=1` to show the password form even when already authenticated; successful login creates a fresh session and returns to `/wallet`. This only changes the frontend redirect and does not relax the server recent-login requirement.

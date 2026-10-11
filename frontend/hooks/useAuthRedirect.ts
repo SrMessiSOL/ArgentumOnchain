@@ -8,12 +8,14 @@ type UseAuthRedirectOptions = {
     redirectTo: string;
     when: "authenticated" | "unauthenticated";
     preserveRedirect?: boolean;
+    allowReauthentication?: boolean;
 };
 
 export function useAuthRedirect({
     redirectTo,
     when,
     preserveRedirect = false,
+    allowReauthentication = false,
 }: UseAuthRedirectOptions) {
     const pathname = usePathname();
     const router = useRouter();
@@ -64,7 +66,7 @@ export function useAuthRedirect({
 
                 setSession(result);
 
-                if (when === "authenticated") {
+                if (when === "authenticated" && !(allowReauthentication && new URLSearchParams(window.location.search).get("reauth") === "1")) {
                     const redirectPath = getRedirectParam();
                     router.replace(redirectPath || redirectTo);
                 }
@@ -84,7 +86,7 @@ export function useAuthRedirect({
         return () => {
             cancelled = true;
         };
-    }, [pathname, preserveRedirect, redirectTo, router, when]);
+    }, [pathname, preserveRedirect, redirectTo, router, when, allowReauthentication]);
 
     return { session, loading };
 }
