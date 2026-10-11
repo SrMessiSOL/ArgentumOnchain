@@ -127,6 +127,9 @@ export default function AuthCard({ mode }: AuthCardProps) {
             </div>
 
             <div className="p-6">
+                <p className="auth-entry-explanation">{locale === "es" ? mode === "login" ? "¿Primera vez acá? Creá tu cuenta para jugar y operar en el mercado." : "Registrate con tu email y una contraseña. Después podrás vincular tu wallet y crear tu personaje." : mode === "login" ? "New to AOCHAIN? Create an account to play and trade on the marketplace." : "Register with your email and a password. Next, you can link your wallet and create your character."}</p>
+                {mode === "login" && <Link className="auth-new-account" href={`/register?redirect=${encodeURIComponent(redirectPath)}`}>{locale === "es" ? "Soy nuevo · Crear cuenta" : "New player · Create account"}</Link>}
+
                 <form aria-busy={pending} className="space-y-3" onSubmit={submit}>
                     {mode === "register" && <label className="realm-field"><span>{copy.usernameLabel}</span><input value={registerForm.name} onChange={e=>setRegisterForm(v=>({...v,name:e.target.value}))} autoComplete="username" maxLength={DISPLAY_NAME_MAX_LENGTH} required disabled={pending}/></label>}
                     <label className="realm-field"><span>{mode === "login" ? copy.identifier : copy.email}</span><input value={mode === "login" ? loginForm.identifier : registerForm.email} onChange={e=>mode === "login" ? setLoginForm(v=>({...v,identifier:e.target.value})) : setRegisterForm(v=>({...v,email:e.target.value}))} type={mode === "login" ? "text" : "email"} autoComplete={mode === "login" ? "username" : "email"} required disabled={pending}/></label>

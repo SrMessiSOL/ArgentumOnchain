@@ -154,12 +154,12 @@ export default function AppChrome({ children }: AppChromeProps) {
                                     <LogOut className="h-4 w-4" />
                                 </button></LocalizedLabel>
                             </>
-                        ) : (
-                            <Link
+                        ) : sessionLoading ? null : (
+                            <><Link className="realm-create-account" href={`/register?redirect=${encodeURIComponent(pathname.startsWith("/wiki") ? "/characters" : pathname === "/" || pathname === "/login" || pathname === "/register" ? "/characters" : pathname)}`}>{locale === "es" ? "Crear cuenta" : "Create account"}</Link><Link
                                 href="/login"
-                                className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-white/8 px-4 py-2 text-sm text-stone-200 transition hover:bg-white/5"
+                                className="realm-sign-in hidden sm:inline-flex items-center gap-2 rounded-xl border border-white/8 px-4 py-2 text-sm text-stone-200 transition hover:bg-white/5"
                             >
-                                <LogIn className="h-4 w-4" />{localizeKey("nav.login")}</Link>
+                                <LogIn className="h-4 w-4" />{localizeKey("nav.login")}</Link></>
                         )}
                     </div>
                 </div>
@@ -191,7 +191,7 @@ export default function AppChrome({ children }: AppChromeProps) {
                             </Link>
                         );
                     })}
-                    {session?<button className="realm-mobile-account" onClick={signOut}><LogOut size={16}/>{localizeKey('nav.logout')}</button>:<Link className="realm-mobile-account" href="/login"><LogIn size={16}/>{localizeKey('nav.login')}</Link>}
+                    {session?<button className="realm-mobile-account" onClick={signOut}><LogOut size={16}/>{localizeKey('nav.logout')}</button>:<><Link className="realm-mobile-account realm-create-account" href="/register">{locale === "es" ? "Crear cuenta" : "Create account"}</Link><Link className="realm-mobile-account" href="/login"><LogIn size={16}/>{localizeKey('nav.login')}</Link></>}
                 </nav>
             </div>
 
