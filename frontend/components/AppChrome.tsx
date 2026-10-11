@@ -17,7 +17,7 @@ import {
     LogIn,
     LogOut,
     MessageCircle,
-    Wallet,
+    Gamepad2,
     Store,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
@@ -28,9 +28,9 @@ type AppChromeProps = {
 };
 
 const navItems: {href:string;label:string;icon:typeof UserRound;external?:boolean}[] = [
- {href:'/characters',label:'play',icon:UserRound},
+ {href:'/characters',label:'play',icon:Gamepad2},
  {href:'/character-market',label:'market',icon:Store},
- {href:'/profile',label:'collection',icon:Wallet},
+ {href:'/profile',label:'collection',icon:UserRound},
  {href:'/wiki',label:'guide',icon:ScrollText},
 
 ];
