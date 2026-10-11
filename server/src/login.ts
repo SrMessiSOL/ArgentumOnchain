@@ -76,8 +76,8 @@ const ULLA_POS_Y = 59;
 const DRAGON_SLAYER_SWORD_ITEM_ID = 402;
 const CLAN_RING_MAP_ID = 273;
 const WELCOME_CONSOLE_MESSAGES = [
-    "Bienvenido a AOWeb. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.",
-    "- Si quieres reportar erorres o sugerir cambios, puedes hacerlo en: https://forms.gle/Df2cmGExTBjjJhAR8",
+    "Bienvenido a AOCHAIN.",
+    "- Actualizaciones, errores y sugerencias: https://x.com/ArgentumOnchain",
     "- Está completamente prohibido el uso de personajes cámara, cheats o cualquier programa externo que modifique el juego, como auto tomar pociones o auto removerse. El uso de los mismos terminará en un ban permanente, sin previo aviso.",
 ];
 

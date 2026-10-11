@@ -179,8 +179,8 @@
   "tipo de NPC": "NPC type",
   "spawn de combate": "combat spawn",
   "Mercado de activos": "Marketplace",
-  "Bienvenido a AOCHAIN. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.": "Welcome to AOCHAIN. Join our Discord for the latest game updates.",
-  "Bienvenido a AOWeb. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.": "Welcome to AOCHAIN. Join our Discord for the latest game updates.",
+  "Bienvenido a AOCHAIN. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.": "Welcome to AOCHAIN.",
+  "Bienvenido a AOWeb. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.": "Welcome to AOCHAIN.",
   "Consulta el ranking publico de AOCHAIN y segui a los mejores jugadores por nivel o kills.": "View the public AOCHAIN rankings and follow top players by level or kills.",
   "Consulta el ranking publico de AOWeb y segui a los mejores jugadores por nivel o kills.": "View the public AOCHAIN rankings and follow top players by level or kills.",
   "Updates de AOCHAIN": "AOCHAIN updates",
@@ -194,5 +194,7 @@
   "Bienvenido a AOCHAIN. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro ": "Welcome to AOCHAIN. For the latest game updates, join our ",
   "Pegá la dirección del cosmético de AOCHAIN recibido por tu wallet vinculada. Verificamos la propiedad antes de equiparlo.": "Paste the asset address of an AOCHAIN cosmetic received by your linked wallet. We verify ownership before equipping it.",
   "También puedes volver con el comando /hogar": "You can also return with /home",
-  "También puedes volver al sacerdote con el comando /hogar": "You can also return to the priest with /home"
+  "También puedes volver al sacerdote con el comando /hogar": "You can also return to the priest with /home",
+  "Bienvenido a AOCHAIN.": "Welcome to AOCHAIN.",
+  "- Actualizaciones, errores y sugerencias: https://x.com/ArgentumOnchain": "- Updates, bugs and suggestions: https://x.com/ArgentumOnchain"
 }

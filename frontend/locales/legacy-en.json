@@ -479,8 +479,8 @@
   "Solo puedes cancelar tu propio reto.": "You can only cancel your own challenge.",
   "El retador ya no está disponible.": "The challenger is no longer available.",
   "No puedes aceptar tu propio reto.": "You cannot accept your own challenge.",
-  "Bienvenido a AOWeb. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.": "Welcome to AOWeb. Join our Discord for the latest game updates.",
-  "- Si quieres reportar erorres o sugerir cambios, puedes hacerlo en: https://forms.gle/Df2cmGExTBjjJhAR8": "- Report bugs or suggest changes at: https://forms.gle/Df2cmGExTBjjJhAR8",
+  "Bienvenido a AOWeb. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.": "Welcome to AOCHAIN.",
+  "- Si quieres reportar erorres o sugerir cambios, puedes hacerlo en: https://forms.gle/Df2cmGExTBjjJhAR8": "- Updates, bugs and suggestions: https://x.com/ArgentumOnchain",
   "Usa /w \"usuario\" mensaje una vez para elegir destinatario.": "Use /w \"player\" message once to choose a recipient.",
   "No se pudo activar pantalla completa en este navegador.": "Could not enter full screen in this browser.",
   "No se pudo recuperar la sala": "Could not recover the room",
@@ -943,5 +943,7 @@
   "Token invalido": "Invalid token",
   "Sacerdote Newbie": "Newbie Priest",
   "Botellas vacias": "Empty bottles",
-  "Botellas llenas": "Filled bottles"
+  "Botellas llenas": "Filled bottles",
+  "Bienvenido a AOCHAIN.": "Welcome to AOCHAIN.",
+  "- Actualizaciones, errores y sugerencias: https://x.com/ArgentumOnchain": "- Updates, bugs and suggestions: https://x.com/ArgentumOnchain"
 }

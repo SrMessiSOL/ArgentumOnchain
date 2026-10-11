@@ -1,4 +1,5 @@
 "use client";
+import {AOCHAIN_X_URL, welcomeConsoleText} from "@/lib/welcome-console";
 import { LocalizedText, LocalizedLabel } from '@/components/LocalizedText';
 import { translateSource, type Locale } from "@/lib/i18n";
 import { localizeConsoleEntry } from "@/lib/game-i18n";
@@ -123,15 +124,6 @@ const RETOS_ERROR_MESSAGES = new Set([
     "El retador ya no está disponible.",
     "No puedes aceptar tu propio reto.",
 ]);
-const CONSOLE_DISCORD_URL = "https://discord.gg/sf8rWAvgxs";
-const CONSOLE_FEEDBACK_FORM_URL = "https://forms.gle/Df2cmGExTBjjJhAR8";
-const WELCOME_CONSOLE_MESSAGES = {
-    discord:
-        "Bienvenido a AOCHAIN. Si quieres enterarte de las últimas actualizaciones del juego, puedes ingresar a nuestro Discord.",
-    feedback:
-        "- Si quieres reportar erorres o sugerir cambios, puedes hacerlo en: https://forms.gle/Df2cmGExTBjjJhAR8",
-    rules: "- Está completamente prohibido el uso de personajes cámara, cheats o cualquier programa externo que modifique el juego, como auto tomar pociones o auto removerse. El uso de los mismos terminará en un ban permanente, sin previo aviso.",
-} as const;
 const CHALLENGE_OVERLAY_PATTERN = /^\[Reto\]\s+(10|[0-9]|YA)$/;
 
 function isPrivateHostname(hostname: string): boolean {
@@ -499,48 +491,11 @@ function buildChatMessageForTab(
 }
 
 function renderConsoleEntryText(text: string, locale: Locale) {
-    if (text === WELCOME_CONSOLE_MESSAGES.discord || text === translateSource(WELCOME_CONSOLE_MESSAGES.discord,'en')) {
-        const suffix = "Discord";
-        const linkStart = text.indexOf(suffix);
-        const prefix = text.slice(0, linkStart);
-        const ending = text.slice(linkStart + suffix.length);
-
-        return (
-            <>
-                {translateSource(prefix, locale)}
-                <a
-                    href={CONSOLE_DISCORD_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-semibold text-sky-300 underline underline-offset-2 hover:text-sky-200"
-                >
-                    {suffix}
-                </a>
-                {ending}
-            </>
-        );
-    }
-
-    if (text === WELCOME_CONSOLE_MESSAGES.feedback || text === translateSource(WELCOME_CONSOLE_MESSAGES.feedback,'en')) {
-        const url = CONSOLE_FEEDBACK_FORM_URL;
-        const prefix = text.slice(0, -url.length);
-
-        return (
-            <>
-                {translateSource(prefix, locale)}
-                <a
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-semibold text-sky-300 underline underline-offset-2 hover:text-sky-200"
-                >
-                    {url}
-                </a>
-            </>
-        );
-    }
-
-    return text;
+    const welcome=welcomeConsoleText(text,locale);
+    if(welcome===null)return text;
+    const linkStart=welcome.indexOf(AOCHAIN_X_URL);
+    if(linkStart<0)return welcome;
+    return <>{welcome.slice(0,linkStart)}<a href={AOCHAIN_X_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-sky-300 underline underline-offset-2 hover:text-sky-200">{AOCHAIN_X_URL}</a>{welcome.slice(linkStart+AOCHAIN_X_URL.length)}</>;
 }
 
 function createEmptyUnreadChatCounts(): Record<NotifiableChatTab, number> {
