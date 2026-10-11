@@ -1,3 +1,4 @@
+import { continuousMovementOffset } from "./movementContinuity";
 import {
     Application,
     AnimatedSprite,
@@ -198,6 +199,7 @@ export interface Character {
     shieldAnimationStartedAt?: number;
     movementStartedAt?: number;
     movementDurationMs?: number;
+    movementOriginOffset?: { x: number; y: number };
     animationIdleStartedAt?: number;
     idBody: number;
     idHead: number;
@@ -1047,6 +1049,16 @@ export class Engine {
             character.frameCounterShield = 1;
         }
 
+        const previousProgress = this.getCharacterMovementProgress(character, now);
+        const previousOrigin = character.movementOriginOffset;
+        const previousOffset = character.moving && previousOrigin
+            ? { x: previousOrigin.x * (1 - previousProgress), y: previousOrigin.y * (1 - previousProgress) }
+            : { x: 0, y: 0 };
+        // Only smooth remote one-tile updates; local prediction and teleports retain their rules.
+        character.movementOriginOffset = continuousMovementOffset(
+            TILE_SIZE, deltaX, deltaY, previousOffset,
+            character.id !== this.user?.id,
+        );
         character.movementStartedAt = startedAt;
         character.movementDurationMs = durationMs;
         if (typeof character.bodyAnimationStartedAt !== "number") {
@@ -1063,8 +1075,8 @@ export class Engine {
         character.addtoUserPos = { x: deltaX, y: deltaY };
         character.scrollDirectionX = this.sign(deltaX);
         character.scrollDirectionY = this.sign(deltaY);
-        character.moveOffsetX = -1 * (TILE_SIZE * deltaX) * (1 - progress);
-        character.moveOffsetY = -1 * (TILE_SIZE * deltaY) * (1 - progress);
+        character.moveOffsetX = character.movementOriginOffset.x * (1 - progress);
+        character.moveOffsetY = character.movementOriginOffset.y * (1 - progress);
 
         if (!character.moving) {
             this.resetMovement(character);
@@ -1327,6 +1339,7 @@ export class Engine {
         } else if (typeof character.animationIdleStartedAt !== "number") {
             character.animationIdleStartedAt = now;
         }
+        character.movementOriginOffset = undefined;
         character.movementStartedAt = undefined;
         character.movementDurationMs = undefined;
 
@@ -1759,9 +1772,9 @@ export class Engine {
                 const progress = this.getCharacterMovementProgress(entity, now);
 
                 entity.moveOffsetX =
-                    -1 * TILE_SIZE * entity.addtoUserPos.x * (1 - progress);
+                    (entity.movementOriginOffset?.x ?? -TILE_SIZE * entity.addtoUserPos.x) * (1 - progress);
                 entity.moveOffsetY =
-                    -1 * TILE_SIZE * entity.addtoUserPos.y * (1 - progress);
+                    (entity.movementOriginOffset?.y ?? -TILE_SIZE * entity.addtoUserPos.y) * (1 - progress);
 
                 if (progress >= 1) {
                     this.resetMovement(entity, {
