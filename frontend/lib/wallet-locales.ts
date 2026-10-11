@@ -1,4 +1,5 @@
 export const walletEnglish = {
+    "wallet.limitReached": "You can link up to five wallets to this account.",
     "wallet.unsupported": "This wallet cannot sign the required message or transaction. Choose another compatible Solana wallet.",
     title: "Your Solana wallet", optional: "Character ownership & game assets",
     description: "Link your wallet to mint and stake new characters, trade character NFTs and move gold or item receipts. Existing unminted characters can opt in.",
@@ -20,6 +21,7 @@ export const walletEnglish = {
 };
 export type WalletTextKey = keyof typeof walletEnglish;
 export const walletSpanish: Record<WalletTextKey, string> = {
+    "wallet.limitReached": "Podés vincular hasta cinco wallets a esta cuenta.",
     "wallet.unsupported": "Esta wallet no puede firmar el mensaje o la transacción requeridos. Elegí otra wallet compatible de Solana.",
     title: "Tu wallet de Solana", optional: "Personajes y activos del juego",
     description: "Vinculá tu wallet para mintear y stakear personajes nuevos, intercambiar NFTs y mover oro u objetos. Los personajes existentes pueden optar por mintear.",

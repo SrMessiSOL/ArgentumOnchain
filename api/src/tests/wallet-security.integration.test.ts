@@ -56,3 +56,35 @@ test('concurrent replacement retries settle once and consume the challenge',asyn
  const results=await Promise.all([post('verify',payload),post('verify',payload)]);expect(results.filter(r=>r.status===200)).toHaveLength(1);expect(results.filter(r=>r.body.error==='wallet.expiredProof')).toHaveLength(1);
  expect((await pool.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rows[0].address).toBe(next.address);
 });
+
+test('additional wallet preserves active wallet, staked characters and sessions; proof is consumed',async()=>{
+ const old=await link(),next=keys(),id=randomUUID();
+ await pool.query("INSERT INTO characters(id,account_id,name,connected,chain_state) VALUES($1,$2,'Linkedplayer',FALSE,'legacy')",[id,account]);
+ await fixtureChainState(id,'staked');
+ const c=(await post('challenge',{address:next.address,mode:'add'})).body;
+ const proof={signature:signature(next,c.message),previousSignature:signature(old,c.message)};
+ expect((await post('verify',proof)).status).toBe(200);
+ expect((await pool.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rows[0].address).toBe(old.address);
+ expect((await pool.query('SELECT count(*)::int n FROM account_linked_wallets WHERE account_id=$1',[account])).rows[0].n).toBe(2);
+ expect(await getPublicSessionByToken(token)).not.toBeNull();
+ expect((await post('verify',proof)).body.error).toBe('wallet.expiredProof');
+});
+test('adding requires both proofs and fresh login, and cannot reuse a wallet owned by another account',async()=>{
+ const old=await link(),next=keys(),c=(await post('challenge',{address:next.address,mode:'add'})).body;
+ expect((await post('verify',{signature:signature(next,c.message)})).body.error).toBe('wallet.previousProofRequired');
+ await pool.query("UPDATE auth_sessions SET created_at=NOW()-INTERVAL '11 minutes' WHERE account_id=$1",[account]);
+ expect((await post('verify',{signature:signature(next,c.message),previousSignature:signature(old,c.message)})).body.error).toBe('wallet.reauthenticate');
+ await pool.query('UPDATE auth_sessions SET created_at=NOW() WHERE account_id=$1',[account]);
+ const other=await registerAccount({name:'Other'+randomUUID().replaceAll('-','').slice(0,8).replace(/[0-9]/g,'x'),email:randomUUID()+'@example.invalid',password:'Securetest123!'});
+ await pool.query('INSERT INTO account_linked_wallets(account_id,address) VALUES($1,$2)',[other.account._id,next.address]);
+ expect((await post('verify',{signature:signature(next,c.message),previousSignature:signature(old,c.message)})).body.error).toBe('wallet.alreadyLinked');
+});
+test('wallet membership limit is five and concurrent submissions only link once',async()=>{
+ const old=await link(),next=keys(),c=(await post('challenge',{address:next.address,mode:'add'})).body;
+ const proof={signature:signature(next,c.message),previousSignature:signature(old,c.message)};
+ const results=await Promise.all([post('verify',proof),post('verify',proof)]);
+ expect(results.filter(x=>x.status===200)).toHaveLength(1);
+ for(let i=0;i<3;i++)await pool.query('INSERT INTO account_linked_wallets(account_id,address) VALUES($1,$2)',[account,keys().address]);
+ const extra=keys(),d=(await post('challenge',{address:extra.address,mode:'add'})).body;
+ expect((await post('verify',{signature:signature(extra,d.message),previousSignature:signature(old,d.message)})).body.error).toBe('wallet.limitReached');
+});
