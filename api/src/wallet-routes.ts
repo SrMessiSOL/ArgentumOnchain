@@ -48,7 +48,7 @@ export function installWalletRoutes(app: Express) {
             adding ? "AOCHAIN: add a linked Solana wallet without changing the active wallet" : replacing ? "AOCHAIN: authorize replacing your linked Solana wallet" : "AOCHAIN: link your Solana wallet",
             `Origin: ${origin}`, `Account: ${auth.accountId}`,
             `Session: ${auth.sessionHash}`, `Wallet: ${parsed.data.address}`,
-            ...(replacing ? [`Previous wallet: ${linked.address}`] : []),
+            ...(replacing && !adding ? [`Previous wallet: ${linked.address}`] : []),
             `Nonce: ${randomUUID()}`, `Expires: ${expiresAt.toISOString()}`,
             "This proves wallet control for this game account only. No transaction, payment, asset transfer or on-chain ownership is authorized.",
         ].join("\n");
@@ -56,7 +56,7 @@ export function installWalletRoutes(app: Express) {
             VALUES ($1, $2, $3, $4, $5) ON CONFLICT (account_id) DO UPDATE SET
             session_hash=EXCLUDED.session_hash, address=EXCLUDED.address, message=EXCLUDED.message, expires_at=EXCLUDED.expires_at`,
             [auth.accountId, auth.sessionHash, parsed.data.address, message, expiresAt]);
-        res.json({ message, expiresAt, ...(replacing ? {previousWallet:linked.address,requiresPreviousWalletProof:true} : {}) });
+        res.json({ message, expiresAt, ...(replacing && !adding ? {previousWallet:linked.address,requiresPreviousWalletProof:true} : {}) });
     });
     app.post("/auth/wallet/verify", async (req, res) => {
         const auth = await session(req, res); if (!auth) return;
@@ -88,7 +88,7 @@ export function installWalletRoutes(app: Express) {
                     EXISTS(SELECT 1 FROM item_sales WHERE seller_id=$1 AND state IN ('listed','reserved'))`,[auth.accountId])).rowCount;
                 if(pending && !adding)throw new Error('wallet.finishOperations');
                 // The same challenge binds both wallet proofs to this account/session/replacement.
-                if(!challenge.message.split('\n').includes('Previous wallet: '+linked.address)||!parsed.data.previousSignature||!validSignature(linked.address,challenge.message,parsed.data.previousSignature))throw new Error('wallet.previousProofRequired');
+                if(!adding && (!challenge.message.split('\n').includes('Previous wallet: '+linked.address)||!parsed.data.previousSignature||!validSignature(linked.address,challenge.message,parsed.data.previousSignature)))throw new Error('wallet.previousProofRequired');
             }
             if (!validSignature(challenge.address,challenge.message,parsed.data.signature)) throw new Error("wallet.invalidProof");
             const membership=(await client.query('SELECT account_id FROM account_linked_wallets WHERE address=$1',[challenge.address])).rows[0];

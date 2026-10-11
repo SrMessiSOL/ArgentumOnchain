@@ -1,3 +1,4 @@
+import {assertCharacterWallet} from '../linked-wallet';
 import http from 'node:http';
 import path from 'node:path';
 import {signerHttpHandler} from './http';
@@ -57,11 +58,12 @@ export async function signCommittedEconomyOperation(pool:Pool,id:string,raw:stri
  COALESCE(s.seller_id,t.seller_id) AS seller_id,COALESCE(s.seller_wallet,t.seller_wallet) AS seller_wallet,COALESCE(s.state,t.state) AS listing_state,
  COALESCE(s.intent_id,t.intent_id) AS listing_intent,COALESCE(s.buyer_id,t.buyer_id) AS buyer_id,
  COALESCE(s.price,t.price)::text AS price,sw.address AS seller_linked_wallet,(c.asset_address IS NOT NULL AND i.kind='purchase') AS tokenized
- FROM economy_intents i JOIN characters c ON c.id=i.character_id JOIN account_wallets w ON w.account_id=i.account_id
+ FROM economy_intents i JOIN characters c ON c.id=i.character_id JOIN account_linked_wallets w ON w.account_id=i.account_id AND w.address=i.wallet
  LEFT JOIN character_sales s ON s.id=i.listing_id LEFT JOIN item_sales t ON t.id=i.item_listing_id
  LEFT JOIN game_assets a ON a.asset_address=c.asset_address
- LEFT JOIN account_wallets sw ON sw.account_id=COALESCE(s.seller_id,t.seller_id) WHERE i.id=$1`,[id]);
+ LEFT JOIN account_linked_wallets sw ON sw.account_id=COALESCE(s.seller_id,t.seller_id) AND sw.address=COALESCE(s.seller_wallet,t.seller_wallet) WHERE i.id=$1`,[id]);
  const row=result.rows[0];if(!row)throw Error('signer.denied');
+ if(row.kind!=='purchase')await assertCharacterWallet(pool,row.character_id,row.wallet);
  const chain=await checkedChain();
  if((await chain.getBlockHeight('finalized'))>Number(row.last_valid_height))throw Error('signer.expired');
  if(row.tokenized){

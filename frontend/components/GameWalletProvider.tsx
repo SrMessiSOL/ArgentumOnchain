@@ -19,9 +19,10 @@ function WalletPicker({children}:{children:ReactNode}){
  const [open,setOpen]=useState(false),[working,setWorking]=useState(false),[error,setError]=useState(false);
  const reconnect=useRef<Promise<void>|null>(null);
  const rememberedKey='aochain:wallet-connector';
- useEffect(()=>{if(state.wallet.status==='connected'){try{localStorage.setItem(rememberedKey,state.wallet.session.connectorId);}catch{}}},[state.wallet]);
+ useEffect(()=>{if(state.wallet.status==='connected'){document.cookie=`aochain-wallet=${encodeURIComponent(state.wallet.session.selectedAccount.account.address)}; Path=/; SameSite=Lax${location.protocol==='https:'?'; Secure':''}`;window.dispatchEvent(new Event('aochain:wallet-linked'));try{localStorage.setItem(rememberedKey,state.wallet.session.connectorId);}catch{}}},[state.wallet]);
  const pending=useRef<{resolve:(wallet:GameWallet)=>void;reject:(error:Error)=>void}|null>(null);
- function current(){const s=client?.getSnapshot();if(!client||s?.wallet.status!=='connected')return null;const wallet=client.getConnector(s.wallet.session.connectorId);if(!wallet)return null;const signer=createTransactionSigner({wallet,account:s.wallet.session.selectedAccount.account,cluster:s.cluster??undefined});return signer?wrapSigner(signer):null;}
+ function rememberAddress(address:string){document.cookie=`aochain-wallet=${encodeURIComponent(address)}; Path=/; SameSite=Lax${location.protocol==='https:'?'; Secure':''}`;}
+ function current(){const s=client?.getSnapshot();if(!client||s?.wallet.status!=='connected')return null;const wallet=client.getConnector(s.wallet.session.connectorId);if(!wallet)return null;const signer=createTransactionSigner({wallet,account:s.wallet.session.selectedAccount.account,cluster:s.cluster??undefined});if(signer)rememberAddress(signer.address);return signer?wrapSigner(signer):null;}
  function cancel(){pending.current?.reject(Error('economy.walletRejected'));pending.current=null;setOpen(false);}
  useEffect(()=>()=>{pending.current?.reject(Error('economy.walletRejected'));},[]);
  async function connect(switchWallet=false){

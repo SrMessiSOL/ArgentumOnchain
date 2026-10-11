@@ -35,6 +35,6 @@ export async function assertPlayableCharacter(id:string,account:string,c?:PoolCl
  if(!row||row.account_id!==account)throw Error('assets.notOwned');
 
  if(!row.asset_address||row.chain_state!=='staked')throw Error('Mint and stake this character from your profile before entering the realm.');
- const wallet=(await db.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rows[0]?.address;
+ const wallet=(await db.query(`SELECT custody.wallet FROM (SELECT wallet,completed_at,id FROM game_asset_operations WHERE character_id=$1 AND kind IN ('mint','stake') AND state='complete' UNION ALL SELECT wallet,completed_at,id FROM economy_intents WHERE character_id=$1 AND kind='purchase' AND state='complete') custody JOIN account_linked_wallets w ON w.account_id=$2 AND w.address=custody.wallet ORDER BY custody.completed_at DESC,custody.id DESC LIMIT 1`,[id,account])).rows[0]?.wallet;
  if(!wallet||!await verifyPlayableAsset(row.asset_address,wallet))throw Error('The character stake could not be verified. Check your linked wallet and retry.');
 }

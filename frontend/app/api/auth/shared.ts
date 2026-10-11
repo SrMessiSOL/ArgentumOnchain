@@ -99,6 +99,8 @@ export async function forwardSessionJsonRequest(
 
     const headers = new Headers(init.headers);
     headers.set("Authorization", `Bearer ${token}`);
+    const selection=(await cookies()).get("aochain-wallet")?.value;
+    if(selection)headers.set("x-aochain-wallet",selection);
 
     const response = await fetchApi(path, {
         ...init,

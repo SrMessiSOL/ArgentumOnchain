@@ -1,3 +1,4 @@
+import {selectedWallet,ownerWalletSql,assertCharacterWallet} from './linked-wallet';
 import {startOperationRecovery} from './operationRecovery';
 import {isolatedSignerConfigured,isolatedAssetIdentity,isolatedSubmission} from './signer-client';
 import {randomUUID} from 'node:crypto';
@@ -29,24 +30,24 @@ function metadataUri(id:string){const url=new URL(process.env.AOWEB_DEVNET_METAD
 const prepareInput=z.object({kind:z.enum(['mint','stake','unstake','item-export','item-import']),characterId:z.string().uuid().optional(),asset:z.string().min(32).max(44).optional(),slot:z.number().int().min(0).max(21).optional(),quantity:z.number().int().min(1).max(10000).optional()}).strict();
 export function installGameAssetRoutes(app:Express){
  function route(action:string,fn:(req:Request,account:string)=>Promise<unknown>,get=false){const handler=async(req:Request,res:any)=>{try{res.json(await fn(req,await identity(req)));}catch(e){const message=e instanceof Error&&/^(assets|economy)\./.test(e.message)?e.message:'assets.failed';res.status(message==='assets.signIn'?401:409).json({error:message});}};if(get)app.get('/auth/game-assets'+action,handler);else app.post('/auth/game-assets'+action,handler);}
- route('/wallet',async(_,account)=>{
-  const address=(await pool.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rows[0]?.address;
+ route('/wallet',async(req,account)=>{
+  const address=await selectedWallet(req,account,pool);
   if(!address)throw Error('assets.linkWallet');
   return readWalletInventory(address);
  },true);
- route('',async(_,account)=>{
-  const chars=(await pool.query(`SELECT c.id,c.name,c.level,c.gold,c.id_body,c.id_head,c.id_weapon,c.id_shield,c.id_helmet,c.chain_required,c.chain_state,c.asset_address,c.connected,c.economy_lock,
+ route('',async(req,account)=>{
+  const chars=(await pool.query(`SELECT ${ownerWalletSql} AS owner_wallet,c.id,c.name,c.level,c.gold,c.id_body,c.id_head,c.id_weapon,c.id_shield,c.id_helmet,c.chain_required,c.chain_state,c.asset_address,c.connected,c.economy_lock,
    COALESCE((SELECT json_agg(json_build_object('slot',i.id_pos,'item',i.id_item,'name',o.name,'quantity',i.cant,'equipped',i.equipped,'tradable',(${itemEligibilitySql}))) FROM character_items i JOIN game_objects o ON o.id=i.id_item WHERE i.character_id=c.id),'[]') AS inventory
    FROM characters c WHERE c.account_id=$1 AND c.deleted_at IS NULL ORDER BY c.name`,[account])).rows;
   const operations=(await pool.query('SELECT p.id,p.kind,p.state,p.signature,p.character_id,p.asset_id,a.item_id FROM game_asset_operations p JOIN game_assets a ON a.id=p.asset_id WHERE p.account_id=$1 ORDER BY p.created_at DESC LIMIT 30',[account])).rows;
   const items=(await pool.query("SELECT a.asset_address,a.item_id,a.quantity,o.name FROM game_assets a JOIN game_asset_operations p ON p.asset_id=a.id AND p.kind='item-export' AND p.state='complete' JOIN game_objects o ON o.id=a.item_id WHERE p.account_id=$1 AND a.state='active' ORDER BY a.created_at DESC LIMIT 50",[account])).rows;
   const goldOperations=(await pool.query("SELECT id,kind,state,signature,amount::text FROM economy_intents WHERE account_id=$1 AND kind IN ('deposit','withdraw') ORDER BY created_at DESC LIMIT 30",[account])).rows;
-  return {goldOperations,ready:assetReady(),network:'devnet',wallet:(await pool.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rows[0]?.address??null,characters:chars,operations,items};
+  return {goldOperations,ready:assetReady(),network:'devnet',wallet:await selectedWallet(req,account,pool),characters:chars,operations,items};
  },true);
  route('/prepare',async(req,account)=>{
   if(!assetReady())throw Error('assets.unavailable');const body=prepareInput.parse(req.body);const kind=body.kind;
   return transaction(async c=>{
-   const address=await wallet(c,account);let record:AssetRecord;let character:any;let settlement:{version:number;hash:string}|undefined;
+   const address=await selectedWallet(req,account,c);let record:AssetRecord;let character:any;let settlement:{version:number;hash:string}|undefined;
    if(kind==='stake'||kind==='item-import'){
     record=(await c.query("SELECT * FROM game_assets WHERE asset_address=$1 AND state='active' FOR UPDATE",[body.asset])).rows[0];
     if(!record||record.kind!==(kind==='stake'?'character':'item'))throw Error('assets.invalidAsset');
@@ -62,6 +63,7 @@ export function installGameAssetRoutes(app:Express){
     }
    }
    if(!character||!record)throw Error('assets.notOwned');assertCharacterAvailable(character);
+   if(kind!=='stake')await assertCharacterWallet(c,character.id,address);
    // Individual item operations touch inventory only. Other escrowed items
    // remain separate; whole-character ownership transitions require clearing them.
    if(kind!=='item-export'&&kind!=='item-import')await clearMarket(c,character.id);

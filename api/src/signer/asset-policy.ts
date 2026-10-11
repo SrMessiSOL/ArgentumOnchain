@@ -1,3 +1,4 @@
+import {assertCharacterWallet} from '../linked-wallet';
 import {Keypair,Transaction} from '@solana/web3.js';
 import type {Pool} from 'pg';
 import {prepareAssetTransaction,signAssetSubmission,verifiedAsset,type AssetRecord,type AssetAction} from '../game-asset-chain';
@@ -30,8 +31,9 @@ export async function signCommittedAssetOperation(pool:Pool,id:string,raw:string
  if(!/^[0-9a-f-]{36}$/i.test(id)||typeof raw!=='string'||raw.length>2200)throw Error('signer.denied');
  const result=await pool.query<AssetApproval>(`SELECT p.*,COALESCE(p.snapshot_version,s.version) AS snapshot_version,to_jsonb(a) AS record,w.address AS linked_wallet,c.account_id AS owner_id,c.economy_lock,c.connected,c.deleted_at,c.chain_state,c.chain_required,c.asset_address AS character_asset,c.name,s.hash AS snapshot_hash
  FROM game_asset_operations p JOIN game_assets a ON a.id=p.asset_id JOIN characters c ON c.id=p.character_id
- JOIN account_wallets w ON w.account_id=p.account_id LEFT JOIN LATERAL (SELECT version,hash FROM character_snapshots WHERE character_id=p.character_id AND ((p.kind='stake' AND settled=TRUE) OR version=p.snapshot_version) ORDER BY version DESC LIMIT 1) s ON TRUE WHERE p.id=$1`,[id]);
+ JOIN account_linked_wallets w ON w.account_id=p.account_id AND w.address=p.wallet LEFT JOIN LATERAL (SELECT version,hash FROM character_snapshots WHERE character_id=p.character_id AND ((p.kind='stake' AND settled=TRUE) OR version=p.snapshot_version) ORDER BY version DESC LIMIT 1) s ON TRUE WHERE p.id=$1`,[id]);
  const row=result.rows[0];checkAssetApproval(row,issuer.publicKey.toBase58(),metadataOrigin);
+ if(row.kind!=='stake')await assertCharacterWallet(pool,row.character_id,row.wallet);
  const chain=await checkedChain();if((await chain.getBlockHeight('finalized'))>Number(row.last_valid_height))throw Error('signer.expired');
  if(row.kind==='stake'){
   const asset=await verifiedAsset(row.record,row.wallet),attrs=new Map(asset.attributes?.attributeList.map(a=>[a.key,a.value]));

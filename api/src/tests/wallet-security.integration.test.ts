@@ -1,3 +1,4 @@
+import {selectedWallet,assertCharacterWallet} from '../linked-wallet';
 import {beforeAll,beforeEach,afterAll,test,expect} from 'vitest';
 import fs from 'node:fs';
 import express from 'express';
@@ -62,16 +63,17 @@ test('additional wallet preserves active wallet, staked characters and sessions;
  await pool.query("INSERT INTO characters(id,account_id,name,connected,chain_state) VALUES($1,$2,'Linkedplayer',FALSE,'legacy')",[id,account]);
  await fixtureChainState(id,'staked');
  const c=(await post('challenge',{address:next.address,mode:'add'})).body;
- const proof={signature:signature(next,c.message),previousSignature:signature(old,c.message)};
+ const proof={signature:signature(next,c.message)};
  expect((await post('verify',proof)).status).toBe(200);
  expect((await pool.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rows[0].address).toBe(old.address);
  expect((await pool.query('SELECT count(*)::int n FROM account_linked_wallets WHERE account_id=$1',[account])).rows[0].n).toBe(2);
  expect(await getPublicSessionByToken(token)).not.toBeNull();
  expect((await post('verify',proof)).body.error).toBe('wallet.expiredProof');
 });
-test('adding requires both proofs and fresh login, and cannot reuse a wallet owned by another account',async()=>{
+test('adding requires its own proof and fresh login, and cannot reuse a wallet owned by another account',async()=>{
  const old=await link(),next=keys(),c=(await post('challenge',{address:next.address,mode:'add'})).body;
- expect((await post('verify',{signature:signature(next,c.message)})).body.error).toBe('wallet.previousProofRequired');
+ expect(c.requiresPreviousWalletProof).toBe(undefined);
+ expect((await post('verify',{signature:signature(keys(),c.message)})).body.error).toBe('wallet.invalidProof');
  await pool.query("UPDATE auth_sessions SET created_at=NOW()-INTERVAL '11 minutes' WHERE account_id=$1",[account]);
  expect((await post('verify',{signature:signature(next,c.message),previousSignature:signature(old,c.message)})).body.error).toBe('wallet.reauthenticate');
  await pool.query('UPDATE auth_sessions SET created_at=NOW() WHERE account_id=$1',[account]);
@@ -81,10 +83,28 @@ test('adding requires both proofs and fresh login, and cannot reuse a wallet own
 });
 test('wallet membership limit is five and concurrent submissions only link once',async()=>{
  const old=await link(),next=keys(),c=(await post('challenge',{address:next.address,mode:'add'})).body;
- const proof={signature:signature(next,c.message),previousSignature:signature(old,c.message)};
+ const proof={signature:signature(next,c.message)};
  const results=await Promise.all([post('verify',proof),post('verify',proof)]);
  expect(results.filter(x=>x.status===200)).toHaveLength(1);
  for(let i=0;i<3;i++)await pool.query('INSERT INTO account_linked_wallets(account_id,address) VALUES($1,$2)',[account,keys().address]);
  const extra=keys(),d=(await post('challenge',{address:extra.address,mode:'add'})).body;
  expect((await post('verify',{signature:signature(extra,d.message),previousSignature:signature(old,d.message)})).body.error).toBe('wallet.limitReached');
+});
+
+test('request selection accepts linked wallets only and does not change another session or default',async()=>{
+ const old=await link(),next=keys(),c=(await post('challenge',{address:next.address,mode:'add'})).body;
+ expect((await post('verify',{signature:signature(next,c.message)})).status).toBe(200);
+ expect(await selectedWallet({headers:{'x-aochain-wallet':next.address}} as any,account,pool)).toBe(next.address);
+ expect(await selectedWallet({headers:{}} as any,account,pool)).toBe(old.address);
+ let rejected=false;try{await selectedWallet({headers:{'x-aochain-wallet':keys().address}} as any,account,pool);}catch{rejected=true;}expect(rejected).toBe(true);
+ expect((await pool.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rows[0].address).toBe(old.address);
+});
+test('finalized character ownership blocks another linked wallet and ignores prepared or failed attempts',async()=>{
+ const old=await link(),next=keys(),id=randomUUID(),asset=keys().address;
+ await pool.query("INSERT INTO characters(id,account_id,name,connected,chain_state,asset_address) VALUES($1,$2,'Walletowned',FALSE,'staked',$3)",[id,account,asset]);
+ await pool.query("INSERT INTO game_assets(id,kind,character_id,asset_address,issuer_address,metadata_uri,state) VALUES($1,'character',$1,$2,$3,'https://example.invalid/asset','active')",[id,asset,old.address]);
+ await pool.query("INSERT INTO game_asset_operations(id,account_id,character_id,asset_id,kind,state,wallet,transaction_bytes,message_bytes,last_valid_height,completed_at) VALUES($1,$2,$3,$3,'mint','complete',$4,'fixture','fixture',1,NOW())",[randomUUID(),account,id,old.address]);
+ await pool.query("INSERT INTO game_asset_operations(id,account_id,character_id,asset_id,kind,state,wallet,transaction_bytes,message_bytes,last_valid_height,completed_at) VALUES($1,$2,$3,$3,'stake','failed',$4,'fixture','fixture',1,NOW()+INTERVAL '1 second')",[randomUUID(),account,id,next.address]);
+ await assertCharacterWallet(pool,id,old.address);
+ let rejected=false;try{await assertCharacterWallet(pool,id,next.address);}catch{rejected=true;}expect(rejected).toBe(true);
 });

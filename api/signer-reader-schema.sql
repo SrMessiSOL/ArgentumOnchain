@@ -14,6 +14,7 @@ GRANT CONNECT ON DATABASE aochain_fresh TO aoweb_signer_reader;
 GRANT USAGE ON SCHEMA public TO aoweb_signer_reader;
 GRANT SELECT ON economy_intents TO aoweb_signer_reader;
 GRANT SELECT(id,account_id,economy_lock,connected,deleted_at,asset_address,name,chain_state,chain_required) ON characters TO aoweb_signer_reader;
+GRANT SELECT(account_id,address) ON account_linked_wallets TO aoweb_signer_reader;
 GRANT SELECT(account_id,address) ON account_wallets TO aoweb_signer_reader;
 GRANT SELECT(id,seller_id,seller_wallet,state,intent_id,buyer_id,price) ON character_sales,item_sales TO aoweb_signer_reader;
 GRANT SELECT ON game_asset_operations,game_assets TO aoweb_signer_reader;
