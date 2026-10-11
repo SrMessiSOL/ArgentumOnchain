@@ -1,4 +1,5 @@
 import {assertMintFeeFunding} from './mint-funding';
+import {expiredMintAbsent} from './expired-mint-proof';
 import {selectedWallet,ownerWalletSql,assertCharacterWallet} from './linked-wallet';
 import {startOperationRecovery} from './operationRecovery';
 import {isolatedSignerConfigured,isolatedAssetIdentity,isolatedSubmission} from './signer-client';
@@ -128,7 +129,12 @@ export function installGameAssetRoutes(app:Express){
 export async function reconcileAssetOperation(id:string,account?:string){
  const initial=(await pool.query('SELECT * FROM game_asset_operations WHERE id=$1',[id])).rows[0];if(!initial||(account&&initial.account_id!==account))throw Error('assets.notOwned');
  if(['complete','failed'].includes(initial.state))return {state:initial.state};
- const proof=await receiptState(initial.signature,Number(initial.last_valid_height));
+ let proof=await receiptState(initial.signature,Number(initial.last_valid_height));
+ let absentMintAddress:string|null=null;
+ if(proof==='pending'&&initial.kind==='mint'&&initial.state==='signed'){
+  const record=(await pool.query('SELECT asset_address FROM game_assets WHERE id=$1',[initial.asset_id])).rows[0];
+  if(record&&await expiredMintAbsent(economyConnection,initial,record.asset_address)){proof='failed';absentMintAddress=record.asset_address;}
+ }
  if(proof==='pending'){if(initial.state==='signed')try{await economyConnection.sendRawTransaction(Buffer.from(initial.transaction_bytes,'base64'),{skipPreflight:false,preflightCommitment:'confirmed',maxRetries:1});}catch(error){reportBroadcastFailure(initial.id,error);}return {state:'pending'};}
  if(proof==='failed'&&initial.state==='prepared'&&(hasPreparedSignatures(initial.transaction_bytes)||canWalletBroadcastPrepared(initial.transaction_bytes,initial.wallet)))return {state:'pending'};
  if(proof==='complete'&&initial.state!=='signed')throw Error('assets.inconsistent');
@@ -138,6 +144,7 @@ export async function reconcileAssetOperation(id:string,account?:string){
   const character=(await c.query('SELECT * FROM characters WHERE id=$1 FOR UPDATE',[op.character_id])).rows[0];
   const asset=(await c.query('SELECT * FROM game_assets WHERE id=$1 FOR UPDATE',[op.asset_id])).rows[0];
   if(!character||character.economy_lock!==op.id)throw Error('assets.inconsistent');
+  if(absentMintAddress&&(asset.asset_address!==absentMintAddress||character.connected||character.chain_state!=='offchain'||character.asset_address||op.transaction_bytes!==initial.transaction_bytes||op.last_valid_height!==initial.last_valid_height))return {state:'pending'};
   if(proof==='complete'){
    if(op.kind==='mint'||op.kind==='stake'){
     await c.query("UPDATE characters SET chain_state='staked',chain_required=TRUE,asset_address=$2,account_id=$3,economy_login_until=NULL WHERE id=$1",[character.id,asset.asset_address,op.account_id]);

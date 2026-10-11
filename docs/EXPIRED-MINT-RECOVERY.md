@@ -1,0 +1,7 @@
+# Expired devnet character mint recovery
+
+The asset reconciler can release an expired signed character mint only after two devnet checks establish: finalized height exceeds the recorded validity window by 150 blocks; the blockhash is invalid; signature status and finalized transaction are absent; and both the intended NFT account and its address history are absent. Recorded signatures must be valid and match the stored signature. RPC failures or conflicting evidence retain the reservation.
+
+The database transaction rechecks the unchanged operation, NFT address and disconnected off-chain character reservation. Recovery marks the operation and asset failed and releases the character lock. It preserves signed bytes, signature, character and operation history. It does not sign, broadcast a replacement, refund SPL, or apply this negative proof to transfers or burns. A player can then prepare a new mint.
+
+Verification: `node scripts/expired-mint-proof.test.cjs`, `node scripts/expired-mint-reconciliation.test.cjs`, and existing receipt-finality tests. Proof tests include wrong network, insufficient expiry, valid blockhash, transaction/account/history presence, provisional status, RPC failure, second-pass conflict and non-mint exclusions. Reconciliation tests use a mocked database; they are not a live chain lifecycle test. A single provider's negative history remains dependent on that provider's correctness; mainnet requires stronger reviewed evidence.
