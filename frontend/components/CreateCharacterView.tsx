@@ -1,4 +1,5 @@
 "use client";
+import {assertWalletHasSol} from "@/lib/sol-funding";
 import { LocalizedLabel } from '@/components/LocalizedText';
 import { useI18n } from "@/components/I18nProvider";
 import {useGameWallet} from './GameWalletProvider';
@@ -230,7 +231,7 @@ export default function CreateCharacterView() {
 
         try {
             const wallet=await walletConnection.connect();
-            await ensureLinkedWallet(wallet);
+            await ensureLinkedWallet(wallet);await assertWalletHasSol(wallet.address);
             let characterId=draftId;
             if(!characterId){
             const response = await fetch("/api/auth/create-character", {
@@ -517,7 +518,7 @@ export default function CreateCharacterView() {
 
                         {mintStage&&!error&&<PortalModal title={locale==='es'?'Creando tu personaje':'Creating your character'} locked={creatingCharacter} onClose={()=>setMintStage(null)}><AssetTransactionVisual stage={mintStage}><CharacterSpritePreview bodyId={selectedAppearance.bodyId} headId={selectedHeadId} scale={1.2}/></AssetTransactionVisual></PortalModal>}
                         {error ? (
-                            <PortalModal title={locale==='es'?'No se pudo crear el personaje':'Could not create the character'} onClose={()=>{setError(null);setMintStage(null);}}><p role="alert">
+                            <PortalModal title={error===(locale==='es'?economySpanish:economyEnglish)['economy.insufficientSol']?(locale==='es'?'Necesitás SOL de prueba':'Test SOL needed'):locale==='es'?'No se pudo crear el personaje':'Could not create the character'} onClose={()=>{setError(null);setMintStage(null);}}><p role="alert">
                                 {localizeText(error)}</p>
                                 {draftId&&<><p>{locale==='es'?'El personaje ya está guardado. Reintentá el mint cuando la operación pendiente termine; no vuelvas a crearlo.':'Your character is saved. Retry minting after any pending operation ends; you do not need to create it again.'}</p><Link href="/wallet">{locale==='es'?'Ver personaje y operaciones':'View character and operations'}</Link></>}
                             </PortalModal>

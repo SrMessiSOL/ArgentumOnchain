@@ -3,6 +3,7 @@ import {createContext,useContext,useEffect,useMemo,useRef,useState,type ReactNod
 import {AppProvider,useConnector,useConnectorClient} from '@solana/connector/react';
 import {getDefaultConfig,createTransactionSigner,type TransactionSigner} from '@solana/connector/headless';
 import {Transaction} from '@solana/web3.js';
+import {assertWalletHasSol} from '@/lib/sol-funding';
 import {resolveSigningWallet} from '@/lib/wallet-connection';
 import PortalModal from './PortalModal';
 import {useI18n} from './I18nProvider';
@@ -12,7 +13,7 @@ const Context=createContext<{connect(switchWallet?:boolean):Promise<GameWallet>;
 export function useGameWallet(){const value=useContext(Context);if(!value)throw Error('Wallet provider missing');return value;}
 export function wrapSigner(signer:TransactionSigner):GameWallet{return {address:signer.address,
  signMessage:async(message)=>{if(!signer.signMessage)throw Error('wallet.unsupported');return signer.signMessage(message);},
- signTransaction:async(tx)=>{const result=await signer.signTransaction(new Uint8Array(tx.serialize({requireAllSignatures:false})));if(!(result instanceof Uint8Array))throw Error('wallet.unsupported');return Transaction.from(result);}
+ signTransaction:async(tx)=>{await assertWalletHasSol(signer.address,btoa(String.fromCharCode(...tx.serialize({requireAllSignatures:false}))));const result=await signer.signTransaction(new Uint8Array(tx.serialize({requireAllSignatures:false})));if(!(result instanceof Uint8Array))throw Error('wallet.unsupported');return Transaction.from(result);}
 };}
 function WalletPicker({children}:{children:ReactNode}){
  const client=useConnectorClient(),state=useConnector(),{locale,t}=useI18n();
