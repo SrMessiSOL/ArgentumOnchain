@@ -8,7 +8,7 @@ export async function POST(request: Request, context: { params: Promise<{ action
         return NextResponse.json({ error: "wallet.failed" }, { status: 403 });
     }
     const { action } = await context.params;
-    if (action !== "challenge" && action !== "verify") {
+    if (action !== "challenge" && action !== "verify" && action !== "unlink") {
         return NextResponse.json({ error: "wallet.failed" }, { status: 404 });
     }
     const text = await request.text();

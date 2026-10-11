@@ -4,7 +4,7 @@ import type {Pool,PoolClient} from 'pg';
 export async function selectedWallet(req:Request,account:string,db:Pool|PoolClient){
  const requested=req.headers['x-aochain-wallet'];
  if(requested!==undefined&&(typeof requested!=='string'||!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(requested)))throw Error('economy.wrongWallet');
- const result=requested?await db.query('SELECT address FROM account_linked_wallets WHERE account_id=$1 AND address=$2',[account,requested]):await db.query('SELECT address FROM account_wallets WHERE account_id=$1',[account]);
+ const result=await db.query('SELECT w.address FROM account_linked_wallets w WHERE w.account_id=$1 AND w.address=COALESCE($2,(SELECT address FROM account_wallets WHERE account_id=$1)) FOR SHARE OF w',[account,requested??null]);
  if(!result.rows[0])throw Error('economy.linkWallet');return result.rows[0].address as string;
 }
 /** Finalized custody history survives wallet switching and pending operations. */

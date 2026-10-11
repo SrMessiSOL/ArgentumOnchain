@@ -13,3 +13,13 @@ Installed validation: 13 disposable PostgreSQL tests, API/frontend compilation, 
 Frontend regression tests exercise additional-wallet challenge mode, exact-address receipt validation, rejection handling and approval/verification stages. These tests do not submit a real wallet signature.
 
 Browser rehearsal found `wallet.reauthenticate` when adding a second wallet from an older session. The login page now accepts `reauth=1` to show the password form even when already authenticated; successful login creates a fresh session and returns to `/wallet`. This only changes the frontend redirect and does not relax the server recent-login requirement.
+
+## Unlinking wallets
+
+`POST /auth/wallet/unlink` removes membership only. It requires the authenticated account and a login within ten minutes. The server locks the account, live session and membership row and rejects wallets recorded as the owner of any minted character still belonging to that account, regardless of staking state. Missing finalized custody history blocks removal conservatively until reconciled. Pending asset/economy operations and active character/item listings also block removal. Completed history and blockchain assets are never deleted. The same wallet can be linked again later through the normal ownership proof.
+
+Removing the default wallet selects the oldest remaining linked wallet, or removes the default when none remain. The frontend disconnects a removed selected wallet and clears its public-address preference. Membership row locks serialize unlinking against new operation preparation. The UI disables removal for recorded character owners, and the endpoint rechecks at commit.
+
+### Server rollout
+
+The frontend only enables unlinking when `GET /auth/wallet` returns `capabilities.unlink: true`. Deploying to Vercel alone does not activate the endpoint. On the game-host computer, pull this commit, run the API build and wallet security tests in a disposable database, then restart the API with the existing secured host procedure. No schema migration or on-chain transaction is required for this change. Verify a character-owner wallet returns `wallet.ownsCharacter`, an empty wallet can be removed, and a fresh login is required. Do not remove wallet memberships directly in SQL.

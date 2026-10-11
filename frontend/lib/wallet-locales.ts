@@ -1,4 +1,7 @@
 export const walletEnglish = {
+    "wallet.notLinked": "This wallet is no longer linked to your account.",
+    "wallet.ownsCharacter": "This wallet owns a character in your account and cannot be unlinked.",
+    "wallet.pendingOperations": "Finish pending operations and cancel marketplace listings for this wallet before unlinking it.",
     "wallet.limitReached": "You can link up to five wallets to this account.",
     "wallet.unsupported": "This wallet cannot sign the required message or transaction. Choose another compatible Solana wallet.",
     title: "Your Solana wallet", optional: "Character ownership & game assets",
@@ -21,6 +24,9 @@ export const walletEnglish = {
 };
 export type WalletTextKey = keyof typeof walletEnglish;
 export const walletSpanish: Record<WalletTextKey, string> = {
+    "wallet.notLinked": "Esta wallet ya no está vinculada a tu cuenta.",
+    "wallet.ownsCharacter": "Esta wallet tiene un personaje de tu cuenta y no se puede desvincular.",
+    "wallet.pendingOperations": "Completá las operaciones pendientes y cancelá las publicaciones de esta wallet antes de desvincularla.",
     "wallet.limitReached": "Podés vincular hasta cinco wallets a esta cuenta.",
     "wallet.unsupported": "Esta wallet no puede firmar el mensaje o la transacción requeridos. Elegí otra wallet compatible de Solana.",
     title: "Tu wallet de Solana", optional: "Personajes y activos del juego",

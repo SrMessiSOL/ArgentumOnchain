@@ -108,3 +108,55 @@ test('finalized character ownership blocks another linked wallet and ignores pre
  await assertCharacterWallet(pool,id,old.address);
  let rejected=false;try{await assertCharacterWallet(pool,id,next.address);}catch{rejected=true;}expect(rejected).toBe(true);
 });
+
+async function addLinked(){const k=keys(),c=(await post('challenge',{address:k.address,mode:'add'})).body;expect((await post('verify',{signature:signature(k,c.message)})).status).toBe(200);return k;}
+async function ownedFixture(address:string,state='complete'){
+ const id=randomUUID(),asset=keys().address;
+ await pool.query("INSERT INTO characters(id,account_id,name,connected,chain_state,asset_address) VALUES($1,$2,$3,FALSE,'staked',$4)",[id,account,'U'+id.replaceAll('-','').slice(0,10),state==='complete'?asset:null]);
+ await pool.query("INSERT INTO game_assets(id,kind,character_id,asset_address,issuer_address,metadata_uri,state) VALUES($1,'character',$1,$2,$3,'https://example.invalid/unlink','active')",[id,asset,address]);
+ await pool.query("INSERT INTO game_asset_operations(id,account_id,character_id,asset_id,kind,state,wallet,transaction_bytes,message_bytes,last_valid_height,completed_at) VALUES($1,$2,$3,$3,'mint',$4,$5,'fixture','fixture',1,NOW())",[randomUUID(),account,id,state,address]);return id;
+}
+test('unlink empty wallet preserves other memberships and selects a valid fallback',async()=>{
+ const old=await link(),next=await addLinked();
+ expect((await post('unlink',{address:old.address})).body.unlinked).toBe(old.address);
+ expect(await selectedWallet({headers:{}} as any,account,pool)).toBe(next.address);
+ await expect(selectedWallet({headers:{'x-aochain-wallet':old.address}} as any,account,pool)).rejects.toThrow();
+ expect((await post('unlink',{address:old.address})).body.error).toBe('wallet.notLinked');
+ expect((await post('unlink',{address:next.address})).status).toBe(200);
+ expect((await pool.query('SELECT address FROM account_wallets WHERE account_id=$1',[account])).rowCount).toBe(0);
+});
+test('unlink rejects owned character including withdrawn state; unrelated wallet can be removed',async()=>{
+ const old=await link(),next=await addLinked(),id=await ownedFixture(old.address);
+ expect((await post('unlink',{address:old.address})).body.error).toBe('wallet.ownsCharacter');
+ await fixtureChainState(id,'unstaked');
+ expect((await post('unlink',{address:old.address})).body.error).toBe('wallet.ownsCharacter');
+ expect((await post('unlink',{address:next.address})).status).toBe(200);
+});
+test('unlink fails closed for minted characters without verified custody history',async()=>{
+ const old=await link();await pool.query("INSERT INTO characters(id,account_id,name,asset_address,chain_state) VALUES($1,$2,'Unknowncustody',$3,'unstaked')",[randomUUID(),account,keys().address]);
+ expect((await post('unlink',{address:old.address})).body.error).toBe('wallet.ownsCharacter');
+});
+test('unlink rejects pending wallet operations, foreign addresses and stale sessions',async()=>{
+ const old=await link();await ownedFixture(old.address,'prepared');
+ expect((await post('unlink',{address:old.address})).body.error).toBe('wallet.pendingOperations');
+ expect((await post('unlink',{address:keys().address})).body.error).toBe('wallet.notLinked');
+ await pool.query("UPDATE auth_sessions SET created_at=NOW()-INTERVAL '11 minutes' WHERE account_id=$1",[account]);
+ expect((await post('unlink',{address:old.address})).body.error).toBe('wallet.reauthenticate');
+ expect((await pool.query('SELECT 1 FROM account_linked_wallets WHERE account_id=$1 AND address=$2',[account,old.address])).rowCount).toBe(1);
+});
+test('unlink waits for in-flight wallet membership readers and cannot race preparation',async()=>{
+ const old=await link(),client=await pool.connect();await client.query('BEGIN');
+ try{await selectedWallet({headers:{'x-aochain-wallet':old.address}} as any,account,client);let settled=false;const request=post('unlink',{address:old.address}).then(result=>{settled=true;return result;});await new Promise(r=>setTimeout(r,100));expect(settled).toBe(false);await client.query('COMMIT');expect((await request).status).toBe(200);}finally{await client.query('ROLLBACK');client.release();}
+});
+
+test('unlink follows latest finalized custody and blocks active marketplace listings',async()=>{
+ const old=await link(),next=await addLinked(),id=await ownedFixture(old.address);
+ await pool.query("INSERT INTO game_asset_operations(id,account_id,character_id,asset_id,kind,state,wallet,transaction_bytes,message_bytes,last_valid_height,completed_at) VALUES($1,$2,$3,$3,'stake','complete',$4,'fixture','fixture',1,NOW()+INTERVAL '1 second')",[randomUUID(),account,id,next.address]);
+ expect((await post('unlink',{address:old.address})).status).toBe(200);
+ expect((await post('unlink',{address:next.address})).body.error).toBe('wallet.ownsCharacter');
+});
+test('unlink cannot abandon a character listing even when the character is unminted',async()=>{
+ const old=await link(),id=randomUUID();await pool.query("INSERT INTO characters(id,account_id,name,connected,chain_state) VALUES($1,$2,'Unlinksale',FALSE,'legacy')",[id,account]);
+ await pool.query("INSERT INTO character_sales(id,character_id,seller_id,seller_wallet,price,state) VALUES($1,$2,$3,$4,1000000,'listed')",[randomUUID(),id,account,old.address]);
+ expect((await post('unlink',{address:old.address})).body.error).toBe('wallet.pendingOperations');
+});

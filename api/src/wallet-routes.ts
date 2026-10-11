@@ -1,3 +1,4 @@
+import {ownerWalletSql} from './linked-wallet';
 import {AuthBudget} from './authBudget';
 import {credentialHash} from './lib/sessionTokens';
 import { createHash, createPublicKey, randomUUID, verify } from "node:crypto";
@@ -32,8 +33,39 @@ export function installWalletRoutes(app: Express) {
     app.get("/auth/wallet", async (req, res) => {
         const auth = await session(req, res); if (!auth) return;
         const result = await pool.query("SELECT address, linked_at FROM account_wallets WHERE account_id = $1", [auth.accountId]);
-        const wallets = await pool.query("SELECT address, linked_at FROM account_linked_wallets WHERE account_id=$1 ORDER BY linked_at,address", [auth.accountId]);
-        res.json({ wallet: result.rows[0] ?? null, wallets: wallets.rows, limit: 5 });
+        const wallets = await pool.query(`SELECT w.address,w.linked_at,EXISTS(SELECT 1 FROM characters c WHERE c.account_id=w.account_id AND c.asset_address IS NOT NULL AND (${ownerWalletSql}=w.address OR ${ownerWalletSql} IS NULL)) AS owns_character FROM account_linked_wallets w WHERE w.account_id=$1 ORDER BY w.linked_at,w.address`, [auth.accountId]);
+        res.json({ wallet: result.rows[0] ?? null, wallets: wallets.rows, limit: 5, capabilities: {unlink:true} });
+    });
+    app.post("/auth/wallet/unlink", async (req,res)=>{
+        const auth=await session(req,res);if(!auth)return;
+        if(!walletBudget.allow(req.path+":"+auth.accountId,10,60_000)){res.status(429).json({error:'wallet.tooManyAttempts'});return;}
+        const parsed=z.object({address:addressSchema}).strict().safeParse(req.body);
+        if(!parsed.success){res.status(400).json({error:'wallet.invalidAddress'});return;}
+        const client=await pool.connect();
+        try{
+            await client.query('BEGIN');
+            await client.query('SELECT 1 FROM accounts WHERE id=$1 FOR UPDATE',[auth.accountId]);
+            const active=(await client.query("SELECT 1 FROM auth_sessions WHERE token=$1 AND account_id=$2 AND expires_at>NOW() AND created_at>NOW()-INTERVAL '10 minutes' FOR UPDATE",[auth.credentialHash,auth.accountId])).rowCount;
+            if(!active)throw Error('wallet.reauthenticate');
+            const member=(await client.query('SELECT address FROM account_linked_wallets WHERE account_id=$1 AND address=$2 FOR UPDATE',[auth.accountId,parsed.data.address])).rowCount;
+            if(!member)throw Error('wallet.notLinked');
+            // Membership lock serializes with prepare/list operations using selectedWallet.
+            const owned=(await client.query(`SELECT 1 FROM characters c WHERE c.account_id=$1 AND c.asset_address IS NOT NULL AND (${ownerWalletSql}=$2 OR ${ownerWalletSql} IS NULL) LIMIT 1`,[auth.accountId,parsed.data.address])).rowCount;
+            if(owned)throw Error('wallet.ownsCharacter');
+            const pending=(await client.query(`SELECT 1 WHERE
+                EXISTS(SELECT 1 FROM game_asset_operations WHERE wallet=$2 AND state IN ('prepared','signed')) OR
+                EXISTS(SELECT 1 FROM economy_intents WHERE wallet=$2 AND state IN ('prepared','signed')) OR
+                EXISTS(SELECT 1 FROM character_sales WHERE seller_id=$1 AND seller_wallet=$2 AND state IN ('listed','reserved')) OR
+                EXISTS(SELECT 1 FROM item_sales WHERE seller_id=$1 AND seller_wallet=$2 AND state IN ('listed','reserved'))`,[auth.accountId,parsed.data.address])).rowCount;
+            if(pending)throw Error('wallet.pendingOperations');
+            await client.query('DELETE FROM account_linked_wallets WHERE account_id=$1 AND address=$2',[auth.accountId,parsed.data.address]);
+            const fallback=(await client.query('SELECT address FROM account_linked_wallets WHERE account_id=$1 ORDER BY linked_at,address LIMIT 1',[auth.accountId])).rows[0];
+            if(fallback)await client.query('UPDATE account_wallets SET address=$3,linked_at=NOW() WHERE account_id=$1 AND address=$2',[auth.accountId,parsed.data.address,fallback.address]);
+            else await client.query('DELETE FROM account_wallets WHERE account_id=$1 AND address=$2',[auth.accountId,parsed.data.address]);
+            await client.query('DELETE FROM wallet_link_challenges WHERE account_id=$1 AND address=$2',[auth.accountId,parsed.data.address]);
+            await client.query('COMMIT');res.json({unlinked:parsed.data.address});
+        }catch(error){await client.query('ROLLBACK');const key=error instanceof Error&&error.message.startsWith('wallet.')?error.message:'wallet.failed';res.status(key==='wallet.reauthenticate'?403:409).json({error:key});}
+        finally{client.release();}
     });
     app.post("/auth/wallet/challenge", async (req, res) => {
         const auth = await session(req, res); if (!auth) return;
