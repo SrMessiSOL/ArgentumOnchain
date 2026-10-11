@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');
+const {Keypair,Transaction,SystemProgram}=require('@solana/web3.js');
+const {assertMintFeeFunding}=require('../dist/mint-funding');
+(async()=>{const payer=Keypair.generate().publicKey,other=Keypair.generate().publicKey;
+ const tx=new Transaction({feePayer:payer,recentBlockhash:Keypair.generate().publicKey.toBase58()}).add(SystemProgram.transfer({fromPubkey:payer,toPubkey:other,lamports:1}));
+ const bytes=tx.serialize({requireAllSignatures:false}).toString('base64');let feeCalls=0;
+ const rpc=balance=>({getBalance:async(address,commitment)=>{assert.equal(address.toBase58(),payer.toBase58());assert.equal(commitment,'confirmed');return balance;},getFeeForMessage:async(message,commitment)=>{feeCalls++;assert.equal(message.accountKeys[0].toBase58(),payer.toBase58());assert.equal(commitment,'confirmed');return {value:5000};}});
+ await assert.rejects(()=>assertMintFeeFunding(rpc(0),payer.toBase58(),bytes),/assets.insufficientSol/);assert.equal(feeCalls,0);
+ await assert.rejects(()=>assertMintFeeFunding(rpc(4999),payer.toBase58(),bytes),/assets.insufficientSol/);
+ await assertMintFeeFunding(rpc(5000),payer.toBase58(),bytes);
+ await assert.rejects(()=>assertMintFeeFunding({...rpc(10000),getFeeForMessage:async()=>({value:null})},payer.toBase58(),bytes),/economy.rpcBusy/);
+ await assert.rejects(()=>assertMintFeeFunding(rpc(10000),other.toBase58(),bytes),/assets.invalidTransaction/);
+ assert.equal(tx.signature,null);console.log('Mint funding preflight passed: zero/low SOL, exact fee, unavailable RPC and payer mismatch; no signatures or broadcasts.');
+})().catch(error=>{console.error(error);process.exitCode=1;});

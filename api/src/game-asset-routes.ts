@@ -1,3 +1,4 @@
+import {assertMintFeeFunding} from './mint-funding';
 import {selectedWallet,ownerWalletSql,assertCharacterWallet} from './linked-wallet';
 import {startOperationRecovery} from './operationRecovery';
 import {isolatedSignerConfigured,isolatedAssetIdentity,isolatedSubmission} from './signer-client';
@@ -95,6 +96,7 @@ export function installGameAssetRoutes(app:Express){
    const pending=(await c.query("SELECT 1 FROM game_asset_operations WHERE asset_id=$1 AND state IN ('prepared','signed')",[record.id])).rowCount;if(pending)throw Error('assets.pending');
    const operation=randomUUID();const name=kind==='item-export'?`AOCHAIN Item ${record.item_id} × ${record.quantity}`:`AOCHAIN · ${character.name}`;
    const prepared=await prepareAssetTransaction(kind,operation,record,address,name,settlement);
+   if(kind==='mint')await assertMintFeeFunding(economyConnection,address,prepared.transaction_bytes);
    await c.query(`INSERT INTO game_asset_operations(id,account_id,character_id,asset_id,kind,wallet,transaction_bytes,message_bytes,last_valid_height,snapshot_version,source_slot) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,[operation,account,character.id,record.id,kind,address,prepared.transaction_bytes,prepared.message_bytes,prepared.last_valid_height,settlement?.version??null,body.slot??null]);
    await c.query('UPDATE characters SET economy_lock=$2 WHERE id=$1',[character.id,operation]);await invalidate(c,character.id);
    return {id:operation,transaction:prepared.transaction_bytes,wallet:address,asset:record.asset_address,network:'devnet'};
