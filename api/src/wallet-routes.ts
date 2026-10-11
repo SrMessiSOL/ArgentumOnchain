@@ -50,14 +50,14 @@ export function installWalletRoutes(app: Express) {
             const member=(await client.query('SELECT address FROM account_linked_wallets WHERE account_id=$1 AND address=$2 FOR UPDATE',[auth.accountId,parsed.data.address])).rowCount;
             if(!member)throw Error('wallet.notLinked');
             // Membership lock serializes with prepare/list operations using selectedWallet.
-            const owned=(await client.query(`SELECT 1 FROM characters c WHERE c.account_id=$1 AND c.asset_address IS NOT NULL AND (${ownerWalletSql}=$2 OR ${ownerWalletSql} IS NULL) LIMIT 1`,[auth.accountId,parsed.data.address])).rowCount;
-            if(owned)throw Error('wallet.ownsCharacter');
             const pending=(await client.query(`SELECT 1 WHERE
                 EXISTS(SELECT 1 FROM game_asset_operations WHERE wallet=$2 AND state IN ('prepared','signed')) OR
                 EXISTS(SELECT 1 FROM economy_intents WHERE wallet=$2 AND state IN ('prepared','signed')) OR
                 EXISTS(SELECT 1 FROM character_sales WHERE seller_id=$1 AND seller_wallet=$2 AND state IN ('listed','reserved')) OR
                 EXISTS(SELECT 1 FROM item_sales WHERE seller_id=$1 AND seller_wallet=$2 AND state IN ('listed','reserved'))`,[auth.accountId,parsed.data.address])).rowCount;
             if(pending)throw Error('wallet.pendingOperations');
+            const owned=(await client.query(`SELECT 1 FROM characters c WHERE c.account_id=$1 AND c.asset_address IS NOT NULL AND (${ownerWalletSql}=$2 OR ${ownerWalletSql} IS NULL) LIMIT 1`,[auth.accountId,parsed.data.address])).rowCount;
+            if(owned)throw Error('wallet.ownsCharacter');
             await client.query('DELETE FROM account_linked_wallets WHERE account_id=$1 AND address=$2',[auth.accountId,parsed.data.address]);
             const fallback=(await client.query('SELECT address FROM account_linked_wallets WHERE account_id=$1 ORDER BY linked_at,address LIMIT 1',[auth.accountId])).rows[0];
             if(fallback)await client.query('UPDATE account_wallets SET address=$3,linked_at=NOW() WHERE account_id=$1 AND address=$2',[auth.accountId,parsed.data.address,fallback.address]);

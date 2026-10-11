@@ -23,3 +23,5 @@ Removing the default wallet selects the oldest remaining linked wallet, or remov
 ### Server rollout
 
 The frontend only enables unlinking when `GET /auth/wallet` returns `capabilities.unlink: true`. Deploying to Vercel alone does not activate the endpoint. On the game-host computer, pull this commit, run the API build and wallet security tests in a disposable database, then restart the API with the existing secured host procedure. No schema migration or on-chain transaction is required for this change. Verify a character-owner wallet returns `wallet.ownsCharacter`, an empty wallet can be removed, and a fresh login is required. Do not remove wallet memberships directly in SQL.
+
+Host installation: apply wallet-unlink-runtime.sql as the database owner before installing the wallet routes. The API receives DELETE for membership/default rows and UPDATE(address) solely to support PostgreSQL row-share locks. No wallet rows are changed by the installer. The signer retains read-only membership access. Pending-operation checks precede finalized custody checks so reconciliation cannot hide both states between reads.
