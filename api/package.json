@@ -10,6 +10,7 @@
         "apply-balance:prod": "node dist/scripts/applyBalanceToCharacters.js",
         "cancel-npc-sold-market-listings": "tsx src/scripts/cancelNpcSoldMarketListings.ts",
         "cancel-npc-sold-market-listings:prod": "node dist/scripts/cancelNpcSoldMarketListings.js",
+        "diag:mint": "tsx src/scripts/diagnoseMint.ts",
         "diag:double-login": "tsx src/scripts/diagnoseDoubleLogin.ts",
         "balance-snapshot": "tsx src/scripts/reportBalanceSnapshot.ts",
         "export-frontend-npcs": "tsx src/scripts/exportFrontendNpcs.ts",
