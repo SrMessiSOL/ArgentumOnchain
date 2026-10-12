@@ -1,4 +1,5 @@
 import {installBodyLimits} from './requestBodyLimits';
+import {installRankedRoutes} from './ranked-routes';
 import {createChainRequestBudget} from './chainRequestBudget';
 import {settlementPause} from './settlementPause';
 import {AuthBudget,authIdentity} from './authBudget';
@@ -2652,5 +2653,6 @@ installPreferencesRoutes(app);
 installAchievementRoutes(app);
 installGameAssetRoutes(app);
 installEconomyRoutes(app);
+installRankedRoutes(app);
 void start();
 

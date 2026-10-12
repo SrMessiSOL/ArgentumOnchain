@@ -3,6 +3,22 @@ const assert=require('node:assert/strict');
 const http=require('node:http');
 const net=require('node:net');
 const {playerRoute,validateConfig,createGateway}=require('./backend-gateway.cjs');
+
+test('ranked bridge is opt-in, allows only fixed signed RPCs and strips player credentials',async t=>{
+ const calls=[];const api=http.createServer((req,res)=>{calls.push({url:req.url,headers:req.headers});req.resume();res.end('{}');});await new Promise(r=>api.listen(0,'127.0.0.1',r));
+ let cfg={enabled:true,backendOrigin:'https://backend.example',siteOrigin:'https://site.example'};
+ const gateway=createGateway(()=>cfg,{api:api.address().port,game:1});await new Promise(r=>gateway.listen(0,'127.0.0.1',r));
+ t.after(()=>{gateway.closeAllConnections();gateway.close();api.closeAllConnections();api.close();});
+ const request=(path,headers={})=>new Promise((resolve,reject)=>{const req=http.request({hostname:'127.0.0.1',port:gateway.address().port,path,method:'POST',headers:{host:'backend.example',...headers}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));});req.on('error',reject);req.end('{}');});
+ const signed={'x-aochain-signature':'a'.repeat(64),authorization:'Bearer must-not-forward',cookie:'must-not-forward'};
+ assert.equal(await request('/region-api/ranked/start',signed),503);cfg={...cfg,rankedBridgeEnabled:true};
+ assert.equal(await request('/region-api/ranked/start'),403);
+ assert.equal(await request('/region-api/ranked/finish?anything=1',signed),404);
+ assert.equal(await request('/region-api/admin',signed),404);
+ assert.equal(await request('/region-api/ranked/start',signed),200);
+ assert.equal(calls.length,1);assert.equal(calls[0].url,'/internal/ranked/start');assert.equal(calls[0].headers.authorization,undefined);assert.equal(calls[0].headers.cookie,undefined);
+ assert.equal(await request('/region-api/ranked/start',{...signed,'content-length':'65537'}),413);
+});
 test('test gateway admits 100 sockets, rejects socket 101 and expires established connections',async t=>{
  const remotes=new Set(),clients=[];
  const game=http.createServer();game.on('upgrade',(req,socket)=>{remotes.add(socket);socket.once('close',()=>remotes.delete(socket));socket.write('HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\n\r\n');});

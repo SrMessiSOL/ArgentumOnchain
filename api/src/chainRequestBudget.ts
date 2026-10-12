@@ -2,6 +2,7 @@ import type {Request,Response,NextFunction} from 'express';
 import {AuthBudget} from './authBudget';
 import {getPublicSessionByToken} from './repositories/auth';
 const policies=new Map<string,{group:string;account:number;global:number}>([
+ ['POST /auth/ranked/admit',{group:'ranked',account:6,global:180}],
  ['POST /auth/economy/prepare',{group:'prepare',account:12,global:240}],
  ['POST /auth/game-assets/prepare',{group:'prepare',account:12,global:240}],
  ['POST /auth/economy/submit',{group:'submit',account:30,global:600}],

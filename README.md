@@ -6,6 +6,8 @@ The project keeps the original game: maps, classes, races, combat, spells, NPCs,
 
 Gameplay runs on an authoritative game server and PostgreSQL. Solana handles asset ownership and economic settlement. Movement, combat and NPC AI stay off-chain. The minting and staking system currently trusts the game operator; it is not a trustless staking contract.
 
+The optional [ranked character integration](docs/RANKED-ASSET-INTEGRATION.md) connects owned staked characters to the separate AOCHAIN regional 1v1 arena. It reserves the character against simultaneous gameplay/economy use, lends a temporary level-50/newbie PvP preset, saves the match once and unlocks atomically. Persistent inventory, gold and progression stay unchanged. The API/portal implementation and local tests are complete; deployment configuration, real Solana admission, native PostgreSQL concurrency and regional capacity tests remain required before public activation.
+
 **Release path:** community testing on devnet, followed by mainnet launch after security hardening, operational validation and network migration. Devnet is a temporary testing stage, not the final product network. The current code enforces devnet and does not yet enable mainnet transactions.
 
 ## What changed from upstream

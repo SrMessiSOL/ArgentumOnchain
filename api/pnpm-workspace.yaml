@@ -4,6 +4,9 @@ allowBuilds:
   utf-8-validate: false
   bigint-buffer: false
 
+minimumReleaseAgeExclude:
+  - '@electric-sql/pglite@0.5.9'
+
 overrides:
   "uuid": "11.1.1"
   "esbuild": "0.28.1"

@@ -25,3 +25,9 @@ test('wallet reads are capped independently; ordinary reads and cancellations re
  const blocked=request('/auth/game-assets/wallet','valid','GET');await middleware(blocked.req as any,blocked.res as any,blocked.next);expect(blocked.res.status).toHaveBeenCalledWith(429);
  for(const path of ['/auth/economy/cancel','/auth/game-assets','/health']){const r=request(path);await middleware(r.req as any,r.res as any,r.next);expect(r.next).toHaveBeenCalledOnce();}
 });
+test('ranked stake verification is capped per account while cancellation stays available',async()=>{
+ const middleware=createChainRequestBudget(async()=> 'account');
+ for(let i=0;i<6;i++){const r=request('/auth/ranked/admit','session-'+i);await middleware(r.req as any,r.res as any,r.next);expect(r.next).toHaveBeenCalledOnce();}
+ const blocked=request('/auth/ranked/admit','rotated-session');await middleware(blocked.req as any,blocked.res as any,blocked.next);expect(blocked.res.status).toHaveBeenCalledWith(429);
+ const cancel=request('/auth/ranked/cancel');await middleware(cancel.req as any,cancel.res as any,cancel.next);expect(cancel.next).toHaveBeenCalledOnce();
+});

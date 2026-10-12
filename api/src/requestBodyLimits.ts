@@ -2,7 +2,8 @@ import express from 'express';
 import type {Express,ErrorRequestHandler} from 'express';
 export function installBodyLimits(app:Express):void {
  // Wallet proofs and transactions are small; game saves retain their existing larger limit.
- app.use(['/auth/economy','/auth/game-assets','/auth/wallet','/auth/cosmetics'],express.json({limit:'8kb'}));
+ app.use(['/auth/economy','/auth/game-assets','/auth/wallet','/auth/cosmetics','/auth/ranked'],express.json({limit:'8kb'}));
+ app.use('/internal/ranked',express.json({limit:'64kb'}));
  app.use(express.json({limit:'2mb'}));
  const rejectBody:ErrorRequestHandler=(error,_req,res,_next)=>{
   const status=error?.type==='entity.too.large'?413:400;

@@ -4,11 +4,13 @@ const {fields:proxyFields,createVerifier}=require('./backend-proxy-proof.cjs');
 
 const routes = {
   GET: [
+    /^\/auth\/ranked\/characters$/,
     /^\/(runtime-config|ranking|wiki|user-online-stats|game-assets\/metadata)$/,
     /^\/auth\/(session|me|character-settings|preferences|wallet|achievements|economy|cosmetics|game-assets(?:\/wallet)?|clans(?:\/[0-9a-f-]{36})?)$/i,
     /^\/auth\/password-reset\/[A-Za-z0-9_-]+$/,
   ],
   POST: [
+    /^\/auth\/ranked\/(admit|cancel)$/,
     /^\/auth\/(register|login|logout|select-character|create-character|game-ticket|password-reset\/(request|confirm)|wallet\/(challenge|verify)|achievements\/title|cosmetics\/(claim|equip)|game-assets\/(prepare|submit|reconcile)|economy\/(list|cancel|item-list|item-cancel|prepare|submit|reconcile))$/,
   ],
   PUT: [/^\/auth\/(character-settings|preferences)$/],
@@ -25,6 +27,7 @@ function playerRoute(method, path) {
 function validateConfig(cfg) {
   if(cfg.maxGameConnections!==undefined&&(!Number.isInteger(cfg.maxGameConnections)||cfg.maxGameConnections<1||cfg.maxGameConnections>100))throw Error('Invalid test connection limit');
   if(cfg.metadataEnabled!==undefined&&typeof cfg.metadataEnabled!=='boolean')throw Error('Invalid metadata switch');
+  if(cfg.rankedBridgeEnabled!==undefined&&typeof cfg.rankedBridgeEnabled!=='boolean')throw Error('Invalid ranked bridge switch');
   if(cfg.proxyHmacKey!==undefined&&!/^[a-f0-9]{64}$/i.test(cfg.proxyHmacKey))throw Error('Invalid separate proxy credential');
   for (const field of ['backendOrigin', 'siteOrigin']) {
     const url = new URL(cfg[field]);
@@ -38,6 +41,7 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
   const verifyProxy=createVerifier();
   const gameSockets=new Set();
   let metadataActive=0,metadataWindow=0,metadataReads=0;
+  let rankedActive=0;
   function getConfig(req) {
     try {
       const cfg = validateConfig(readConfig());
@@ -56,6 +60,27 @@ function createGateway(readConfig, ports = {api:3101, game:7766}) {
     return result;
   }
   const server = http.createServer((req,res) => {
+    // Fixed worker RPC bridge only. The API verifies the region's HMAC, freshness
+    // and persisted nonce before touching locks. Never forward account credentials.
+    if((req.url||'').startsWith('/region-api/')){
+      const cfg=getConfig(req),match=/^\/region-api\/ranked\/(start|renew|release|finish)$/.exec(req.url||'');
+      if(!cfg||cfg.rankedBridgeEnabled!==true){res.writeHead(503);return res.end();}
+      if(req.method!=='POST'||!match){res.writeHead(404);return res.end();}
+      if(!/^[a-f0-9]{64}$/i.test(req.headers['x-aochain-signature']||'')){res.writeHead(403);return res.end();}
+      if(rankedActive>=8){res.writeHead(429);return res.end();}
+      if(Number(req.headers['content-length']||0)>65536){res.writeHead(413);return res.end();}
+      rankedActive++;let size=0,released=false;const chunks=[];
+      const release=()=>{if(!released){released=true;rankedActive--;}};
+      req.on('data',chunk=>{size+=chunk.length;if(size>65536){release();res.writeHead(413);res.end();req.destroy();return;}chunks.push(chunk);});
+      req.on('aborted',release);req.on('error',release);res.on('close',release);
+      req.on('end',()=>{
+        if(released)return;
+        const body=Buffer.concat(chunks),upstream=http.request({hostname:'127.0.0.1',port:ports.api,path:'/internal/ranked/'+match[1],method:'POST',headers:{'content-type':'application/json','content-length':body.length,'x-aochain-signature':req.headers['x-aochain-signature']}},reply=>{
+          res.writeHead(reply.statusCode,{'content-type':'application/json','cache-control':'no-store'});reply.pipe(res);reply.on('end',release);
+        });
+        upstream.on('error',()=>{release();if(!res.headersSent)res.writeHead(502);res.end();});upstream.setTimeout(10000,()=>upstream.destroy());res.on('close',()=>upstream.destroy());upstream.end(body);
+      });return;
+    }
     // Public NFT metadata is read-only and may be available while player access
     // stays closed. Exact UUID query only; no cookies or credentials forwarded.
     if(req.method==='GET'&&/^\/player-api\/game-assets\/metadata\?id=[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(req.url||'')){
